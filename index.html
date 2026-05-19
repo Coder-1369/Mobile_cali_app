@@ -183,7 +183,33 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 .modal-day-title{font-family:var(--ff-head);font-size:20px;font-weight:800;}
 .modal-close{width:32px;height:32px;border-radius:50%;background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-size:20px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;}
 
-/* ── SCROLL ANIMATE ── */
+/* ── SPLASH SCREEN ── */
+#splash{position:fixed;inset:0;background:#0c0c0e;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;transition:opacity .7s ease;}
+#splash.done{opacity:0;pointer-events:none;}
+.spl-glow{position:absolute;width:320px;height:130px;top:50%;left:50%;transform:translate(-50%,-62%);background:radial-gradient(ellipse,#ff5c3528 0%,transparent 70%);animation:glow-p 2.4s ease-in-out infinite;}
+@keyframes glow-p{0%,100%{opacity:.5}50%{opacity:1}}
+.spl-fig{width:88%;max-width:360px;overflow:visible;}
+.sf{stroke-dasharray:600;stroke-dashoffset:600;}
+.sf-body {animation:sdraw .85s .05s ease forwards;}
+.sf-leg1 {animation:sdraw .45s .55s ease forwards;}
+.sf-leg2 {animation:sdraw .45s .65s ease forwards;}
+.sf-ft1  {animation:sdraw .3s  .95s ease forwards;}
+.sf-ft2  {animation:sdraw .3s  1.0s ease forwards;}
+.sf-arm1 {animation:sdraw .45s 1.05s ease forwards;}
+.sf-arm2 {animation:sdraw .45s 1.15s ease forwards;}
+.sf-hd   {stroke-dasharray:122;stroke-dashoffset:122;animation:sdraw .6s .85s ease forwards;}
+.sf-h1   {animation:sdraw .25s 1.45s ease forwards;}
+.sf-h2   {animation:sdraw .25s 1.5s ease forwards;}
+@keyframes sdraw{to{stroke-dashoffset:0}}
+#spl-headfill{opacity:0;transition:opacity .4s;}
+.spl-label{margin-top:18px;text-align:center;}
+.spl-title{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;letter-spacing:9px;color:#f0f0f5;opacity:0;transform:translateY(10px);animation:txtin .55s 2.0s ease forwards;}
+.spl-sub{font-family:'DM Mono',monospace;font-size:11px;color:#505060;letter-spacing:2.5px;margin-top:6px;opacity:0;animation:txtin .55s 2.25s ease forwards;}
+@keyframes txtin{to{opacity:1;transform:translateY(0)}}
+.spl-pip{width:28px;height:3px;background:var(--accent-p);border-radius:2px;margin:20px auto 0;transform:scaleX(0);transform-origin:left;animation:pipin .45s 2.1s cubic-bezier(.34,1.56,.64,1) forwards;}
+@keyframes pipin{to{transform:scaleX(1)}}
+/* ── END SPLASH ── */
+
 .ex-card{animation:fadeUp .25s ease both;}
 @keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
 .ex-card:nth-child(1){animation-delay:.02s;}
@@ -195,6 +221,39 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 </head>
 <body>
 <div id="app">
+
+<!-- SPLASH SCREEN -->
+<div id="splash">
+  <div class="spl-glow"></div>
+  <svg class="spl-fig" viewBox="0 0 500 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- Body -->
+    <line class="sf sf-body" x1="108" y1="150" x2="298" y2="150" stroke="#f0f0f5" stroke-width="7" stroke-linecap="round"/>
+    <!-- Head outline draws in -->
+    <circle class="sf sf-hd" cx="320" cy="141" r="19" stroke="#ff5c35" stroke-width="6" fill="none"/>
+    <!-- Head fill (appears after outline) -->
+    <circle id="spl-headfill" cx="320" cy="141" r="19" fill="#ff5c35"/>
+    <!-- Leg 1 (upper) -->
+    <line class="sf sf-leg1" x1="108" y1="150" x2="58" y2="142" stroke="#f0f0f5" stroke-width="6" stroke-linecap="round"/>
+    <!-- Leg 2 (lower) -->
+    <line class="sf sf-leg2" x1="108" y1="150" x2="58" y2="159" stroke="#f0f0f5" stroke-width="6" stroke-linecap="round"/>
+    <!-- Foot 1 -->
+    <line class="sf sf-ft1" x1="58" y1="142" x2="28" y2="142" stroke="#3b9eff" stroke-width="5" stroke-linecap="round"/>
+    <!-- Foot 2 -->
+    <line class="sf sf-ft2" x1="58" y1="159" x2="28" y2="159" stroke="#3b9eff" stroke-width="5" stroke-linecap="round"/>
+    <!-- Front arm -->
+    <line class="sf sf-arm1" x1="215" y1="150" x2="215" y2="202" stroke="#f0f0f5" stroke-width="6" stroke-linecap="round"/>
+    <!-- Back arm -->
+    <line class="sf sf-arm2" x1="168" y1="150" x2="168" y2="202" stroke="#f0f0f5" stroke-width="6" stroke-linecap="round"/>
+    <!-- Hand bars (orange) -->
+    <line class="sf sf-h1" x1="198" y1="203" x2="234" y2="203" stroke="#ff5c35" stroke-width="5" stroke-linecap="round"/>
+    <line class="sf sf-h2" x1="151" y1="203" x2="187" y2="203" stroke="#ff5c35" stroke-width="5" stroke-linecap="round"/>
+  </svg>
+  <div class="spl-label">
+    <div class="spl-title">TRAINING</div>
+    <div class="spl-sub">Planche · Front Lever</div>
+  </div>
+  <div class="spl-pip"></div>
+</div>
 
   <!-- HEADER -->
   <div class="app-header">
@@ -871,6 +930,12 @@ if('serviceWorker' in navigator){
     navigator.serviceWorker.register('./sw.js').catch(()=>{});
   });
 }
+// ── SPLASH ──────────────────────────────────────────
+setTimeout(()=>{document.getElementById('spl-headfill').style.opacity='1';},1400);
+setTimeout(()=>{
+  const s=document.getElementById('splash');
+  if(s){s.classList.add('done');setTimeout(()=>s.remove(),800);}
+},3300);
 
 renderPlancheTrack();
 renderFLTrack();
