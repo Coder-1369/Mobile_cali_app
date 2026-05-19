@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Skill Training · Program</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0c0c0e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Training">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:ital,wght@0,400;0,500;1,400&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+:root{
+  --bg:#0c0c0e;
+  --surface:#141417;
+  --surface2:#1c1c21;
+  --border:#2a2a32;
+  --border2:#363640;
+  --text:#f0f0f5;
+  --muted:#7a7a8a;
+  --muted2:#505060;
+  --accent-p:#ff5c35;
+  --accent-fl:#3b9eff;
+  --accent-p-dim:#ff5c3520;
+  --accent-fl-dim:#3b9eff20;
+  --green:#2dbd7f;
+  --green-dim:#2dbd7f20;
+  --amber:#f5a623;
+  --amber-dim:#f5a62320;
+  --red:#e54b4b;
+  --ff-head:'Syne',sans-serif;
+  --ff-mono:'DM Mono',monospace;
+  --ff-body:'DM Sans',sans-serif;
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--ff-body);overflow:hidden;}
+#app{display:flex;flex-direction:column;height:100%;max-width:430px;margin:0 auto;position:relative;}
+
+/* ── HEADER ── */
+.app-header{padding:52px 20px 16px;background:var(--bg);flex-shrink:0;}
+.header-row{display:flex;align-items:center;justify-content:space-between;}
+.app-title{font-family:var(--ff-head);font-size:22px;font-weight:800;letter-spacing:-0.5px;}
+.today-chip{font-family:var(--ff-mono);font-size:10px;padding:4px 10px;border-radius:20px;font-weight:500;}
+.chip-planche{background:var(--accent-p-dim);color:var(--accent-p);border:1px solid var(--accent-p)40;}
+.chip-fl{background:var(--accent-fl-dim);color:var(--accent-fl);border:1px solid var(--accent-fl)40;}
+.chip-rest{background:#2a2a3220;color:var(--muted);border:1px solid var(--border);}
+.header-sub{font-size:12px;color:var(--muted);margin-top:4px;font-family:var(--ff-mono);}
+
+/* ── SCROLL AREA ── */
+.scroll-area{flex:1;overflow-y:auto;padding:0 16px 100px;scroll-behavior:smooth;}
+.scroll-area::-webkit-scrollbar{display:none;}
+
+/* ── BOTTOM NAV ── */
+.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:var(--surface);border-top:1px solid var(--border);display:flex;padding:8px 0 24px;z-index:100;}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;padding:6px 4px;border:none;background:none;color:var(--muted2);transition:color .2s;}
+.nav-item.active{color:var(--text);}
+.nav-item svg{width:20px;height:20px;stroke-width:1.8;}
+.nav-label{font-size:10px;font-family:var(--ff-mono);font-weight:500;letter-spacing:.3px;}
+.nav-dot{width:4px;height:4px;border-radius:50%;margin-top:2px;}
+.nav-item.active .nav-dot-p{background:var(--accent-p);}
+.nav-item.active .nav-dot-fl{background:var(--accent-fl);}
+.nav-item.active .nav-dot-s{background:var(--green);}
+.nav-item.active .nav-dot-w{background:var(--amber);}
+
+/* ── SECTION ── */
+.section-label{font-family:var(--ff-mono);font-size:10px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;padding:20px 0 10px;}
+
+/* ── SKILL STAT HEADER ── */
+.skill-header{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:18px 18px 14px;margin-bottom:12px;}
+.skill-header-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;}
+.skill-name{font-family:var(--ff-head);font-size:20px;font-weight:800;}
+.skill-tag{font-family:var(--ff-mono);font-size:10px;padding:4px 10px;border-radius:20px;}
+.tag-sloppy{background:#f5a62318;color:var(--amber);border:1px solid var(--amber)40;}
+.tag-working{background:#3b9eff18;color:var(--accent-fl);border:1px solid var(--accent-fl)40;}
+.tag-solid{background:#2dbd7f18;color:var(--green);border:1px solid var(--green)40;}
+.skill-std{font-family:var(--ff-mono);font-size:11px;color:var(--muted);line-height:1.5;}
+.skill-std span{color:var(--text);}
+.skill-progress{margin-top:14px;}
+.prog-bar-bg{height:3px;background:var(--border);border-radius:2px;overflow:hidden;}
+.prog-bar-fill{height:100%;border-radius:2px;transition:width .4s ease;}
+.prog-bar-labels{display:flex;justify-content:space-between;margin-top:5px;}
+.prog-bar-labels span{font-family:var(--ff-mono);font-size:9px;color:var(--muted2);}
+
+/* ── EXERCISE CARD ── */
+.ex-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:10px;transition:border-color .2s;}
+.ex-card:active{border-color:var(--border2);}
+.ex-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:8px;}
+.ex-name{font-family:var(--ff-head);font-size:15px;font-weight:700;line-height:1.25;flex:1;}
+.pillar-pill{font-family:var(--ff-mono);font-size:9px;padding:3px 8px;border-radius:20px;white-space:nowrap;flex-shrink:0;}
+.pill-hold{background:var(--accent-fl-dim);color:var(--accent-fl);}
+.pill-push{background:var(--accent-p-dim);color:var(--accent-p);}
+.pill-pull{background:var(--green-dim);color:var(--green);}
+.pill-press{background:var(--amber-dim);color:var(--amber);}
+.ex-meta{display:flex;gap:12px;margin-bottom:8px;}
+.meta-item{display:flex;align-items:center;gap:5px;}
+.meta-icon{width:12px;height:12px;opacity:.5;}
+.meta-text{font-family:var(--ff-mono);font-size:11px;color:var(--muted);}
+.ex-cue{font-size:13px;color:var(--muted);line-height:1.55;}
+.ex-cue strong{color:var(--text);font-weight:500;}
+.ex-divider{height:1px;background:var(--border);margin:10px 0;}
+
+/* ── FOCUS BOX ── */
+.focus-box{border:1px solid var(--border);border-left:3px solid;border-radius:0 12px 12px 0;padding:14px 14px;margin-bottom:12px;font-size:13px;line-height:1.6;}
+.focus-box.p{border-left-color:var(--accent-p);background:var(--accent-p-dim);}
+.focus-box.fl{border-left-color:var(--accent-fl);background:var(--accent-fl-dim);}
+.focus-box.neutral{border-left-color:var(--muted);background:var(--surface);}
+.focus-title{font-family:var(--ff-mono);font-size:10px;text-transform:uppercase;letter-spacing:1px;margin-bottom:5px;}
+.focus-title.p{color:var(--accent-p);}
+.focus-title.fl{color:var(--accent-fl);}
+.focus-title.neutral{color:var(--muted);}
+.focus-text{color:var(--muted);}
+.focus-text strong{color:var(--text);font-weight:500;}
+
+/* ── SUMMARY ROW ── */
+.summary-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;}
+.sum-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 10px;text-align:center;}
+.sum-num{font-family:var(--ff-head);font-size:24px;font-weight:800;}
+.sum-label{font-family:var(--ff-mono);font-size:9px;color:var(--muted);margin-top:2px;letter-spacing:.5px;}
+
+/* ── LEVEL SELECT ── */
+.level-row{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px 16px;margin-bottom:14px;display:flex;align-items:center;gap:12px;}
+.level-label{font-family:var(--ff-mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;white-space:nowrap;}
+.level-select{flex:1;background:var(--surface2);border:1px solid var(--border2);color:var(--text);font-family:var(--ff-mono);font-size:12px;padding:8px 10px;border-radius:8px;cursor:pointer;-webkit-appearance:none;appearance:none;}
+.level-select:focus{outline:none;border-color:var(--border2);}
+
+/* ── WEEK GRID ── */
+.week-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:16px;}
+.day-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:8px 4px;text-align:center;}
+.day-card.today{border-color:var(--accent-p);background:var(--accent-p-dim);}
+.day-card.fl-day{border-color:var(--accent-fl)40;}
+.day-card.rest-day{opacity:.6;}
+.day-name{font-family:var(--ff-mono);font-size:9px;color:var(--muted);font-weight:500;}
+.day-dot{width:6px;height:6px;border-radius:50%;margin:5px auto 3px;}
+.day-dot.p{background:var(--accent-p);}
+.day-dot.fl{background:var(--accent-fl);}
+.day-dot.rest{background:var(--border2);}
+.day-skill-text{font-size:8px;color:var(--muted2);line-height:1.3;}
+
+/* ── TODAY TOGGLE ── */
+.today-toggle{display:flex;background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:16px;}
+.toggle-btn{flex:1;padding:11px;font-family:var(--ff-mono);font-size:12px;font-weight:500;border:none;background:none;cursor:pointer;transition:all .2s;color:var(--muted);}
+.toggle-btn.active-p{background:var(--accent-p);color:#fff;}
+.toggle-btn.active-fl{background:var(--accent-fl);color:#fff;}
+
+/* ── VIEWS ── */
+.view{display:none;}
+.view.active{display:block;}
+
+/* ── TIMER ── */
+.timer-strip{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;}
+.timer-label{font-family:var(--ff-mono);font-size:11px;color:var(--muted);}
+.timer-display{font-family:var(--ff-head);font-size:28px;font-weight:800;color:var(--text);}
+.timer-btns{display:flex;gap:8px;}
+.timer-btn{font-family:var(--ff-mono);font-size:11px;padding:7px 14px;border-radius:8px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);cursor:pointer;}
+.timer-btn.start{background:var(--green);color:#fff;border-color:var(--green);}
+.timer-btn.reset-btn{color:var(--muted);}
+
+/* ── DELOAD CARD ── */
+.deload-card{background:var(--amber-dim);border:1px solid var(--amber)30;border-radius:14px;padding:16px;margin-bottom:12px;}
+.deload-title{font-family:var(--ff-mono);font-size:10px;color:var(--amber);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;}
+.deload-text{font-size:13px;color:var(--muted);line-height:1.55;}
+
+/* ── REST DAY CARD ── */
+.rest-day-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:18px;margin-bottom:12px;}
+.rest-day-title{font-family:var(--ff-head);font-size:18px;font-weight:800;margin-bottom:4px;}
+.rest-item{padding:10px 0;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:3px;}
+.rest-item:last-child{border-bottom:none;}
+.rest-item-name{font-family:var(--ff-mono);font-size:12px;color:var(--text);font-weight:500;}
+.rest-item-detail{font-size:12px;color:var(--muted);line-height:1.5;}
+.rest-note{margin-top:12px;font-size:12px;color:var(--muted);font-style:italic;line-height:1.5;}
+
+/* ── DAY MODAL ── */
+.modal-overlay{position:fixed;inset:0;background:#00000070;z-index:200;opacity:0;pointer-events:none;transition:opacity .25s;}
+.modal-overlay.open{opacity:1;pointer-events:all;}
+.day-modal{position:fixed;bottom:0;left:50%;transform:translateX(-50%) translateY(105%);width:100%;max-width:430px;background:var(--bg);border-radius:22px 22px 0 0;z-index:201;transition:transform .32s cubic-bezier(.4,0,.2,1);max-height:88vh;overflow-y:auto;padding:0 16px 100px;}
+.day-modal.open{transform:translateX(-50%) translateY(0);}
+.day-modal::-webkit-scrollbar{display:none;}
+.modal-handle{width:36px;height:4px;border-radius:2px;background:var(--border2);margin:12px auto 16px;}
+.modal-header-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.modal-day-title{font-family:var(--ff-head);font-size:20px;font-weight:800;}
+.modal-close{width:32px;height:32px;border-radius:50%;background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-size:20px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+
+/* ── SCROLL ANIMATE ── */
+.ex-card{animation:fadeUp .25s ease both;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+.ex-card:nth-child(1){animation-delay:.02s;}
+.ex-card:nth-child(2){animation-delay:.06s;}
+.ex-card:nth-child(3){animation-delay:.10s;}
+.ex-card:nth-child(4){animation-delay:.14s;}
+.ex-card:nth-child(5){animation-delay:.18s;}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- HEADER -->
+  <div class="app-header">
+    <div class="header-row">
+      <div class="app-title">Training</div>
+      <div class="today-chip chip-planche" id="today-chip">Planche Day</div>
+    </div>
+    <div class="header-sub" id="header-sub">Advanced Tuck · Session 1</div>
+  </div>
+
+  <!-- SCROLL AREA -->
+  <div class="scroll-area" id="scroll-area">
+
+    <!-- VIEW: TODAY -->
+    <div class="view active" id="view-today">
+      <div class="today-toggle">
+        <button class="toggle-btn active-p" id="btn-p" onclick="switchToday('p')">Planche</button>
+        <button class="toggle-btn" id="btn-fl" onclick="switchToday('fl')">Front Lever</button>
+      </div>
+      <div id="today-content"></div>
+    </div>
+
+    <!-- VIEW: PLANCHE -->
+    <div class="view" id="view-planche">
+      <div class="skill-header" id="planche-skill-header"></div>
+      <div class="level-row">
+        <span class="level-label">Level</span>
+        <select class="level-select" id="planche-level" onchange="renderPlancheTrack()">
+          <option value="lean">1 — Planche Lean</option>
+          <option value="tuck-band">2 — Tuck (Band)</option>
+          <option value="tuck">3 — Tuck Planche</option>
+          <option value="tuck-pu">4 — Tuck Push-Up</option>
+          <option value="adv-band">5 — Adv Tuck (Band)</option>
+          <option value="adv" selected>6 — Adv Tuck ★</option>
+          <option value="straddle-band">7 — Straddle (Band)</option>
+          <option value="straddle">8 — Straddle Planche</option>
+        </select>
+      </div>
+      <div id="planche-exercises"></div>
+    </div>
+
+    <!-- VIEW: FRONT LEVER -->
+    <div class="view" id="view-fl">
+      <div class="skill-header" id="fl-skill-header"></div>
+      <div class="level-row">
+        <span class="level-label">Level</span>
+        <select class="level-select" id="fl-level" onchange="renderFLTrack()">
+          <option value="hang">1 — Dead Hang + Scap</option>
+          <option value="stc">2 — Skin the Cat</option>
+          <option value="tuck">3 — Tuck FL</option>
+          <option value="tuck-row">4 — Tuck FL Row</option>
+          <option value="adv" selected>5 — Adv Tuck FL ★</option>
+          <option value="one-leg">6 — One-Leg FL</option>
+          <option value="straddle">7 — Straddle FL</option>
+          <option value="full">8 — Full Front Lever</option>
+        </select>
+      </div>
+      <div id="fl-exercises"></div>
+    </div>
+
+    <!-- VIEW: WEEK -->
+    <div class="view" id="view-week">
+      <div class="section-label">This Week</div>
+      <div class="week-grid" id="week-grid"></div>
+
+      <!-- PLANCHE DAY -->
+      <div class="section-label">Planche Day</div>
+      <div class="focus-box p">
+        <div class="focus-title p">Session structure · ~50 min</div>
+        <div class="focus-text">
+          <strong>4 × Hold</strong> — Advanced tuck (band then no-band)<br>
+          <strong>3 × Push</strong> — Tuck PU + Pseudo push-up<br>
+          <strong>2 × Press</strong> — L-sit press to tuck<br>
+          Rest 2–3 min between sets. Film at least 1 set.
+        </div>
+      </div>
+      <div class="ex-card">
+        <div class="ex-top">
+          <span class="ex-name">Advanced Tuck Planche (Band)</span>
+          <span class="pillar-pill pill-hold">Hold</span>
+        </div>
+        <div class="ex-meta">
+          <div class="meta-item"><span class="meta-text">2 sets · 6–8 sec</span></div>
+          <div class="meta-item"><span class="meta-text">Rest 2 min</span></div>
+        </div>
+        <div class="ex-cue">Start band-assisted. Exaggerate protraction — 110%. Knees true 90°. Shoulders down, never at ears.</div>
+      </div>
+      <div class="ex-card">
+        <div class="ex-top">
+          <span class="ex-name">Advanced Tuck Planche</span>
+          <span class="pillar-pill pill-hold">Hold</span>
+        </div>
+        <div class="ex-meta">
+          <div class="meta-item"><span class="meta-text">2 sets · 4–6 sec</span></div>
+          <div class="meta-item"><span class="meta-text">Rest 3 min</span></div>
+        </div>
+        <div class="ex-cue"><strong>Stop the rep when protraction breaks.</strong> 4 clean seconds beats 8 sloppy ones every time.</div>
+      </div>
+      <div class="ex-card">
+        <div class="ex-top">
+          <span class="ex-name">Tuck Planche Push-Up</span>
+          <span class="pillar-pill pill-push">Push</span>
+        </div>
+        <div class="ex-meta">
+          <div class="meta-item"><span class="meta-text">2 sets · 2–3 reps + 3s hold</span></div>
+        </div>
+        <div class="ex-cue">Press to top, hold 3 sec. The hold is the training stimulus — don't skip it.</div>
+      </div>
+      <div class="ex-card">
+        <div class="ex-top">
+          <span class="ex-name">Pseudo Push-Up (Max Lean)</span>
+          <span class="pillar-pill pill-push">Push</span>
+        </div>
+        <div class="ex-meta">
+          <div class="meta-item"><span class="meta-text">1 set · 6–8 reps</span></div>
+        </div>
+        <div class="ex-cue">Hands 45° out, maximum lean. 2 sec eccentric. Builds anterior delt reserve.</div>
+      </div>
+      <div class="ex-card">
+        <div class="ex-top">
+          <span class="ex-name">L-sit Press to Tuck Planche</span>
+          <span class="pillar-pill pill-press">Press</span>
+        </div>
+        <div class="ex-meta">
+          <div class="meta-item"><span class="meta-text">2 sets · 2–3 reps</span></div>
+          <div class="meta-item"><span class="meta-text">Rest 2–3 min</span></div>
+        </div>
+        <div class="ex-cue">Most skipped exercise. Most important for advanced tuck. Use feet assist to learn the path first.</div>
+      </div>
+
+      <!-- FL DAY -->
+      <div class="section-label" style="margin-top:8px;">Front Lever Day</div>
+      <div class="focus-box fl">
+        <div class="focus-title fl">Session structure · ~45 min</div>
+        <div class="focus-text">
+          <strong>4 × Hold</strong> — Adv tuck (one leg each side, then bilateral)<br>
+          <strong>3 × Pull</strong> — Tuck FL rows + Straight-arm pull-downs<br>
+          Rest 2–3 min between sets. Film at least 1 set.
+        </div>
+      </div>
+      <div class="ex-card">
+        <div class="ex-top">
+          <span class="ex-name">Adv Tuck FL · One Leg (R + L)</span>
+          <span class="pillar-pill pill-hold">Hold</span>
+        </div>
+        <div class="ex-meta">
+          <div class="meta-item"><span class="meta-text">2 sets each side · 5–8 sec</span></div>
+        </div>
+        <div class="ex-cue">Right leg extended, left tucked. Build both sides to 8 sec before going bilateral. Scap depressed + retracted throughout.</div>
+      </div>
+      <div class="ex-card">
+        <div class="ex-top">
+          <span class="ex-name">Adv Tuck FL · Both Legs</span>
+          <span class="pillar-pill pill-hold">Hold</span>
+        </div>
+        <div class="ex-meta">
+          <div class="meta-item"><span class="meta-text">2 sets · 4–6 sec</span></div>
+          <div class="meta-item"><span class="meta-text">Rest 3 min</span></div>
+        </div>
+        <div class="ex-cue">Both knees at 90°. Push bar backward hard. Back near horizontal. Stop before form breaks.</div>
+      </div>
+      <div class="ex-card">
+        <div class="ex-top">
+          <span class="ex-name">Tuck Front Lever Row</span>
+          <span class="pillar-pill pill-pull">Pull</span>
+        </div>
+        <div class="ex-meta">
+          <div class="meta-item"><span class="meta-text">3 sets · 4–5 reps + 3s hold</span></div>
+        </div>
+        <div class="ex-cue">From tuck FL, pull chest to bar, extend back to straight-arm. Top hold = key stimulus.</div>
+      </div>
+      <div class="ex-card">
+        <div class="ex-top">
+          <span class="ex-name">Straight-Arm Pull-Down</span>
+          <span class="pillar-pill pill-pull">Pull</span>
+        </div>
+        <div class="ex-meta">
+          <div class="meta-item"><span class="meta-text">2 sets · 10–12 reps</span></div>
+        </div>
+        <div class="ex-cue">Cable or band. Trains shoulder extension — the exact FL motor pattern. Keep this in every FL session.</div>
+      </div>
+
+      <!-- DELOAD REMINDER -->
+      <div class="deload-card">
+        <div class="deload-title">Deload every 4–6 weeks</div>
+        <div class="deload-text">Drop both skills back one level, cut sets in half. Keep wrist prep and hollow body work. This is where your adaptations consolidate — don't skip it.</div>
+      </div>
+    </div>
+
+    <!-- VIEW: TIMER -->
+    <div class="view" id="view-timer">
+      <div class="section-label">Rest Timer</div>
+      <div class="timer-strip">
+        <div>
+          <div class="timer-label">Elapsed</div>
+          <div class="timer-display" id="timer-display">00:00</div>
+        </div>
+        <div class="timer-btns">
+          <button class="timer-btn start" id="timer-start" onclick="toggleTimer()">Start</button>
+          <button class="timer-btn reset-btn" onclick="resetTimer()">Reset</button>
+        </div>
+      </div>
+
+      <!-- REST PRESETS -->
+      <div class="section-label">Rest presets</div>
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:16px;">
+        <button class="timer-btn" onclick="setTimer(90)" style="padding:14px;border-radius:12px;font-size:13px;">1:30 · Push sets</button>
+        <button class="timer-btn" onclick="setTimer(120)" style="padding:14px;border-radius:12px;font-size:13px;">2:00 · Standard</button>
+        <button class="timer-btn" onclick="setTimer(180)" style="padding:14px;border-radius:12px;font-size:13px;">3:00 · Hard holds</button>
+        <button class="timer-btn" onclick="setTimer(240)" style="padding:14px;border-radius:12px;font-size:13px;">4:00 · Max effort</button>
+      </div>
+
+      <!-- HOLD TIMER -->
+      <div class="section-label">Hold timer</div>
+      <div class="timer-strip" id="hold-strip">
+        <div>
+          <div class="timer-label">Hold duration</div>
+          <div class="timer-display" id="hold-display">0.0s</div>
+        </div>
+        <div class="timer-btns">
+          <button class="timer-btn start" id="hold-btn" onclick="holdToggle()" style="padding:12px 22px;min-width:80px;">Start</button>
+        </div>
+      </div>
+      <div style="font-family:var(--ff-mono);font-size:11px;color:var(--muted);margin-top:8px;">Tap <strong style="color:var(--text)">Start</strong> when you get into position. Tap <strong style="color:var(--text)">Stop</strong> when you come out. Hands-free.</div>
+
+      <!-- HOLD LOG -->
+      <div class="section-label">Session log</div>
+      <div id="hold-log" style="font-family:var(--ff-mono);font-size:12px;color:var(--muted);"></div>
+    </div>
+
+  </div><!-- end scroll area -->
+
+  <!-- DAY MODAL -->
+  <div class="modal-overlay" id="modal-overlay" onclick="closeDayModal()"></div>
+  <div class="day-modal" id="day-modal">
+    <div class="modal-handle"></div>
+    <div class="modal-header-row">
+      <div class="modal-day-title" id="modal-day-title"></div>
+      <button class="modal-close" onclick="closeDayModal()">×</button>
+    </div>
+    <div id="modal-day-content"></div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
+    <button class="nav-item active" id="nav-today" onclick="showView('today')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      <span class="nav-label">Today</span>
+      <div class="nav-dot nav-dot-p"></div>
+    </button>
+    <button class="nav-item" id="nav-planche" onclick="showView('planche')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9"/><path d="M8 12h8M12 8l4 4-4 4"/></svg>
+      <span class="nav-label">Planche</span>
+      <div class="nav-dot nav-dot-p"></div>
+    </button>
+    <button class="nav-item" id="nav-fl" onclick="showView('fl')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 12h16M4 6l6 6-6 6"/></svg>
+      <span class="nav-label">FL</span>
+      <div class="nav-dot nav-dot-fl"></div>
+    </button>
+    <button class="nav-item" id="nav-week" onclick="showView('week')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+      <span class="nav-label">Week</span>
+      <div class="nav-dot nav-dot-s"></div>
+    </button>
+    <button class="nav-item" id="nav-timer" onclick="showView('timer')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M9 3h6"/></svg>
+      <span class="nav-label">Timer</span>
+      <div class="nav-dot nav-dot-w"></div>
+    </button>
+  </nav>
+
+</div>
+
+<script>
+// ── DATA ──────────────────────────────────────────────
+const PD={
+  lean:{label:"Planche Lean",std:"15s hold · all 8 points",prog:12,tag:"solid",exs:[
+    {n:"Planche Lean",p:"hold",s:"4 sets",r:"8–12 sec",c:"Shoulders past wrists. Max protraction. Shoulders depressed. Glutes squeezed. Press floor away."},
+    {n:"Scapula Push-Up",p:"push",s:"3 sets",r:"10–12 reps",c:"Full protraction at top, flat at bottom. Trains serratus anterior directly."},
+    {n:"Pseudo Push-Up",p:"push",s:"2 sets",r:"8 reps",c:"Hands turned 45° out. Forward lean. Build the press pattern early."}
+  ]},
+  "tuck-band":{label:"Tuck Planche (Band)",std:"10s hold · light band",prog:25,tag:"solid",exs:[
+    {n:"Tuck Planche · Heavy Band",p:"hold",s:"2 sets",r:"6–8 sec",c:"Knees to chest. Stay high off floor. Drop band when you hit 10s comfortably."},
+    {n:"Tuck Planche · Light Band",p:"hold",s:"2 sets",r:"5–7 sec",c:"Work toward 10s here. Full protraction, chest between arms, abs tight."},
+    {n:"Pseudo Push-Up",p:"push",s:"3 sets",r:"8–10 reps",c:"Builds the anterior delt reserve. Heavy lean, 2s eccentric."}
+  ]},
+  tuck:{label:"Tuck Planche",std:"15 solid seconds",prog:37,tag:"solid",exs:[
+    {n:"Tuck Planche",p:"hold",s:"4 sets",r:"8–12 sec → 15 sec",c:"Stay high off floor. Arms fully straight. Press floor away continuously. Stop when protraction drops."},
+    {n:"Tuck Planche Push-Up (Band)",p:"push",s:"3 sets",r:"2–3 reps + 3s hold",c:"Band makes it learnable. Top hold is the stimulus. Build to 3 clean reps before removing band."},
+    {n:"L-sit Press to Tuck",p:"press",s:"2 sets",r:"2–3 reps",c:"Most important press for tuck level. Builds shoulder flexion strength directly."}
+  ]},
+  "tuck-pu":{label:"Tuck Push-Up",std:"3 reps + 3s hold",prog:50,tag:"working",exs:[
+    {n:"Tuck Planche Push-Up",p:"push",s:"3 sets",r:"1→2→3 reps + 3s hold",c:"Build one rep at a time. 1+3s, then 2+3s, then 3+3s. Top hold is the key stimulus."},
+    {n:"Tuck Planche Hold",p:"hold",s:"3 sets",r:"12–15 sec",c:"Maintain hold quality while adding push-up volume. Don't let holds regress."},
+    {n:"Weighted Pseudo Push-Up",p:"push",s:"2 sets",r:"6–8 reps · 5 kg",c:"Especially important for taller athletes. Breaks the shoulder strength plateau."}
+  ]},
+  "adv-band":{label:"Adv Tuck (Band)",std:"10s hold · light band",prog:60,tag:"working",exs:[
+    {n:"Adv Tuck · One Leg at a Time",p:"hold",s:"2 sets each side",r:"5–8 sec",c:"Open one knee to 90° while holding tuck on the other. Build to 8s each side before going bilateral."},
+    {n:"Adv Tuck · Both Legs (Band)",p:"hold",s:"2 sets",r:"5–8 sec",c:"Both knees at 90°. Never extend spine. Abs locked. Build to 10s with light band."},
+    {n:"Tuck Planche Push-Up",p:"push",s:"3 sets",r:"3 reps + 3s hold",c:"Keep this sharp — directly builds the strength the band hold demands."}
+  ]},
+  adv:{label:"Adv Tuck Planche",std:"8–10 solid seconds",prog:70,tag:"sloppy",exs:[
+    {n:"Adv Tuck Planche (Band)",p:"hold",s:"2 sets",r:"6–8 sec",c:"Light band. Groove the perfect position first. Exaggerate protraction — 110%."},
+    {n:"Adv Tuck Planche",p:"hold",s:"2 sets",r:"4–6 sec",c:"<strong>Stop when protraction breaks.</strong> 4 clean sec beats 8 sloppy ones."},
+    {n:"Tuck Planche Push-Up",p:"push",s:"2 sets",r:"3 reps + 3s hold",c:"Direct anterior delt builder. The hold at the top is the training — don't skip."},
+    {n:"Pseudo Push-Up (Max Lean)",p:"push",s:"1 set",r:"6–8 reps",c:"Maximum lean, 2s eccentric. Front delts under full load."},
+    {n:"L-sit Press to Tuck",p:"press",s:"2 sets",r:"2–3 reps",c:"Most efficient shoulder flexion builder at this level. Use feet assist to learn the path."}
+  ]},
+  "straddle-band":{label:"Straddle (Band)",std:"10s hold · light band",prog:82,tag:"working",exs:[
+    {n:"Straddle Planche (Strong Band)",p:"hold",s:"2 sets",r:"4–6 sec",c:"Legs as wide as possible. Push heels backward and UP. Exaggerate protraction."},
+    {n:"Straddle Planche (Light Band)",p:"hold",s:"2 sets",r:"4–6 sec",c:"Build to 10s before removing band. Mental cue: press to handstand."},
+    {n:"Adv Tuck Planche Push-Up",p:"push",s:"3 sets",r:"2–3 reps",c:"Hardest push variation. Directly bridges to straddle strength."}
+  ]},
+  straddle:{label:"Straddle Planche",std:"10 second hold",prog:95,tag:"working",exs:[
+    {n:"Straddle Planche",p:"hold",s:"4 sets",r:"5–10 sec",c:"Wide straddle. Heels up and back. Protraction max. Press floor away."},
+    {n:"Straddle Planche Push-Up",p:"push",s:"2 sets",r:"2–3 reps",c:"Dynamic straddle. Lower controlled, press to top hold 3s."},
+    {n:"Straddle Press to Handstand",p:"press",s:"2 sets",r:"1–3 reps",c:"When you can do this consistently, you're ready for the full planche phase."}
+  ]}
+};
+
+const FD={
+  hang:{label:"Dead Hang + Scap",std:"30s + 10 scap pulls",prog:10,tag:"solid",exs:[
+    {n:"Dead Hang",p:"hold",s:"3 sets",r:"30 sec",c:"Fully relax first, then depress scapulae — DOWN and BACK. No elbow bend at all."},
+    {n:"Scapular Pull",p:"pull",s:"3 sets",r:"10 reps",c:"From dead hang, pull blades down and together. Full range. Foundation of every FL hold."}
+  ]},
+  stc:{label:"Skin the Cat",std:"5 controlled reps",prog:22,tag:"solid",exs:[
+    {n:"Skin-the-Cat",p:"hold",s:"4 sets",r:"3–5 reps",c:"Slow on the way over AND back. Never drop. The eccentric is where the gains live."},
+    {n:"Scapular Pull",p:"pull",s:"3 sets",r:"10 reps",c:"Keep grooving this. Pairs with STC to condition shoulder connective tissue."}
+  ]},
+  tuck:{label:"Tuck Front Lever",std:"15 solid seconds",prog:35,tag:"solid",exs:[
+    {n:"Tuck Front Lever",p:"hold",s:"4 sets",r:"8–12 sec → 15 sec",c:"Scap retracted + depressed. Push bar back. Knees to chest. Body hollow, no arch."},
+    {n:"Straight-Arm Pull-Down",p:"pull",s:"3 sets",r:"10–12 reps",c:"Trains shoulder extension — exact FL motor pattern. Keep in every FL session."}
+  ]},
+  "tuck-row":{label:"Tuck FL Row",std:"5 reps + 3s hold",prog:48,tag:"solid",exs:[
+    {n:"Tuck Front Lever Row",p:"pull",s:"3 sets",r:"3–5 reps + 3s hold",c:"From tuck FL position, pull chest to bar, extend back to straight-arm. Body stays horizontal."},
+    {n:"Tuck Front Lever Hold",p:"hold",s:"3 sets",r:"12–15 sec",c:"Maintain hold quality while adding row volume. Don't let holds regress."},
+    {n:"Weighted Pull-Up",p:"pull",s:"2 sets",r:"5 reps · 5–10 kg",c:"Builds the lat reserve. Directly transfers to FL hold endurance."}
+  ]},
+  adv:{label:"Adv Tuck FL",std:"10 solid seconds",prog:62,tag:"working",exs:[
+    {n:"Adv Tuck FL · One Leg (R)",p:"hold",s:"2 sets",r:"5–8 sec",c:"Right leg extended, left tucked. Full scap retraction. 8s each side before bilateral."},
+    {n:"Adv Tuck FL · One Leg (L)",p:"hold",s:"2 sets",r:"5–8 sec",c:"Build both sides equally — imbalances cause problems at straddle level."},
+    {n:"Adv Tuck FL · Both Legs",p:"hold",s:"1 set",r:"4–6 sec",c:"Both knees at 90°. Push bar back hard. Back near horizontal. Stop before form breaks."},
+    {n:"Tuck FL Row",p:"pull",s:"3 sets",r:"4–5 reps + 3s hold",c:"Dynamic strength builder. Keeps lat reserve growing alongside hold work."},
+    {n:"Straight-Arm Pull-Down",p:"pull",s:"2 sets",r:"10 reps",c:"Keep this every FL session. Most specific lat pattern for the FL."}
+  ]},
+  "one-leg":{label:"One-Leg FL",std:"8s each side",prog:74,tag:"working",exs:[
+    {n:"One-Leg Front Lever",p:"hold",s:"4 sets",r:"6–8 sec each side",c:"Push extended heel away from bar. Tucked leg close. Even body line both sides."},
+    {n:"Adv Tuck FL Row",p:"pull",s:"3 sets",r:"4–5 reps",c:"Row from advanced tuck — harder than tuck rows, builds more force capacity."},
+    {n:"Weighted Pull-Up",p:"pull",s:"2 sets",r:"5 reps · 10 kg",c:"Heavy pull strength is the single best predictor of FL progress at this stage."}
+  ]},
+  straddle:{label:"Straddle FL",std:"10 solid seconds",prog:86,tag:"working",exs:[
+    {n:"Straddle Front Lever",p:"hold",s:"4 sets",r:"6–10 sec",c:"Legs wide, toes pointed, heels driving back. Scap down+together. Push bar back hard."},
+    {n:"Straddle FL Row",p:"pull",s:"2 sets",r:"3–4 reps",c:"Dynamic straddle. Pull chest to bar, extend back to straight-arm hold."},
+    {n:"Straddle FL · Closing Legs",p:"hold",s:"2 sets",r:"3–5 sec",c:"Slowly press legs inward from straddle. Stop when hips drop. Build over weeks."}
+  ]},
+  full:{label:"Full Front Lever",std:"5 second hold",prog:98,tag:"working",exs:[
+    {n:"Full Front Lever",p:"hold",s:"4 sets",r:"3–5 sec",c:"Legs together, fully extended. Everything maximally engaged. Peak torque."},
+    {n:"FL Eccentric Entry",p:"hold",s:"3 sets",r:"5 sec descent",c:"From inverted hang, slowly lower to horizontal. Eccentric builds hold strength fast."},
+    {n:"Front Lever Pull-Up",p:"pull",s:"2 sets",r:"2–3 reps",c:"From full FL, pull up, lower back. The lat destroyer. Next frontier."}
+  ]}
+};
+
+const WEEK_DATA=[
+  {day:"Sun",type:"p",skill:"Planche",detail:"Hold · Push · Press",
+   restPlan:null},
+  {day:"Mon",type:"fl",skill:"FL",detail:"Hold · Pull",
+   restPlan:null},
+  {day:"Tue",type:"rest",skill:"Rest",detail:"Mobility",
+   restPlan:{title:"Mobility & Recovery",color:"var(--green)",chip:"Rest Day",
+   items:[
+     {name:"Wrist Circles + Wrist Push-Ups",detail:"2×10 each direction. Non-negotiable — wrist prep before every session, including tomorrow."},
+     {name:"Shoulder Dislocations (Band)",detail:"3×10 slow passes. Open thoracic extension. Keep arms straight throughout."},
+     {name:"Pike Stretch",detail:"3×30 sec. Breathe into it. Hamstrings + lower back loosen over 3 rounds."},
+     {name:"Hollow Body Hold",detail:"3×20 sec, 20 sec rest. Keeps core primed between sessions. Arms overhead."},
+     {name:"Couch Stretch",detail:"2×45 sec each side. Hip flexors take a beating on planche days — address it here."},
+     {name:"Cat-Cow + Thoracic Extension",detail:"10 slow reps. Decompress the spine. End face-down breathing for 2 min."},
+   ],
+   note:"Total: 20–30 min. No skill work today. Connective tissue adapts during rest — this is not optional recovery, it is the recovery."}},
+  {day:"Wed",type:"p",skill:"Planche",detail:"Hold · Push · Press",
+   restPlan:null},
+  {day:"Thu",type:"fl",skill:"FL",detail:"Hold · Pull",
+   restPlan:null},
+  {day:"Fri",type:"rest",skill:"Active",detail:"Handstand",
+   restPlan:{title:"Active Rest · Handstand",color:"var(--amber)",chip:"Active Day",
+   items:[
+     {name:"Wall Kick-Up Practice",detail:"5–8 attempts. Focus on tight body line — hollow, not arched. This is handstand skill work, not cardio."},
+     {name:"Wall Handstand Hold",detail:"4×20–30 sec. Fingertip balance. Shrug shoulders up. One shoulder-width from wall."},
+     {name:"Pike Press Attempts",detail:"5–8 reps. Hips high, head between arms. Even if you can't press yet, the pattern is training."},
+     {name:"Freestanding Balance",detail:"10 min open practice. Kick up, bail safely, repeat. Track best hold each session."},
+   ],
+   note:"Total: 30–40 min. Keep it playful. Handstand directly transfers to planche balance — this is skill carryover, not filler."}},
+  {day:"Sat",type:"rest",skill:"Rest",detail:"Full Rest",
+   restPlan:{title:"Full Rest Day",color:"var(--muted)",chip:"Rest Day",
+   items:[
+     {name:"No Training",detail:"Seriously. Tendons and connective tissue need 48h to remodel. Respect the process."},
+     {name:"Walk / Swim (optional)",detail:"Light movement is fine — 20–30 min easy pace. Nothing that loads the upper body."},
+     {name:"Sleep & Nutrition Priority",detail:"8h+ sleep. Protein 1.6–2.2g/kg. This is where supercompensation happens."},
+     {name:"Prep for Sunday",detail:"Check your band, chalk, rings or bar. Have equipment ready before you start — decision fatigue kills sessions."},
+   ],
+   note:"Tomorrow is Planche day. Rest today means a better session tomorrow. The workout is already done — now let the body catch up."}}
+];
+
+
+// ── RENDER HELPERS ──────────────────────────────────
+const PILLAR_CLASS={hold:"pill-hold",push:"pill-push",pull:"pill-pull",press:"pill-press"};
+const TAG_CLASS={sloppy:"tag-sloppy",working:"tag-working",solid:"tag-solid"};
+
+function renderExCards(exs){
+  return exs.map((e,i)=>`
+    <div class="ex-card" style="animation-delay:${i*0.04}s">
+      <div class="ex-top">
+        <span class="ex-name">${e.n}</span>
+        <span class="pillar-pill ${PILLAR_CLASS[e.p]}">${e.p}</span>
+      </div>
+      <div class="ex-meta">
+        <div class="meta-item"><span class="meta-text">${e.s}</span></div>
+        <div class="meta-item"><span class="meta-text">${e.r}</span></div>
+      </div>
+      <div class="ex-cue">${e.c}</div>
+    </div>`).join('');
+}
+
+function renderSkillHeader(d,color){
+  return `
+    <div class="skill-header-top">
+      <span class="skill-name" style="color:${color}">${d.label}</span>
+      <span class="skill-tag ${TAG_CLASS[d.tag]}">${d.tag}</span>
+    </div>
+    <div class="skill-std">Standard to advance: <span>${d.std}</span></div>
+    <div class="skill-progress">
+      <div class="prog-bar-bg"><div class="prog-bar-fill" style="width:${d.prog}%;background:${color}"></div></div>
+      <div class="prog-bar-labels"><span>Lean</span><span>Straddle</span></div>
+    </div>`;
+}
+
+function renderPlancheTrack(){
+  const v=document.getElementById('planche-level').value;
+  const d=PD[v];
+  document.getElementById('planche-skill-header').innerHTML=renderSkillHeader(d,'var(--accent-p)');
+  document.getElementById('planche-exercises').innerHTML=
+    `<div class="focus-box p" style="margin-bottom:12px;"><div class="focus-title p">Standard to advance</div><div class="focus-text">${d.std}</div></div>`+
+    renderExCards(d.exs);
+}
+
+function renderFLTrack(){
+  const v=document.getElementById('fl-level').value;
+  const d=FD[v];
+  document.getElementById('fl-skill-header').innerHTML=renderSkillHeader(d,'var(--accent-fl)');
+  document.getElementById('fl-exercises').innerHTML=
+    `<div class="focus-box fl" style="margin-bottom:12px;"><div class="focus-title fl">Standard to advance</div><div class="focus-text">${d.std}</div></div>`+
+    renderExCards(d.exs);
+}
+
+// ── TODAY ──────────────────────────────────────────
+let todaySkill='p';
+function switchToday(s){
+  todaySkill=s;
+  document.getElementById('btn-p').className='toggle-btn'+(s==='p'?' active-p':'');
+  document.getElementById('btn-fl').className='toggle-btn'+(s==='fl'?' active-fl':'');
+  renderToday();
+}
+
+function countSets(exs){
+  return exs.reduce((t,e)=>{const m=e.s.match(/^(\d+)/);return t+(m?parseInt(m[1]):0);},0);
+}
+
+function renderToday(){
+  const todayIdx=new Date().getDay();
+  const todayDayData=WEEK_DATA[todayIdx];
+  // Rest day override panel
+  let restBanner='';
+  if(todayDayData&&todayDayData.type==='rest'&&todayDayData.restPlan){
+    const p=todayDayData.restPlan;
+    restBanner=`<div class="focus-box neutral" style="margin-bottom:12px;">
+      <div class="focus-title neutral">${p.chip} · ${todayDayData.detail}</div>
+      <div class="focus-text"><strong>${p.title}</strong><br>${p.items.slice(0,3).map(it=>'· '+it.name).join('<br>')}<br><span style="color:var(--muted2);font-size:11px;">Tap the Week tab → ${todayDayData.day} for full plan</span></div>
+    </div>`;
+  }
+
+  const d=todaySkill==='p'?PD[document.getElementById('planche-level').value]:FD[document.getElementById('fl-level').value];
+  const color=todaySkill==='p'?'var(--accent-p)':'var(--accent-fl)';
+  const cls=todaySkill==='p'?'p':'fl';
+  const advice=todaySkill==='p'
+    ?"<strong>Today's focus:</strong> Quality over hold time. Start band-assisted. Stop every rep the moment protraction breaks. Film one set — watch it back before you leave."
+    :"<strong>Today's focus:</strong> One-leg holds first, build each side to 8s before going bilateral. Rows after. Keep scap depressed and retracted throughout.";
+  const sets=countSets(d.exs);
+  const mins=todaySkill==='p'?50:45;
+
+  document.getElementById('today-content').innerHTML=restBanner+`
+    <div class="focus-box ${cls}">
+      <div class="focus-title ${cls}">${d.label}</div>
+      <div class="focus-text">${advice}</div>
+    </div>
+    <div class="summary-row">
+      <div class="sum-card"><div class="sum-num" style="color:${color}">${sets}</div><div class="sum-label">Total sets</div></div>
+      <div class="sum-card"><div class="sum-num">~${mins}</div><div class="sum-label">Minutes</div></div>
+      <div class="sum-card"><div class="sum-num" style="font-size:18px;padding-top:4px">72h</div><div class="sum-label">Next session</div></div>
+    </div>
+    ${renderExCards(d.exs)}`;
+}
+
+function initToday(){
+  const todayIdx=new Date().getDay(); // 0=Sun
+  const d=WEEK_DATA[todayIdx];
+  // Update header
+  const chip=document.getElementById('today-chip');
+  const sub=document.getElementById('header-sub');
+  if(d.type==='p'){
+    chip.className='today-chip chip-planche';chip.textContent='Planche Day';
+    sub.textContent='Advanced Tuck · '+d.day+' Session';
+    todaySkill='p';
+    document.getElementById('btn-p').className='toggle-btn active-p';
+    document.getElementById('btn-fl').className='toggle-btn';
+  } else if(d.type==='fl'){
+    chip.className='today-chip chip-fl';chip.textContent='FL Day';
+    sub.textContent='Adv Tuck FL · '+d.day+' Session';
+    todaySkill='fl';
+    document.getElementById('btn-p').className='toggle-btn';
+    document.getElementById('btn-fl').className='toggle-btn active-fl';
+  } else {
+    chip.className='today-chip chip-rest';chip.textContent=d.restPlan?d.restPlan.chip:'Rest';
+    sub.textContent=d.skill+' · '+d.detail;
+  }
+  renderToday();
+}
+
+// ── WEEK ──────────────────────────────────────────
+function renderWeekGrid(){
+  const todayIdx=new Date().getDay(); // 0=Sun
+  document.getElementById('week-grid').innerHTML=WEEK_DATA.map((d,i)=>`
+    <div class="day-card ${i===todayIdx?'today':d.type==='fl'?'fl-day':d.type==='rest'?'rest-day':''}" onclick="showDayModal(${i})" style="cursor:pointer;">
+      <div class="day-name">${d.day}</div>
+      <div class="day-dot ${d.type==='p'?'p':d.type==='fl'?'fl':'rest'}"></div>
+      <div class="day-skill-text">${d.skill}</div>
+    </div>`).join('');
+}
+
+function showDayModal(idx){
+  const d=WEEK_DATA[idx];
+  const todayIdx=new Date().getDay();
+  const isTodayLabel=idx===todayIdx?' · Today':'';
+  document.getElementById('modal-day-title').innerHTML=`${d.day}${isTodayLabel}`;
+  document.getElementById('modal-day-content').innerHTML=renderDayModalContent(d,idx);
+  document.getElementById('modal-overlay').classList.add('open');
+  document.getElementById('day-modal').classList.add('open');
+}
+function closeDayModal(){
+  document.getElementById('modal-overlay').classList.remove('open');
+  document.getElementById('day-modal').classList.remove('open');
+}
+function renderDayModalContent(d,idx){
+  if(d.type==='rest'&&d.restPlan){
+    const p=d.restPlan;
+    return `<div class="focus-box neutral" style="margin-bottom:12px;">
+      <div class="focus-title neutral">${p.chip} · ${d.detail}</div>
+      <div class="focus-text"><strong>${p.title}</strong></div>
+    </div>
+    <div class="rest-day-card">
+      ${p.items.map(it=>`<div class="rest-item"><div class="rest-item-name">${it.name}</div><div class="rest-item-detail">${it.detail}</div></div>`).join('')}
+      <div class="rest-note">${p.note}</div>
+    </div>`;
+  }
+  const isP=d.type==='p';
+  const skillData=isP?PD[document.getElementById('planche-level').value]:FD[document.getElementById('fl-level').value];
+  const cls=isP?'p':'fl';
+  const color=isP?'var(--accent-p)':'var(--accent-fl)';
+  const sets=countSets(skillData.exs);
+  return `<div class="focus-box ${cls}" style="margin-bottom:12px;">
+    <div class="focus-title ${cls}">${isP?'Planche Day':'Front Lever Day'} · ${d.detail}</div>
+    <div class="focus-text"><strong>${skillData.label}</strong> — ${sets} sets · ~${isP?50:45} min</div>
+  </div>
+  ${renderExCards(skillData.exs)}`;
+}
+
+// ── NAV ──────────────────────────────────────────
+const VIEWS=['today','planche','fl','week','timer'];
+function showView(name){
+  VIEWS.forEach(v=>{
+    document.getElementById('view-'+v).classList.toggle('active',v===name);
+    const nav=document.getElementById('nav-'+v);
+    if(nav) nav.classList.toggle('active',v===name);
+  });
+  document.getElementById('scroll-area').scrollTop=0;
+  if(name==='week') renderWeekGrid();
+}
+
+// ── TIMER ──────────────────────────────────────────
+let timerInterval=null,timerSecs=0,timerRunning=false;
+function toggleTimer(){
+  if(timerRunning){
+    clearInterval(timerInterval);
+    timerRunning=false;
+    document.getElementById('timer-start').textContent='Resume';
+    document.getElementById('timer-start').style.background='var(--amber)';
+  } else {
+    timerRunning=true;
+    document.getElementById('timer-start').textContent='Pause';
+    document.getElementById('timer-start').style.background='var(--red)';
+    timerInterval=setInterval(()=>{
+      timerSecs++;
+      const m=Math.floor(timerSecs/60).toString().padStart(2,'0');
+      const s=(timerSecs%60).toString().padStart(2,'0');
+      document.getElementById('timer-display').textContent=m+':'+s;
+    },1000);
+  }
+}
+function resetTimer(){
+  clearInterval(timerInterval);
+  timerRunning=false;timerSecs=0;
+  document.getElementById('timer-display').textContent='00:00';
+  document.getElementById('timer-start').textContent='Start';
+  document.getElementById('timer-start').style.background='var(--green)';
+}
+function setTimer(secs){
+  resetTimer();
+  timerSecs=0;
+  document.getElementById('timer-display').textContent='00:00';
+  setTimeout(()=>{timerSecs=-1;toggleTimer();},50);
+  setTimeout(()=>{
+    clearInterval(timerInterval);
+    timerRunning=false;timerSecs=secs;
+    const m=Math.floor(secs/60).toString().padStart(2,'0');
+    const s=(secs%60).toString().padStart(2,'0');
+    document.getElementById('timer-display').textContent=m+':'+s;
+    document.getElementById('timer-start').textContent='Start';
+    document.getElementById('timer-start').style.background='var(--green)';
+    timerInterval=setInterval(()=>{
+      timerSecs--;
+      if(timerSecs<0){clearInterval(timerInterval);timerRunning=false;document.getElementById('timer-display').textContent='Done!';return;}
+      const mm=Math.floor(timerSecs/60).toString().padStart(2,'0');
+      const ss=(timerSecs%60).toString().padStart(2,'0');
+      document.getElementById('timer-display').textContent=mm+':'+ss;
+    },1000);
+    timerRunning=true;
+    document.getElementById('timer-start').textContent='Pause';
+    document.getElementById('timer-start').style.background='var(--red)';
+  },100);
+}
+
+// ── HOLD TIMER ──────────────────────────────────────
+let holdStart_t=null,holdInterval2=null,holdRunning=false,holdLog=[];
+function holdToggle(){
+  if(!holdRunning){
+    holdRunning=true;
+    holdStart_t=Date.now();
+    document.getElementById('hold-btn').textContent='Stop';
+    document.getElementById('hold-btn').style.background='var(--red)';
+    holdInterval2=setInterval(()=>{
+      const elapsed=((Date.now()-holdStart_t)/1000).toFixed(1);
+      document.getElementById('hold-display').textContent=elapsed+'s';
+    },100);
+  } else {
+    holdRunning=false;
+    clearInterval(holdInterval2);
+    const duration=((Date.now()-holdStart_t)/1000).toFixed(1);
+    holdStart_t=null;
+    document.getElementById('hold-display').textContent=duration+'s';
+    document.getElementById('hold-btn').textContent='Start';
+    document.getElementById('hold-btn').style.background='var(--green)';
+    holdLog.unshift(duration+'s');
+    if(holdLog.length>10) holdLog.pop();
+    document.getElementById('hold-log').innerHTML=holdLog.map((h,i)=>
+      `<div style="padding:8px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;">
+        <span style="color:var(--muted)">Set ${holdLog.length-i}</span>
+        <span style="color:var(--text)">${h}</span>
+      </div>`).join('');
+  }
+}
+
+// ── SERVICE WORKER ──────────────────────────────────
+if('serviceWorker' in navigator){
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(()=>{});
+  });
+}
+
+renderPlancheTrack();
+renderFLTrack();
+initToday();
+renderWeekGrid();
+</script>
+</body>
+</html>
