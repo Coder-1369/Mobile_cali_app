@@ -54,7 +54,19 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 .scroll-area::-webkit-scrollbar{display:none;}
 
 /* ── BOTTOM NAV ── */
-.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:var(--surface);border-top:1px solid var(--border);display:flex;padding:8px 0 24px;z-index:100;}
+.bottom-nav{
+  position:fixed;bottom:0;left:50%;transform:translateX(-50%);
+  width:100%;max-width:430px;background:var(--surface);border-top:1px solid var(--border);
+  display:flex;padding:8px 0 24px;z-index:100;
+  transition:transform .28s ease, opacity .28s ease;
+  will-change:transform, opacity;
+}
+.bottom-nav.nav-hidden{
+  transform:translateX(-50%) translateY(100%);
+  opacity:0;
+  pointer-events:none;
+}
+
 .nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;padding:6px 4px;border:none;background:none;color:var(--muted2);transition:color .2s;}
 .nav-item.active{color:var(--text);}
 .nav-item svg{width:20px;height:20px;stroke-width:1.8;}
@@ -498,7 +510,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
   </div>
 
   <!-- BOTTOM NAV -->
-  <nav class="bottom-nav">
+  <nav class="bottom-nav" id="bottom-nav">
     <button class="nav-item active" id="nav-today" onclick="showView('today')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
       <span class="nav-label">Today</span>
@@ -656,7 +668,6 @@ const WEEK_DATA=[
    ],
    note:"Tomorrow is Planche day. Rest today means a better session tomorrow. The workout is already done — now let the body catch up."}}
 ];
-
 
 // ── RENDER HELPERS ──────────────────────────────────
 const PILLAR_CLASS={hold:"pill-hold",push:"pill-push",pull:"pill-pull",press:"pill-press"};
@@ -840,6 +851,27 @@ function showView(name){
   document.getElementById('scroll-area').scrollTop=0;
   if(name==='week') renderWeekGrid();
 }
+
+// ── SCROLL-BASED NAV VISIBILITY ─────────────────────
+const scrollArea = document.getElementById('scroll-area');
+const bottomNav = document.getElementById('bottom-nav');
+let lastScrollTop = 0;
+let navHidden = false;
+
+scrollArea.addEventListener('scroll', () => {
+  const st = scrollArea.scrollTop;
+  const goingDown = st > lastScrollTop + 4;
+  const goingUp = st < lastScrollTop - 4;
+
+  if(goingDown && !navHidden){
+    bottomNav.classList.add('nav-hidden');
+    navHidden = true;
+  } else if(goingUp && navHidden){
+    bottomNav.classList.remove('nav-hidden');
+    navHidden = false;
+  }
+  lastScrollTop = st;
+});
 
 // ── TIMER ──────────────────────────────────────────
 let timerInterval=null,timerSecs=0,timerRunning=false;
