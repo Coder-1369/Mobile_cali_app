@@ -39,6 +39,22 @@
 html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--ff-body);overflow:hidden;}
 #app{display:flex;flex-direction:column;height:100%;max-width:430px;margin:0 auto;position:relative;}
 
+/* Responsive widths */
+@media (min-width:900px){
+  #app{max-width:900px;}
+  .bottom-nav{max-width:900px;}
+  .day-modal{max-width:900px;}
+  .scroll-area{padding:0 24px 120px;}
+  .app-header{padding:40px 24px 16px;}
+}
+@media (min-width:1200px){
+  #app{max-width:1200px;}
+  .bottom-nav{max-width:1200px;}
+  .day-modal{max-width:1200px;}
+  .scroll-area{padding:0 32px 140px;}
+  .app-header{padding:36px 28px 16px;}
+}
+
 /* ── HEADER ── */
 .app-header{padding:52px 20px 16px;background:var(--bg);flex-shrink:0;}
 .header-row{display:flex;align-items:center;justify-content:space-between;}
@@ -66,7 +82,6 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
   opacity:0;
   pointer-events:none;
 }
-
 .nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;padding:6px 4px;border:none;background:none;color:var(--muted2);transition:color .2s;}
 .nav-item.active{color:var(--text);}
 .nav-item svg{width:20px;height:20px;stroke-width:1.8;}
@@ -119,10 +134,12 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 .focus-box.p{border-left-color:var(--accent-p);background:var(--accent-p-dim);}
 .focus-box.fl{border-left-color:var(--accent-fl);background:var(--accent-fl-dim);}
 .focus-box.neutral{border-left-color:var(--muted);background:var(--surface);}
+.focus-box.active{border-left-color:var(--amber);background:var(--amber-dim);}
 .focus-title{font-family:var(--ff-mono);font-size:10px;text-transform:uppercase;letter-spacing:1px;margin-bottom:5px;}
 .focus-title.p{color:var(--accent-p);}
 .focus-title.fl{color:var(--accent-fl);}
 .focus-title.neutral{color:var(--muted);}
+.focus-title.active{color:var(--amber);}
 .focus-text{color:var(--muted);}
 .focus-text strong{color:var(--text);font-weight:500;}
 
@@ -152,10 +169,12 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 .day-skill-text{font-size:8px;color:var(--muted2);line-height:1.3;}
 
 /* ── TODAY TOGGLE ── */
-.today-toggle{display:flex;background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:16px;}
-.toggle-btn{flex:1;padding:11px;font-family:var(--ff-mono);font-size:12px;font-weight:500;border:none;background:none;cursor:pointer;transition:all .2s;color:var(--muted);}
+.today-toggle{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:6px;margin-bottom:16px;}
+.toggle-btn{padding:10px 6px;font-family:var(--ff-mono);font-size:11px;font-weight:500;border:none;background:none;cursor:pointer;transition:all .2s;color:var(--muted);border-radius:8px;}
 .toggle-btn.active-p{background:var(--accent-p);color:#fff;}
 .toggle-btn.active-fl{background:var(--accent-fl);color:#fff;}
+.toggle-btn.active-rest{background:var(--surface2);color:var(--text);border:1px solid var(--border2);}
+.toggle-btn.active-active{background:var(--amber);color:#fff;}
 
 /* ── VIEWS ── */
 .view{display:none;}
@@ -238,25 +257,15 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 <div id="splash">
   <div class="spl-glow"></div>
   <svg class="spl-fig" viewBox="0 0 500 300" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <!-- Body -->
     <line class="sf sf-body" x1="108" y1="150" x2="298" y2="150" stroke="#f0f0f5" stroke-width="7" stroke-linecap="round"/>
-    <!-- Head outline draws in -->
     <circle class="sf sf-hd" cx="320" cy="141" r="19" stroke="#ff5c35" stroke-width="6" fill="none"/>
-    <!-- Head fill (appears after outline) -->
     <circle id="spl-headfill" cx="320" cy="141" r="19" fill="#ff5c35"/>
-    <!-- Leg 1 (upper) -->
     <line class="sf sf-leg1" x1="108" y1="150" x2="58" y2="142" stroke="#f0f0f5" stroke-width="6" stroke-linecap="round"/>
-    <!-- Leg 2 (lower) -->
     <line class="sf sf-leg2" x1="108" y1="150" x2="58" y2="159" stroke="#f0f0f5" stroke-width="6" stroke-linecap="round"/>
-    <!-- Foot 1 -->
     <line class="sf sf-ft1" x1="58" y1="142" x2="28" y2="142" stroke="#3b9eff" stroke-width="5" stroke-linecap="round"/>
-    <!-- Foot 2 -->
     <line class="sf sf-ft2" x1="58" y1="159" x2="28" y2="159" stroke="#3b9eff" stroke-width="5" stroke-linecap="round"/>
-    <!-- Front arm -->
     <line class="sf sf-arm1" x1="215" y1="150" x2="215" y2="202" stroke="#f0f0f5" stroke-width="6" stroke-linecap="round"/>
-    <!-- Back arm -->
     <line class="sf sf-arm2" x1="168" y1="150" x2="168" y2="202" stroke="#f0f0f5" stroke-width="6" stroke-linecap="round"/>
-    <!-- Hand bars (orange) -->
     <line class="sf sf-h1" x1="198" y1="203" x2="234" y2="203" stroke="#ff5c35" stroke-width="5" stroke-linecap="round"/>
     <line class="sf sf-h2" x1="151" y1="203" x2="187" y2="203" stroke="#ff5c35" stroke-width="5" stroke-linecap="round"/>
   </svg>
@@ -284,6 +293,8 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
       <div class="today-toggle">
         <button class="toggle-btn active-p" id="btn-p" onclick="switchToday('p')">Planche</button>
         <button class="toggle-btn" id="btn-fl" onclick="switchToday('fl')">Front Lever</button>
+        <button class="toggle-btn" id="btn-rest" onclick="switchToday('rest')">Rest</button>
+        <button class="toggle-btn" id="btn-active" onclick="switchToday('active')">Active</button>
       </div>
       <div id="today-content"></div>
     </div>
@@ -347,7 +358,6 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
         </div>
       </div>
 
-      <!-- REST PRESETS -->
       <div class="section-label">Rest presets</div>
       <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:16px;">
         <button class="timer-btn" onclick="setTimer(90)" style="padding:14px;border-radius:12px;font-size:13px;">1:30 · Push sets</button>
@@ -356,7 +366,6 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
         <button class="timer-btn" onclick="setTimer(240)" style="padding:14px;border-radius:12px;font-size:13px;">4:00 · Max effort</button>
       </div>
 
-      <!-- HOLD TIMER -->
       <div class="section-label">Hold timer</div>
       <div class="timer-strip" id="hold-strip">
         <div>
@@ -369,12 +378,11 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
       </div>
       <div style="font-family:var(--ff-mono);font-size:11px;color:var(--muted);margin-top:8px;">Tap <strong style="color:var(--text)">Start</strong> when you get into position. Tap <strong style="color:var(--text)">Stop</strong> when you come out. Hands-free.</div>
 
-      <!-- HOLD LOG -->
       <div class="section-label">Session log</div>
       <div id="hold-log" style="font-family:var(--ff-mono);font-size:12px;color:var(--muted);"></div>
     </div>
 
-  </div><!-- end scroll area -->
+  </div>
 
   <!-- DAY MODAL -->
   <div class="modal-overlay" id="modal-overlay" onclick="closeDayModal()"></div>
@@ -599,6 +607,8 @@ function switchToday(s){
   todaySkill=s;
   document.getElementById('btn-p').className='toggle-btn'+(s==='p'?' active-p':'');
   document.getElementById('btn-fl').className='toggle-btn'+(s==='fl'?' active-fl':'');
+  document.getElementById('btn-rest').className='toggle-btn'+(s==='rest'?' active-rest':'');
+  document.getElementById('btn-active').className='toggle-btn'+(s==='active'?' active-active':'');
   renderToday();
 }
 
@@ -606,18 +616,39 @@ function countSets(exs){
   return exs.reduce((t,e)=>{const m=e.s.match(/^(\d+)/);return t+(m?parseInt(m[1]):0);},0);
 }
 
-function renderToday(){
-  const todayIdx=new Date().getDay();
-  const todayDayData=WEEK_DATA[todayIdx];
-  let restBanner='';
-  if(todayDayData&&todayDayData.type==='rest'&&todayDayData.restPlan){
-    const p=todayDayData.restPlan;
-    restBanner=`<div class="focus-box neutral" style="margin-bottom:12px;">
-      <div class="focus-title neutral">${p.chip} · ${todayDayData.detail}</div>
-      <div class="focus-text"><strong>${p.title}</strong><br>${p.items.slice(0,3).map(it=>'· '+it.name).join('<br>')}<br><span style="color:var(--muted2);font-size:11px;">Tap the Week tab → ${todayDayData.day} for full plan</span></div>
-    </div>`;
+function getRestPlan(type){
+  if(type==='rest'){
+    return WEEK_DATA.find(d=>d.restPlan && d.restPlan.chip==='Rest Day');
   }
+  if(type==='active'){
+    return WEEK_DATA.find(d=>d.restPlan && d.restPlan.chip==='Active Day');
+  }
+  return null;
+}
 
+function renderRestActive(type){
+  const d=getRestPlan(type);
+  if(!d || !d.restPlan){
+    return `<div class="focus-box neutral"><div class="focus-title neutral">No plan</div><div class="focus-text">No ${type} plan configured.</div></div>`;
+  }
+  const p=d.restPlan;
+  const cls=type==='active'?'active':'neutral';
+  return `
+    <div class="focus-box ${cls}" style="margin-bottom:12px;">
+      <div class="focus-title ${cls}">${p.chip} · ${d.detail}</div>
+      <div class="focus-text"><strong>${p.title}</strong></div>
+    </div>
+    <div class="rest-day-card">
+      ${p.items.map(it=>`<div class="rest-item"><div class="rest-item-name">${it.name}</div><div class="rest-item-detail">${it.detail}</div></div>`).join('')}
+      <div class="rest-note">${p.note}</div>
+    </div>`;
+}
+
+function renderToday(){
+  if(todaySkill==='rest' || todaySkill==='active'){
+    document.getElementById('today-content').innerHTML=renderRestActive(todaySkill);
+    return;
+  }
   const d=todaySkill==='p'?PD[document.getElementById('planche-level').value]:FD[document.getElementById('fl-level').value];
   const color=todaySkill==='p'?'var(--accent-p)':'var(--accent-fl)';
   const cls=todaySkill==='p'?'p':'fl';
@@ -627,7 +658,7 @@ function renderToday(){
   const sets=countSets(d.exs);
   const mins=todaySkill==='p'?50:45;
 
-  document.getElementById('today-content').innerHTML=restBanner+`
+  document.getElementById('today-content').innerHTML=`
     <div class="focus-box ${cls}">
       <div class="focus-title ${cls}">${d.label}</div>
       <div class="focus-text">${advice}</div>
@@ -645,34 +676,32 @@ function initToday(){
   const d=WEEK_DATA[todayIdx];
   const chip=document.getElementById('today-chip');
   const sub=document.getElementById('header-sub');
+
   if(d.type==='p'){
     chip.className='today-chip chip-planche';chip.textContent='Planche Day';
     sub.textContent='Advanced Tuck · '+d.day+' Session';
     todaySkill='p';
-    document.getElementById('btn-p').className='toggle-btn active-p';
-    document.getElementById('btn-fl').className='toggle-btn';
   } else if(d.type==='fl'){
     chip.className='today-chip chip-fl';chip.textContent='FL Day';
     sub.textContent='Adv Tuck FL · '+d.day+' Session';
     todaySkill='fl';
-    document.getElementById('btn-p').className='toggle-btn';
-    document.getElementById('btn-fl').className='toggle-btn active-fl';
   } else {
     chip.className='today-chip chip-rest';chip.textContent=d.restPlan?d.restPlan.chip:'Rest';
     sub.textContent=d.skill+' · '+d.detail;
+    todaySkill = d.restPlan && d.restPlan.chip==='Active Day' ? 'active' : 'rest';
   }
-  renderToday();
+
+  switchToday(todaySkill);
 }
 
 // ── WEEK ──────────────────────────────────────────
 function renderWeekDetail(idx){
   const d = WEEK_DATA[idx];
-  const content = renderDayModalContent(d, idx);
-  document.getElementById('week-detail').innerHTML = content;
+  document.getElementById('week-detail').innerHTML = renderDayModalContent(d, idx);
 }
 
 function renderWeekGrid(){
-  const todayIdx=new Date().getDay();
+  const todayIdx=new Date().getDay(); // 0=Sun
   document.getElementById('week-grid').innerHTML=WEEK_DATA.map((d,i)=>`
     <div class="day-card ${i===todayIdx?'today':d.type==='fl'?'fl-day':d.type==='rest'?'rest-day':''}" onclick="showDayModal(${i})" style="cursor:pointer;">
       <div class="day-name">${d.day}</div>
@@ -691,9 +720,6 @@ function showDayModal(idx){
   document.getElementById('modal-day-content').innerHTML=renderDayModalContent(d,idx);
   document.getElementById('modal-overlay').classList.add('open');
   document.getElementById('day-modal').classList.add('open');
-
-  // Keep week detail synced with tapped day
-  renderWeekDetail(idx);
 }
 function closeDayModal(){
   document.getElementById('modal-overlay').classList.remove('open');
