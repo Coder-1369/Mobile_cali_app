@@ -1,4 +1,4 @@
-const CACHE = 'training-v4';
+const CACHE = 'training-v5';
 const BASE = '/Mobile_cali_app/';
 
 const ASSETS = [
@@ -6,43 +6,52 @@ const ASSETS = [
   BASE + 'index.html',
   BASE + 'manifest.json',
   BASE + 'icon-192.png',
-  BASE + 'icon-512.png',
-  'https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:ital,wght@0,400;0,500;1,400&family=DM+Sans:wght@400;500&display=swap'
+  BASE + 'icon-512.png'
 ];
 
-self.addEventListener('install', e => {
-  e.waitUntil(
+// Install and cache essential files
+self.addEventListener('install', event => {
+  event.waitUntil(
     caches.open(CACHE)
-      .then(c => c.addAll(ASSETS))
+      .then(cache => cache.addAll(ASSETS))
       .then(() => self.skipWaiting())
   );
 });
 
-self.addEventListener('activate', e => {
-  e.waitUntil(
+// Remove old caches
+self.addEventListener('activate', event => {
+  event.waitUntil(
     caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
+      Promise.all(
+        keys
+          .filter(key => key !== CACHE)
+          .map(key => caches.delete(key))
+      )
     ).then(() => self.clients.claim())
   );
 });
 
-self.addEventListener('fetch', e => {
-  // Always revalidate HTML navigations to avoid stale index.html
-  if (e.request.mode === 'navigate') {
-    e.respondWith(
-      fetch(e.request)
-        .then(res => {
-          const copy = res.clone();
-          caches.open(CACHE).then(c => c.put(BASE + 'index.html', copy));
-          return res;
+// Network-first for HTML pages
+self.addEventListener('fetch', event => {
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request)
+        .then(response => {
+          const copy = response.clone();
+          caches.open(CACHE).then(cache =>
+            cache.put(BASE + 'index.html', copy)
+          );
+          return response;
         })
         .catch(() => caches.match(BASE + 'index.html'))
     );
     return;
   }
 
-  // Cache-first for static assets
-  e.respondWith(
-    caches.match(e.request).then(cached => cached || fetch(e.request))
+  // Cache-first for all other assets
+  event.respondWith(
+    caches.match(event.request).then(cached => {
+      return cached || fetch(event.request);
+    })
   );
 });
