@@ -1,4 +1,4 @@
-const CACHE = 'training-v3';
+const CACHE = 'training-v4';
 const BASE = '/Mobile_cali_app/';
 
 const ASSETS = [
@@ -27,14 +27,21 @@ self.addEventListener('activate', e => {
 });
 
 self.addEventListener('fetch', e => {
-  // Handle navigation requests (important for installed PWA)
+  // Always revalidate HTML navigations to avoid stale index.html
   if (e.request.mode === 'navigate') {
     e.respondWith(
-      caches.match(BASE + 'index.html').then(cached => cached || fetch(BASE + 'index.html'))
+      fetch(e.request)
+        .then(res => {
+          const copy = res.clone();
+          caches.open(CACHE).then(c => c.put(BASE + 'index.html', copy));
+          return res;
+        })
+        .catch(() => caches.match(BASE + 'index.html'))
     );
     return;
   }
 
+  // Cache-first for static assets
   e.respondWith(
     caches.match(e.request).then(cached => cached || fetch(e.request))
   );
