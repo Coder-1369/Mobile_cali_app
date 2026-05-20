@@ -51,6 +51,25 @@
     --ff-mono:'DM Mono',monospace;
     --ff-body:'DM Sans',sans-serif;
   }
+  :root[data-theme='light']{
+    --bg:#f6f6f8;
+    --surface:#ffffff;
+    --surface2:#f1f1f6;
+    --border:#e1e1ea;
+    --border2:#d2d2dd;
+    --text:#101015;
+    --muted:#6b6b78;
+    --muted2:#8a8a98;
+    --accent-p:#e24a24;
+    --accent-fl:#2d86e8;
+    --accent-p-dim:#e24a2418;
+    --accent-fl-dim:#2d86e818;
+    --green:#1aa56f;
+    --green-dim:#1aa56f18;
+    --amber:#e1971a;
+    --amber-dim:#e1971a18;
+    --red:#d04343;
+  }
   html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--ff-body);overflow:hidden;}
   #app{display:flex;flex-direction:column;height:100%;max-width:430px;margin:0 auto;position:relative;}
 
@@ -223,6 +242,33 @@
   .sw-best{color:var(--green);}
   .sw-worst{color:var(--red);}
 
+  /* ── MINI TIMER ── */
+  .mini-timer{display:none;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:10px 12px;margin-bottom:12px;align-items:center;justify-content:space-between;gap:10px;}
+  .mini-timer.active{display:flex;}
+  .mini-timer-display{font-family:var(--ff-head);font-size:18px;font-weight:800;letter-spacing:.3px;}
+  .mini-timer-actions{display:flex;gap:6px;}
+  .mini-timer-actions .timer-btn{padding:6px 10px;font-size:10px;}
+
+  /* ── SETTINGS ── */
+  .settings-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px 16px;margin-bottom:12px;}
+  .settings-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);}
+  .settings-row:last-child{border-bottom:none;padding-bottom:0;}
+  .settings-label{font-family:var(--ff-mono);font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;}
+  .settings-title{font-size:14px;color:var(--text);font-weight:500;}
+  .settings-desc{font-size:12px;color:var(--muted);line-height:1.4;margin-top:2px;}
+  .settings-control{display:flex;align-items:center;gap:8px;}
+  .settings-select{background:var(--surface2);border:1px solid var(--border2);color:var(--text);font-family:var(--ff-mono);font-size:11px;padding:6px 8px;border-radius:8px;cursor:pointer;}
+  .toggle{width:44px;height:24px;border-radius:14px;border:1px solid var(--border2);background:var(--surface2);position:relative;cursor:pointer;transition:all .2s;}
+  .toggle::after{content:'';position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:var(--muted2);transition:all .2s;}
+  .toggle.on{background:var(--accent-fl-dim);border-color:var(--accent-fl);}
+  .toggle.on::after{left:22px;background:var(--accent-fl);}
+  .settings-btn{font-family:var(--ff-mono);font-size:11px;padding:8px 12px;border-radius:8px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);cursor:pointer;}
+  .settings-btn.warn{border-color:var(--amber);color:var(--amber);}
+  .settings-btn.danger{border-color:var(--red);color:var(--red);}
+
+  /* ── REDUCE MOTION ── */
+  .reduce-motion *{animation:none !important;transition:none !important;}
+
   /* ── DELOAD CARD ── */
   .deload-card{background:var(--amber-dim);border:1px solid var(--amber)30;border-radius:14px;padding:16px;margin-bottom:12px;}
   .deload-title{font-family:var(--ff-mono);font-size:10px;color:var(--amber);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;}
@@ -330,6 +376,16 @@
           <button class="toggle-btn" id="btn-rest" onclick="switchToday('rest')">Rest</button>
           <button class="toggle-btn" id="btn-active" onclick="switchToday('active')">Active</button>
         </div>
+        <div class="mini-timer" id="mini-timer">
+          <div>
+            <div class="timer-label">Quick timer</div>
+            <div class="mini-timer-display" id="mini-timer-display">00:00</div>
+          </div>
+          <div class="mini-timer-actions">
+            <button class="timer-btn start" id="mini-timer-start" onclick="toggleTimer()">Start</button>
+            <button class="timer-btn reset-btn" onclick="resetTimer()">Reset</button>
+          </div>
+        </div>
         <div id="today-content"></div>
       </div>
 
@@ -436,6 +492,86 @@
         </div>
       </div>
 
+      <!-- VIEW: SETTINGS -->
+      <div class="view" id="view-settings">
+        <div class="section-label">Appearance</div>
+        <div class="settings-card">
+          <div class="settings-row">
+            <div>
+              <div class="settings-title">Theme</div>
+              <div class="settings-desc">Switch between dark and light themes.</div>
+            </div>
+            <div class="settings-control">
+              <select class="settings-select" id="setting-theme">
+                <option value="dark">Dark</option>
+                <option value="light">Light</option>
+              </select>
+            </div>
+          </div>
+          <div class="settings-row">
+            <div>
+              <div class="settings-title">Reduce motion</div>
+              <div class="settings-desc">Limit animations for a calmer UI.</div>
+            </div>
+            <div class="toggle" id="setting-reduce-motion" onclick="toggleSetting('reduceMotion')"></div>
+          </div>
+        </div>
+
+        <div class="section-label">Navigation</div>
+        <div class="settings-card">
+          <div class="settings-row">
+            <div>
+              <div class="settings-title">Swipe between pages</div>
+              <div class="settings-desc">Swipe left or right to change tabs.</div>
+            </div>
+            <div class="toggle" id="setting-swipe" onclick="toggleSetting('swipeNav')"></div>
+          </div>
+          <div class="settings-row">
+            <div>
+              <div class="settings-title">Mini timer in training</div>
+              <div class="settings-desc">Show a compact timer on the Today page.</div>
+            </div>
+            <div class="toggle" id="setting-mini-timer" onclick="toggleSetting('miniTimer')"></div>
+          </div>
+        </div>
+
+        <div class="section-label">Display</div>
+        <div class="settings-card">
+          <div class="settings-row">
+            <div>
+              <div class="settings-title">Keep screen awake</div>
+              <div class="settings-desc">Prevent sleep while timers run.</div>
+            </div>
+            <div class="toggle" id="setting-keep-awake" onclick="toggleSetting('keepAwake')"></div>
+          </div>
+          <div class="settings-row">
+            <div>
+              <div class="settings-title">Include rest timer</div>
+              <div class="settings-desc">Also keep screen awake for the rest timer.</div>
+            </div>
+            <div class="toggle" id="setting-keep-awake-rest" onclick="toggleSetting('keepAwakeRest')"></div>
+          </div>
+        </div>
+
+        <div class="section-label">Storage</div>
+        <div class="settings-card">
+          <div class="settings-row">
+            <div>
+              <div class="settings-title">Clear app data</div>
+              <div class="settings-desc">Remove saved settings and cached resources.</div>
+            </div>
+            <button class="settings-btn danger" onclick="clearAppData()">Clear</button>
+          </div>
+          <div class="settings-row">
+            <div>
+              <div class="settings-title">Repair app</div>
+              <div class="settings-desc">Re-fetch cached files and reload.</div>
+            </div>
+            <button class="settings-btn warn" onclick="repairApp()">Repair</button>
+          </div>
+        </div>
+      </div>
+
     </div>
 
     <!-- DAY MODAL -->
@@ -474,6 +610,11 @@
       <button class="nav-item" id="nav-timer" onclick="showView('timer')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M9 3h6"/></svg>
         <span class="nav-label">Timer</span>
+        <div class="nav-dot nav-dot-w"></div>
+      </button>
+      <button class="nav-item" id="nav-settings" onclick="showView('settings')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1 1 0 0 0 .2 1.1l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1 1 0 0 0-1.1-.2 1 1 0 0 0-.6.9V21a2 2 0 1 1-4 0v-.1a1 1 0 0 0-.6-.9 1 1 0 0 0-1.1.2l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1 1 0 0 0 .2-1.1 1 1 0 0 0-.9-.6H3a2 2 0 1 1 0-4h.1a1 1 0 0 0 .9-.6 1 1 0 0 0-.2-1.1l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1 1 0 0 0 1.1.2 1 1 0 0 0 .6-.9V3a2 2 0 1 1 4 0v.1a1 1 0 0 0 .6.9 1 1 0 0 0 1.1-.2l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1 1 0 0 0-.2 1.1 1 1 0 0 0 .9.6H21a2 2 0 1 1 0 4h-.1a1 1 0 0 0-.9.6z"/></svg>
+        <span class="nav-label">Settings</span>
         <div class="nav-dot nav-dot-w"></div>
       </button>
     </nav>
@@ -805,7 +946,7 @@
   }
 
   // ── NAV ──────────────────────────────────────────
-  const VIEWS=['today','planche','fl','week','timer'];
+  const VIEWS=['today','planche','fl','week','timer','settings'];
   function showView(name){
     VIEWS.forEach(v=>{
       document.getElementById('view-'+v).classList.toggle('active',v===name);
@@ -815,6 +956,76 @@
     document.getElementById('scroll-area').scrollTop=0;
     if(name==='week') renderWeekGrid();
   }
+
+  // ── SETTINGS ───────────────────────────────────────
+  const DEFAULT_SETTINGS={
+    theme:'dark',
+    reduceMotion:false,
+    swipeNav:true,
+    miniTimer:true,
+    keepAwake:true,
+    keepAwakeRest:false
+  };
+
+  let settings={...DEFAULT_SETTINGS};
+
+  function loadSettings(){
+    try{
+      const raw=localStorage.getItem('training_settings');
+      if(raw){settings={...DEFAULT_SETTINGS,...JSON.parse(raw)};}
+    }catch(e){settings={...DEFAULT_SETTINGS};}
+  }
+
+  function saveSettings(){
+    localStorage.setItem('training_settings', JSON.stringify(settings));
+  }
+
+  function applySettings(){
+    document.documentElement.setAttribute('data-theme', settings.theme);
+    document.documentElement.classList.toggle('reduce-motion', !!settings.reduceMotion);
+    document.getElementById('setting-theme').value=settings.theme;
+    document.getElementById('setting-reduce-motion').classList.toggle('on', !!settings.reduceMotion);
+    document.getElementById('setting-swipe').classList.toggle('on', !!settings.swipeNav);
+    document.getElementById('setting-mini-timer').classList.toggle('on', !!settings.miniTimer);
+    document.getElementById('setting-keep-awake').classList.toggle('on', !!settings.keepAwake);
+    document.getElementById('setting-keep-awake-rest').classList.toggle('on', !!settings.keepAwakeRest);
+    document.getElementById('mini-timer').classList.toggle('active', !!settings.miniTimer);
+    updateWakeLock();
+  }
+
+  function toggleSetting(key){
+    settings[key]=!settings[key];
+    saveSettings();
+    applySettings();
+  }
+
+  document.getElementById('setting-theme').addEventListener('change', (e)=>{
+    settings.theme=e.target.value;
+    saveSettings();
+    applySettings();
+  });
+
+  // ── SWIPE NAV ───────────────────────────────────────
+  let touchX=0,touchY=0;
+  const scrollAreaEl=document.getElementById('scroll-area');
+  scrollAreaEl.addEventListener('touchstart', (e)=>{
+    if(!settings.swipeNav) return;
+    if(!e.touches || e.touches.length!==1) return;
+    touchX=e.touches[0].clientX;
+    touchY=e.touches[0].clientY;
+  }, {passive:true});
+
+  scrollAreaEl.addEventListener('touchend', (e)=>{
+    if(!settings.swipeNav) return;
+    if(!e.changedTouches || e.changedTouches.length!==1) return;
+    const dx=e.changedTouches[0].clientX-touchX;
+    const dy=e.changedTouches[0].clientY-touchY;
+    if(Math.abs(dx)<50 || Math.abs(dx)<Math.abs(dy)) return;
+    const active=VIEWS.find(v=>document.getElementById('view-'+v).classList.contains('active'))||'today';
+    const idx=VIEWS.indexOf(active);
+    const next=dx<0 ? Math.min(VIEWS.length-1, idx+1) : Math.max(0, idx-1);
+    if(next!==idx) showView(VIEWS[next]);
+  }, {passive:true});
 
   // ── SCROLL-BASED NAV VISIBILITY ─────────────────────
   const scrollArea = document.getElementById('scroll-area');
@@ -839,54 +1050,78 @@
 
   // ── TIMER ──────────────────────────────────────────
   let timerInterval=null,timerSecs=0,timerRunning=false;
+
+  function renderRestTimerDisplay(){
+    const m=Math.floor(timerSecs/60).toString().padStart(2,'0');
+    const s=(timerSecs%60).toString().padStart(2,'0');
+    const display=m+':'+s;
+    document.getElementById('timer-display').textContent=display;
+    const mini=document.getElementById('mini-timer-display');
+    if(mini) mini.textContent=display;
+  }
+
+  function renderRestTimerButtons(){
+    const btn=document.getElementById('timer-start');
+    const mini=document.getElementById('mini-timer-start');
+    if(timerRunning){
+      btn.textContent='Pause';
+      btn.style.background='var(--red)';
+      if(mini){mini.textContent='Pause';mini.style.background='var(--red)';}
+    } else {
+      btn.textContent=timerSecs>0?'Resume':'Start';
+      btn.style.background='var(--green)';
+      if(mini){mini.textContent=timerSecs>0?'Resume':'Start';mini.style.background='var(--green)';}
+    }
+  }
   function toggleTimer(){
     if(timerRunning){
       clearInterval(timerInterval);
       timerRunning=false;
-      document.getElementById('timer-start').textContent='Resume';
-      document.getElementById('timer-start').style.background='var(--amber)';
+      renderRestTimerButtons();
     } else {
       timerRunning=true;
-      document.getElementById('timer-start').textContent='Pause';
-      document.getElementById('timer-start').style.background='var(--red)';
+      renderRestTimerButtons();
       timerInterval=setInterval(()=>{
         timerSecs++;
-        const m=Math.floor(timerSecs/60).toString().padStart(2,'0');
-        const s=(timerSecs%60).toString().padStart(2,'0');
-        document.getElementById('timer-display').textContent=m+':'+s;
+        renderRestTimerDisplay();
       },1000);
     }
+    updateWakeLock();
   }
   function resetTimer(){
     clearInterval(timerInterval);
     timerRunning=false;timerSecs=0;
-    document.getElementById('timer-display').textContent='00:00';
-    document.getElementById('timer-start').textContent='Start';
-    document.getElementById('timer-start').style.background='var(--green)';
+    renderRestTimerDisplay();
+    renderRestTimerButtons();
+    updateWakeLock();
   }
   function setTimer(secs){
     resetTimer();
     timerSecs=0;
-    document.getElementById('timer-display').textContent='00:00';
+    renderRestTimerDisplay();
     setTimeout(()=>{timerSecs=-1;toggleTimer();},50);
     setTimeout(()=>{
       clearInterval(timerInterval);
       timerRunning=false;timerSecs=secs;
-      const m=Math.floor(secs/60).toString().padStart(2,'0');
-      const s=(secs%60).toString().padStart(2,'0');
-      document.getElementById('timer-display').textContent=m+':'+s;
-      document.getElementById('timer-start').textContent='Start';
-      document.getElementById('timer-start').style.background='var(--green)';
+      renderRestTimerDisplay();
+      renderRestTimerButtons();
       timerInterval=setInterval(()=>{
         timerSecs--;
-        if(timerSecs<0){clearInterval(timerInterval);timerRunning=false;document.getElementById('timer-display').textContent='Done!';return;}
-        const mm=Math.floor(timerSecs/60).toString().padStart(2,'0');
-        const ss=(timerSecs%60).toString().padStart(2,'0');
-        document.getElementById('timer-display').textContent=mm+':'+ss;
+        if(timerSecs<0){
+          clearInterval(timerInterval);
+          timerRunning=false;
+          document.getElementById('timer-display').textContent='Done!';
+          const mini=document.getElementById('mini-timer-display');
+          if(mini) mini.textContent='Done!';
+          renderRestTimerButtons();
+          updateWakeLock();
+          return;
+        }
+        renderRestTimerDisplay();
       },1000);
       timerRunning=true;
-      document.getElementById('timer-start').textContent='Pause';
-      document.getElementById('timer-start').style.background='var(--red)';
+      renderRestTimerButtons();
+      updateWakeLock();
     },100);
   }
 
@@ -918,6 +1153,7 @@
           <span style="color:var(--text)">${h}</span>
         </div>`).join('');
     }
+      updateWakeLock();
   }
 
   // ── ADV STOPWATCH ──────────────────────────────────
@@ -961,6 +1197,7 @@
       swStartTick();
     }
     swRender();
+    updateWakeLock();
   }
 
   function swReset(){
@@ -973,6 +1210,7 @@
     document.getElementById('sw-start').className='timer-btn resume';
     document.getElementById('sw-rows').innerHTML='';
     swRender();
+    updateWakeLock();
   }
 
   function swLap(){
@@ -1002,6 +1240,76 @@
 
   swRender();
 
+  // ── WAKE LOCK ──────────────────────────────────────
+  let wakeLock=null;
+
+  async function requestWakeLock(){
+    if(!('wakeLock' in navigator)) return;
+    try{
+      if(!wakeLock) wakeLock=await navigator.wakeLock.request('screen');
+    }catch(e){wakeLock=null;}
+  }
+
+  async function releaseWakeLock(){
+    try{
+      if(wakeLock){await wakeLock.release();wakeLock=null;}
+    }catch(e){wakeLock=null;}
+  }
+
+  function updateWakeLock(){
+    if(!settings.keepAwake){releaseWakeLock();return;}
+    const restActive=timerRunning && settings.keepAwakeRest;
+    const shouldKeep=swRunning || holdRunning || restActive;
+    if(shouldKeep){requestWakeLock();} else {releaseWakeLock();}
+  }
+
+  document.addEventListener('visibilitychange', ()=>{
+    if(document.visibilityState==='visible') updateWakeLock();
+  });
+
+  // ── APP DATA ACTIONS ───────────────────────────────
+  async function clearAppData(){
+    const ok=confirm('Clear app data and cached files?');
+    if(!ok) return;
+    localStorage.removeItem('training_settings');
+    try{
+      if('caches' in window){
+        const keys=await caches.keys();
+        await Promise.all(keys.map(k=>caches.delete(k)));
+      }
+      if('serviceWorker' in navigator){
+        const regs=await navigator.serviceWorker.getRegistrations();
+        await Promise.all(regs.map(r=>r.unregister()));
+      }
+    }catch(e){}
+    location.reload();
+  }
+
+  async function repairApp(){
+    const ok=confirm('Repair app and re-fetch cached resources?');
+    if(!ok) return;
+    try{
+      if('serviceWorker' in navigator){
+        const regs=await navigator.serviceWorker.getRegistrations();
+        await Promise.all(regs.map(r=>r.unregister()));
+      }
+      if('caches' in window){
+        const keys=await caches.keys();
+        await Promise.all(keys.map(k=>caches.delete(k)));
+      }
+    }catch(e){}
+    if('serviceWorker' in navigator){
+      try{await navigator.serviceWorker.register('./sw.js');}catch(e){}
+    }
+    location.reload();
+  }
+
+  // ── INIT SETTINGS ──────────────────────────────────
+  loadSettings();
+  applySettings();
+  renderRestTimerDisplay();
+  renderRestTimerButtons();
+
   // ── SERVICE WORKER ──────────────────────────────────
   if('serviceWorker' in navigator){
     window.addEventListener('load', () => {
@@ -1021,8 +1329,8 @@
   renderWeekGrid();
   </script>
   <script>
-    document.documentElement.style.background = '#0c0c0e';
-    document.body.style.background = '#0c0c0e';
+    document.documentElement.style.background = 'var(--bg)';
+    document.body.style.background = 'var(--bg)';
   </script>
   </body>
   </html>
