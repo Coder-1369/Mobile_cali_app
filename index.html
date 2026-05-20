@@ -29,6 +29,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:ital,wght@0,400;0,500;1,400&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
   <style>
   *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  .no-select, .nav-item, .toggle-btn, .icon-btn, .timer-btn, .settings-btn, .day-card, .toggle, .editor-group.exercise{
+    -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;
+  }
   :root{
     --bg:#0c0c0e;
     --surface:#141417;
@@ -198,6 +201,9 @@
   .week-grid.reorder .day-card{cursor:grab;}
   .week-grid.reorder .day-card:active{cursor:grabbing;}
   .week-grid.reorder .day-card{animation:wiggle .7s ease-in-out infinite;transform-origin:center;}
+  .week-grid.reorder .day-card{transition:transform .18s ease, box-shadow .18s ease, opacity .18s ease;}
+  .day-card.dragging{transform:scale(1.05) translateY(-6px);box-shadow:0 12px 30px #00000030;opacity:.95;z-index:5;}
+  .day-card.drop-target{transform:scale(0.95) translateY(2px);opacity:.8;}
   .day-card.today{border-color:var(--accent-p);background:var(--accent-p-dim);}
   .day-card.fl-day{border-color:var(--accent-fl)40;}
   .day-card.rest-day{opacity:.6;}
@@ -1206,14 +1212,25 @@
       card.addEventListener('dragstart', (e)=>{
         if(!weekReorderActive) return;
         e.dataTransfer.setData('text/plain', card.dataset.weekIndex);
+        card.classList.add('dragging');
+      });
+      card.addEventListener('dragend', ()=>{
+        card.classList.remove('dragging');
+        cards.forEach(c=>c.classList.remove('drop-target'));
       });
       card.addEventListener('dragover', (e)=>{
         if(!weekReorderActive) return;
         e.preventDefault();
+        cards.forEach(c=>c.classList.remove('drop-target'));
+        card.classList.add('drop-target');
+      });
+      card.addEventListener('dragleave', ()=>{
+        card.classList.remove('drop-target');
       });
       card.addEventListener('drop', (e)=>{
         if(!weekReorderActive) return;
         e.preventDefault();
+        cards.forEach(c=>c.classList.remove('drop-target'));
         const from=parseInt(e.dataTransfer.getData('text/plain'),10);
         const to=parseInt(card.dataset.weekIndex,10);
         if(Number.isNaN(from) || Number.isNaN(to) || from===to) return;
