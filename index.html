@@ -204,6 +204,8 @@
   .week-grid.reorder .day-card{transition:transform .18s ease, box-shadow .18s ease, opacity .18s ease;}
   .day-card.dragging{transform:scale(1.05) translateY(-6px);box-shadow:0 12px 30px #00000030;opacity:.95;z-index:5;}
   .day-card.drop-target{transform:scale(0.95) translateY(2px);opacity:.8;}
+  .day-card.shift-down{transform:translateY(10px);}
+  .day-card.shift-up{transform:translateY(-10px);}
   .day-card.today{border-color:var(--accent-p);background:var(--accent-p-dim);}
   .day-card.fl-day{border-color:var(--accent-fl)40;}
   .day-card.rest-day{opacity:.6;}
@@ -1135,6 +1137,7 @@
   let weekReorderDraft=null;
   let weekReorderActive=false;
   let weekLongPressTimer=null;
+  let weekDragFrom=null;
 
   function getWeekViewData(){
     if(!weekReorderDraft) return weekData;
@@ -1201,6 +1204,9 @@
   function wireWeekReorder(){
     const grid=document.getElementById('week-grid');
     const cards=grid.querySelectorAll('.day-card');
+    const clearShift=()=>{
+      cards.forEach(c=>c.classList.remove('shift-up','shift-down'));
+    };
     cards.forEach(card=>{
       card.addEventListener('pointerdown', (e)=>{
         if(weekReorderActive) return;
@@ -1212,25 +1218,42 @@
       card.addEventListener('dragstart', (e)=>{
         if(!weekReorderActive) return;
         e.dataTransfer.setData('text/plain', card.dataset.weekIndex);
+        weekDragFrom=parseInt(card.dataset.weekIndex,10);
         card.classList.add('dragging');
       });
       card.addEventListener('dragend', ()=>{
         card.classList.remove('dragging');
         cards.forEach(c=>c.classList.remove('drop-target'));
+        clearShift();
+        weekDragFrom=null;
       });
       card.addEventListener('dragover', (e)=>{
         if(!weekReorderActive) return;
         e.preventDefault();
         cards.forEach(c=>c.classList.remove('drop-target'));
         card.classList.add('drop-target');
+        clearShift();
+        const to=parseInt(card.dataset.weekIndex,10);
+        if(Number.isNaN(weekDragFrom) || Number.isNaN(to) || weekDragFrom===to) return;
+        cards.forEach(c=>{
+          const idx=parseInt(c.dataset.weekIndex,10);
+          if(Number.isNaN(idx)) return;
+          if(weekDragFrom<to && idx>weekDragFrom && idx<=to){
+            c.classList.add('shift-up');
+          } else if(weekDragFrom>to && idx>=to && idx<weekDragFrom){
+            c.classList.add('shift-down');
+          }
+        });
       });
       card.addEventListener('dragleave', ()=>{
         card.classList.remove('drop-target');
+        clearShift();
       });
       card.addEventListener('drop', (e)=>{
         if(!weekReorderActive) return;
         e.preventDefault();
         cards.forEach(c=>c.classList.remove('drop-target'));
+        clearShift();
         const from=parseInt(e.dataTransfer.getData('text/plain'),10);
         const to=parseInt(card.dataset.weekIndex,10);
         if(Number.isNaN(from) || Number.isNaN(to) || from===to) return;
