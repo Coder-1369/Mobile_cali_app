@@ -1,4 +1,4 @@
-  <!DOCTYPE html>
+<!DOCTYPE html>
   <html lang="en">
   <head>
     <link rel="icon" type="image/png" href="favicon.png">
@@ -197,15 +197,32 @@
 
   /* ── WEEK GRID ── */
   .week-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:16px;}
-  .day-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:8px 4px;text-align:center;}
+  .day-card{
+    background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:8px 4px;text-align:center;
+    /* Prevent text selection and context menus on long-press */
+    -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;
+    /* Required for pointer capture to work smoothly */
+    touch-action:none;
+  }
   .week-grid.reorder .day-card{cursor:grab;}
   .week-grid.reorder .day-card:active{cursor:grabbing;}
   .week-grid.reorder .day-card{animation:wiggle .7s ease-in-out infinite;transform-origin:center;}
-  .week-grid.reorder .day-card{transition:transform .18s ease, box-shadow .18s ease, opacity .18s ease;}
-  .day-card.dragging{transform:scale(1.05) translateY(-6px);box-shadow:0 12px 30px #00000030;opacity:.95;z-index:5;}
-  .day-card.drop-target{transform:scale(0.95) translateY(2px);opacity:.8;}
-  .day-card.shift-down{transform:translateY(10px);}
-  .day-card.shift-up{transform:translateY(-10px);}
+  /* Smooth spring transition for shift animations */
+  .week-grid.reorder .day-card{transition:transform .25s cubic-bezier(.34,1.3,.64,1),box-shadow .2s ease,opacity .2s ease;}
+  /* Dragging card: lifted, no wiggle, instant response */
+  .day-card.dragging{
+    transform:scale(1.14) translateY(-10px) !important;
+    box-shadow:0 20px 44px #00000060;
+    opacity:.97;
+    z-index:10;
+    animation:none !important;
+    transition:box-shadow .1s,opacity .1s !important;
+    cursor:grabbing;
+  }
+  /* Neighbour cards shift sideways to reveal the gap */
+  .day-card.shift-right{transform:translateX(10px);}
+  .day-card.shift-left{transform:translateX(-10px);}
+
   .day-card.today{border-color:var(--accent-p);background:var(--accent-p-dim);}
   .day-card.fl-day{border-color:var(--accent-fl)40;}
   .day-card.rest-day{opacity:.6;}
@@ -334,7 +351,7 @@
   .editor-pill{font-family:var(--ff-mono);font-size:9px;padding:4px 8px;border-radius:20px;background:var(--surface2);border:1px solid var(--border2);color:var(--muted);}
   .editor-add{border-color:var(--green);color:var(--green);}
   .editor-done{border-color:var(--border2);color:var(--text);}
-  .editor-group.exercise{position:relative;}
+  .editor-group.exercise{position:relative;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;}
   .editor-remove{position:absolute;top:8px;right:8px;width:22px;height:22px;border-radius:50%;border:1px solid var(--red);background:var(--red);color:#fff;font-size:14px;line-height:1;display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:0;pointer-events:none;transition:opacity .2s;}
   .editor-group.exercise.delete-mode .editor-remove{opacity:1;pointer-events:auto;}
   .editor-hint{font-family:var(--ff-mono);font-size:10px;color:var(--muted);margin-top:8px;}
@@ -491,7 +508,7 @@
           <button class="icon-btn" onclick="openWeekEditor()">Edit</button>
         </div>
         <div class="week-actions" id="week-actions">
-          <div class="settings-desc">Reorder preview · save to apply</div>
+          <div class="settings-desc">Hold &amp; drag · save to apply</div>
           <div class="settings-control">
             <button class="settings-btn" onclick="saveWeekReorder()">Save</button>
             <button class="settings-btn danger" onclick="restoreWeekReorder()">Restore</button>
@@ -1136,8 +1153,8 @@
 
   let weekReorderDraft=null;
   let weekReorderActive=false;
-  let weekLongPressTimer=null;
-  let weekDragFrom=null;
+  // activeDrag tracks the in-progress pointer drag
+  let activeDrag=null;
 
   function getWeekViewData(){
     if(!weekReorderDraft) return weekData;
@@ -1150,7 +1167,7 @@
     const grid=document.getElementById('week-grid');
     grid.classList.toggle('reorder', !!weekReorderActive);
     grid.innerHTML=data.map((d,i)=>`
-      <div class="day-card ${i===todayIdx?'today':d.type==='fl'?'fl-day':d.type==='active'?'active-day':d.type==='rest'?'rest-day':''}" data-week-index="${i}" draggable="${weekReorderActive}" onclick="${weekReorderActive?'return false':'showDayModal('+i+')'}" style="cursor:pointer;">
+      <div class="day-card ${i===todayIdx?'today':d.type==='fl'?'fl-day':d.type==='active'?'active-day':d.type==='rest'?'rest-day':''}" data-week-index="${i}" onclick="showDayModal(${i})" style="cursor:pointer;">
         <div class="day-name">${d.day}</div>
         <div class="day-dot ${d.type==='p'?'p':d.type==='fl'?'fl':d.type==='active'?'active':'rest'}"></div>
         <div class="day-skill-text">${d.skill}</div>
@@ -1164,14 +1181,15 @@
     return {type:d.type, skill:d.skill, detail:d.detail, restPlan:d.restPlan};
   }
 
-  function startWeekReorder(){
+  // Enter reorder mode WITHOUT re-rendering the DOM so the pressed card
+  // element stays alive and pointer capture can be applied immediately.
+  function enterReorderModeInPlace(){
     if(weekReorderActive) return;
     weekReorderDraft=weekData.map(weekPayload);
     weekReorderActive=true;
     document.getElementById('week-actions').classList.add('active');
-    renderWeekGrid();
-    haptic('tap');
-    showToast('Reorder mode');
+    document.getElementById('week-grid').classList.add('reorder');
+    showToast('Hold & drag to reorder');
   }
 
   function saveWeekReorder(){
@@ -1180,6 +1198,7 @@
     saveWeekData();
     weekReorderDraft=null;
     weekReorderActive=false;
+    activeDrag=null;
     document.getElementById('week-actions').classList.remove('active');
     renderWeekGrid();
     initToday();
@@ -1193,6 +1212,7 @@
     saveWeekData();
     weekReorderDraft=null;
     weekReorderActive=false;
+    activeDrag=null;
     document.getElementById('week-actions').classList.remove('active');
     renderWeekGrid();
     initToday();
@@ -1201,70 +1221,132 @@
     showToast('Week restored');
   }
 
+  // ── WEEK DRAG (pointer-events based, works on mobile + desktop) ──────────
+
   function wireWeekReorder(){
     const grid=document.getElementById('week-grid');
-    const cards=grid.querySelectorAll('.day-card');
-    const clearShift=()=>{
-      cards.forEach(c=>c.classList.remove('shift-up','shift-down'));
-    };
+    const cards=Array.from(grid.querySelectorAll('.day-card'));
+
+    // Single contextmenu guard for the whole grid
+    grid.oncontextmenu=(e)=>e.preventDefault();
+
     cards.forEach(card=>{
-      card.addEventListener('pointerdown', (e)=>{
-        if(weekReorderActive) return;
-        if(weekLongPressTimer) clearTimeout(weekLongPressTimer);
-        weekLongPressTimer=setTimeout(()=>startWeekReorder(), 1000);
-      });
-      card.addEventListener('pointerup', ()=>{if(weekLongPressTimer) clearTimeout(weekLongPressTimer);});
-      card.addEventListener('pointerleave', ()=>{if(weekLongPressTimer) clearTimeout(weekLongPressTimer);});
-      card.addEventListener('dragstart', (e)=>{
-        if(!weekReorderActive) return;
-        e.dataTransfer.setData('text/plain', card.dataset.weekIndex);
-        weekDragFrom=parseInt(card.dataset.weekIndex,10);
-        card.classList.add('dragging');
-      });
-      card.addEventListener('dragend', ()=>{
-        card.classList.remove('dragging');
-        cards.forEach(c=>c.classList.remove('drop-target'));
-        clearShift();
-        weekDragFrom=null;
-      });
-      card.addEventListener('dragover', (e)=>{
-        if(!weekReorderActive) return;
-        e.preventDefault();
-        cards.forEach(c=>c.classList.remove('drop-target'));
-        card.classList.add('drop-target');
-        clearShift();
-        const to=parseInt(card.dataset.weekIndex,10);
-        if(Number.isNaN(weekDragFrom) || Number.isNaN(to) || weekDragFrom===to) return;
-        cards.forEach(c=>{
-          const idx=parseInt(c.dataset.weekIndex,10);
-          if(Number.isNaN(idx)) return;
-          if(weekDragFrom<to && idx>weekDragFrom && idx<=to){
-            c.classList.add('shift-up');
-          } else if(weekDragFrom>to && idx>=to && idx<weekDragFrom){
-            c.classList.add('shift-down');
-          }
-        });
-      });
-      card.addEventListener('dragleave', ()=>{
-        card.classList.remove('drop-target');
-        clearShift();
-      });
-      card.addEventListener('drop', (e)=>{
-        if(!weekReorderActive) return;
-        e.preventDefault();
-        cards.forEach(c=>c.classList.remove('drop-target'));
-        clearShift();
-        const from=parseInt(e.dataTransfer.getData('text/plain'),10);
-        const to=parseInt(card.dataset.weekIndex,10);
-        if(Number.isNaN(from) || Number.isNaN(to) || from===to) return;
-        const item=weekReorderDraft.splice(from,1)[0];
-        weekReorderDraft.splice(to,0,item);
-        renderWeekGrid();
+      const idx=parseInt(card.dataset.weekIndex,10);
+      card.oncontextmenu=(e)=>e.preventDefault();
+
+      card.addEventListener('pointerdown', e=>{
+        // Only primary pointer (finger / left-click)
+        if(e.button && e.button!==0) return;
+
+        if(weekReorderActive){
+          // Already in reorder mode — begin drag immediately
+          e.preventDefault();
+          beginCardDrag(card, idx, e.pointerId);
+          return;
+        }
+
+        // Not in reorder mode — start a long-press timer.
+        // If held for 550 ms without movement, enter reorder mode
+        // and start dragging the same card, all in one gesture.
+        const startX=e.clientX, startY=e.clientY;
+        let pressTimer=setTimeout(()=>{
+          pressTimer=null;
+          enterReorderModeInPlace();
+          beginCardDrag(card, idx, e.pointerId);
+        }, 550);
+
+        const cancelPress=()=>{
+          if(pressTimer){clearTimeout(pressTimer);pressTimer=null;}
+          document.removeEventListener('pointermove', onMoveCheck);
+        };
+        const onMoveCheck=mv=>{
+          if(!pressTimer) return;
+          if(Math.hypot(mv.clientX-startX, mv.clientY-startY)>8) cancelPress();
+        };
+        document.addEventListener('pointermove', onMoveCheck);
+        card.addEventListener('pointerup',     cancelPress, {once:true});
+        card.addEventListener('pointercancel', cancelPress, {once:true});
       });
     });
   }
 
+  // Captures the pointer and drives the drag-and-shift interaction
+  function beginCardDrag(card, fromIdx, pointerId){
+    if(activeDrag) return;
+    activeDrag={card, fromIdx, toIdx:fromIdx};
+
+    try{ card.setPointerCapture(pointerId); }catch(_){}
+    card.classList.add('dragging');
+    haptic('tap'); // single haptic, right when the card lifts
+
+    const onMove=e=>{
+      if(!activeDrag) return;
+      const grid=document.getElementById('week-grid');
+      const cards=Array.from(grid.querySelectorAll('.day-card'));
+
+      // Find the non-dragging card whose centre is closest to the pointer
+      let best=activeDrag.toIdx, bestDist=Infinity;
+      cards.forEach(c=>{
+        if(c===card) return;
+        const r=c.getBoundingClientRect();
+        const d=Math.hypot(e.clientX-(r.left+r.width/2), e.clientY-(r.top+r.height/2));
+        if(d<bestDist){ bestDist=d; best=parseInt(c.dataset.weekIndex,10); }
+      });
+
+      if(!isNaN(best) && best!==activeDrag.toIdx){
+        activeDrag.toIdx=best;
+        applyWeekShiftClasses(fromIdx, best);
+      }
+    };
+
+    const onUp=()=>{
+      if(!activeDrag) return;
+      const{toIdx}=activeDrag;
+
+      // Clean up visual state
+      const grid=document.getElementById('week-grid');
+      grid.querySelectorAll('.day-card').forEach(c=>
+        c.classList.remove('shift-left','shift-right','dragging'));
+
+      // Commit reorder into draft
+      if(toIdx!==fromIdx && weekReorderDraft){
+        const item=weekReorderDraft.splice(fromIdx,1)[0];
+        weekReorderDraft.splice(toIdx,0,item);
+      }
+
+      activeDrag=null;
+      document.removeEventListener('pointermove', onMove);
+      document.removeEventListener('pointerup',   onUp);
+      document.removeEventListener('pointercancel',onUp);
+
+      if(toIdx!==fromIdx) haptic('soft');
+      renderWeekGrid(); // re-render with updated draft order
+    };
+
+    document.addEventListener('pointermove',  onMove);
+    document.addEventListener('pointerup',    onUp);
+    document.addEventListener('pointercancel',onUp);
+  }
+
+  // Applies shift-left / shift-right to cards that need to make space
+  function applyWeekShiftClasses(fromIdx, toIdx){
+    const grid=document.getElementById('week-grid');
+    const cards=Array.from(grid.querySelectorAll('.day-card'));
+    cards.forEach(c=>{
+      c.classList.remove('shift-left','shift-right');
+      if(c.classList.contains('dragging')) return;
+      const i=parseInt(c.dataset.weekIndex,10);
+      if(isNaN(i)) return;
+      // Cards between from and to slide toward the vacated spot
+      if(fromIdx<toIdx && i>fromIdx && i<=toIdx) c.classList.add('shift-left');
+      else if(fromIdx>toIdx && i>=toIdx && i<fromIdx) c.classList.add('shift-right');
+    });
+  }
+
+  // ─────────────────────────────────────────────────────
+
   function showDayModal(idx){
+    if(weekReorderActive) return; // block taps during reorder
     const d=weekData[idx];
     const todayIdx=new Date().getDay();
     const isTodayLabel=idx===todayIdx?' · Today':'';
@@ -1426,6 +1508,8 @@
   function wireProgramEditor(){
     const groups=document.querySelectorAll('.editor-group.exercise');
     groups.forEach(g=>{
+      // Prevent context menu on long-press
+      g.oncontextmenu=(e)=>e.preventDefault();
       let pressTimer=null;
       const start=(e)=>{
         if(['INPUT','TEXTAREA','SELECT','BUTTON'].includes(e.target.tagName)) return;
@@ -1435,6 +1519,7 @@
       g.addEventListener('pointerdown', start);
       g.addEventListener('pointerup', clear);
       g.addEventListener('pointerleave', clear);
+      g.addEventListener('pointercancel', clear);
     });
   }
 
@@ -1977,6 +2062,15 @@
 
   document.addEventListener('visibilitychange', ()=>{
     if(document.visibilityState==='visible') updateWakeLock();
+  });
+
+  // ── GLOBAL CONTEXTMENU GUARD ──────────────────────
+  // Prevents the system context menu / text-selection popup on long press
+  // for any element that is purely interactive (not text inputs).
+  document.addEventListener('contextmenu', e=>{
+    if(e.target.closest('.day-card,.nav-item,.toggle-btn,.icon-btn,.timer-btn,.settings-btn,.editor-group.exercise,.toggle')){
+      e.preventDefault();
+    }
   });
 
   // ── APP DATA ACTIONS ───────────────────────────────
