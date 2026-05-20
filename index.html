@@ -311,6 +311,22 @@
   .editor-textarea{min-height:72px;resize:vertical;}
   .editor-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}
   .editor-pill{font-family:var(--ff-mono);font-size:9px;padding:4px 8px;border-radius:20px;background:var(--surface2);border:1px solid var(--border2);color:var(--muted);}
+  .editor-add{border-color:var(--green);color:var(--green);}
+  .editor-done{border-color:var(--border2);color:var(--text);}
+  .editor-group.exercise{position:relative;}
+  .editor-remove{position:absolute;top:8px;right:8px;width:22px;height:22px;border-radius:50%;border:1px solid var(--red);background:var(--red);color:#fff;font-size:14px;line-height:1;display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:0;pointer-events:none;transition:opacity .2s;}
+  .editor-group.exercise.delete-mode .editor-remove{opacity:1;pointer-events:auto;}
+  .editor-hint{font-family:var(--ff-mono);font-size:10px;color:var(--muted);margin-top:8px;}
+
+  /* ── TIMER HELP ── */
+  .timer-help{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:10px 14px;margin:12px 0;}
+  .timer-help summary{cursor:pointer;font-family:var(--ff-mono);font-size:11px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;}
+  .timer-help p{font-size:12px;color:var(--muted);line-height:1.6;margin-top:8px;}
+  .timer-help strong{color:var(--text);font-weight:500;}
+
+  /* ── TOAST ── */
+  .toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%) translateY(10px);background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:12px;font-family:var(--ff-mono);font-size:11px;opacity:0;pointer-events:none;transition:opacity .2s ease, transform .2s ease;z-index:500;}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
   /* ── SPLASH SCREEN ── */
   #splash{position:fixed;inset:0;background:#0c0c0e;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;transition:opacity .7s ease;}
@@ -513,6 +529,13 @@
             <div class="stopwatch-body" id="sw-rows"></div>
           </div>
         </div>
+
+        <details class="timer-help">
+          <summary>How the timers work</summary>
+          <p><strong>Rest timer</strong> is a simple count-up or preset countdown. It is for breaks between sets.</p>
+          <p><strong>Hold timer</strong> records the exact time you are in position. Tap Start when you go up, Stop when you come down.</p>
+          <p><strong>Advanced stopwatch</strong> shows <strong>Lap</strong> (last segment), <strong>Split</strong> (time since the first lap), and <strong>Total</strong> time. Use Lap to mark each set.</p>
+        </details>
       </div>
 
       <!-- VIEW: SETTINGS -->
@@ -576,6 +599,31 @@
           </div>
         </div>
 
+        <div class="section-label">Feedback</div>
+        <div class="settings-card">
+          <div class="settings-row">
+            <div>
+              <div class="settings-title">Toast duration</div>
+              <div class="settings-desc">How long action messages stay on screen.</div>
+            </div>
+            <div class="settings-control">
+              <select class="settings-select" id="setting-toast">
+                <option value="800">0.8s</option>
+                <option value="1200">1.2s</option>
+                <option value="1800">1.8s</option>
+                <option value="2500">2.5s</option>
+              </select>
+            </div>
+          </div>
+          <div class="settings-row">
+            <div>
+              <div class="settings-title">Saved programs</div>
+              <div class="settings-desc">View and manage your saved programs.</div>
+            </div>
+            <button class="settings-btn" onclick="openSavedPrograms()">Open</button>
+          </div>
+        </div>
+
         <div class="section-label">Storage</div>
         <div class="settings-card">
           <div class="settings-row">
@@ -594,8 +642,6 @@
           </div>
         </div>
 
-        <div class="section-label">Saved Programs</div>
-        <div class="settings-card" id="saved-programs"></div>
       </div>
 
     </div>
@@ -621,6 +667,19 @@
       </div>
       <div id="edit-content"></div>
     </div>
+
+    <!-- SAVED PROGRAMS MODAL -->
+    <div class="modal-overlay" id="saved-overlay" onclick="closeSavedPrograms()"></div>
+    <div class="edit-modal" id="saved-modal">
+      <div class="modal-handle"></div>
+      <div class="modal-header-row">
+        <div class="modal-day-title">Saved Programs</div>
+        <button class="modal-close" onclick="closeSavedPrograms()">×</button>
+      </div>
+      <div id="saved-programs"></div>
+    </div>
+
+    <div class="toast" id="toast"></div>
 
     <!-- BOTTOM NAV -->
     <nav class="bottom-nav" id="bottom-nav">
@@ -798,6 +857,17 @@
 
   function escapeHtml(str){
     return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  let toastTimer=null;
+  function showToast(msg){
+    const el=document.getElementById('toast');
+    if(!el) return;
+    el.textContent=msg;
+    el.classList.add('show');
+    if(toastTimer) clearTimeout(toastTimer);
+    const delay=Number(settings && settings.toastDuration ? settings.toastDuration : 1200);
+    toastTimer=setTimeout(()=>{el.classList.remove('show');}, delay);
   }
 
   function loadProgramOverrides(){
@@ -1069,10 +1139,17 @@
   function openProgramEditor(type){
     const level=type==='p' ? document.getElementById('planche-level').value : document.getElementById('fl-level').value;
     const d=getProgram(type, level);
-    editContext={type, level};
+    editContext={type, level, label:d.label, exs:deepClone(d.exs), deleteMode:false};
+    openEditModal(type==='p'?'Edit Planche Program':'Edit Front Lever Program', '<div id="program-editor"></div>');
+    renderProgramEditor();
+  }
 
-    const exBlocks=d.exs.map((e,i)=>`
-      <div class="editor-group">
+  function renderProgramEditor(){
+    if(!editContext) return;
+    const {exs, deleteMode}=editContext;
+    const exBlocks=exs.map((e,i)=>`
+      <div class="editor-group exercise ${deleteMode?'delete-mode':''}" data-ex-index="${i}">
+        <button class="editor-remove" onclick="removeExercise(${i})">-</button>
         <div class="editor-row" style="flex-direction:row;align-items:center;justify-content:space-between;">
           <div class="editor-label">Exercise ${i+1}</div>
           <div class="editor-pill">${e.p}</div>
@@ -1099,7 +1176,7 @@
       <div class="editor-group">
         <div class="editor-row">
           <div class="editor-label">Program title</div>
-          <input class="editor-input" id="prog-title" value="${escapeAttr(d.label)}" />
+          <input class="editor-input" id="prog-title" value="${escapeAttr(editContext.label)}" />
         </div>
         <div class="editor-row">
           <div class="editor-label">Save as name</div>
@@ -1109,25 +1186,73 @@
           <button class="settings-btn" onclick="saveProgramEdit()">Save</button>
           <button class="settings-btn warn" onclick="saveProgramAs()">Save to library</button>
           <button class="settings-btn danger" onclick="resetProgramEdit()">Reset to default</button>
+          <button class="settings-btn editor-add" onclick="addExercise()">Add +</button>
+          ${deleteMode?'<button class="settings-btn editor-done" onclick="toggleDeleteMode(false)">Done</button>':''}
         </div>
+        <div class="editor-hint">Press and hold any exercise card to show delete buttons.</div>
       </div>
       ${exBlocks}`;
 
-    openEditModal(type==='p'?'Edit Planche Program':'Edit Front Lever Program', content);
+    const host=document.getElementById('program-editor');
+    if(host) host.innerHTML=content;
+    wireProgramEditor();
+  }
+
+  function syncProgramEditorState(){
+    if(!editContext) return;
+    const title=document.getElementById('prog-title');
+    if(title) editContext.label=title.value.trim() || editContext.label;
+    editContext.exs=editContext.exs.map((e,i)=>({
+      ...e,
+      n:(document.getElementById(`ex-name-${i}`)?.value || e.n).trim() || e.n,
+      s:(document.getElementById(`ex-sets-${i}`)?.value || e.s).trim() || e.s,
+      r:(document.getElementById(`ex-reps-${i}`)?.value || e.r).trim() || e.r,
+      c:(document.getElementById(`ex-note-${i}`)?.value || e.c).trim() || e.c
+    }));
+  }
+
+  function addExercise(){
+    if(!editContext) return;
+    syncProgramEditorState();
+    editContext.exs.unshift({n:'New Exercise',p:'hold',s:'3 sets',r:'8 sec',c:'Add notes here.'});
+    renderProgramEditor();
+    showToast('Workout added');
+  }
+
+  function removeExercise(idx){
+    if(!editContext) return;
+    syncProgramEditorState();
+    if(editContext.exs.length<=1){showToast('Keep at least one workout');return;}
+    editContext.exs=editContext.exs.filter((_,i)=>i!==idx);
+    renderProgramEditor();
+    showToast('Workout removed');
+  }
+
+  function toggleDeleteMode(force){
+    if(!editContext) return;
+    editContext.deleteMode=typeof force==='boolean' ? force : !editContext.deleteMode;
+    renderProgramEditor();
+    showToast(editContext.deleteMode?'Delete mode on':'Delete mode off');
+  }
+
+  function wireProgramEditor(){
+    const groups=document.querySelectorAll('.editor-group.exercise');
+    groups.forEach(g=>{
+      let pressTimer=null;
+      const start=(e)=>{
+        if(['INPUT','TEXTAREA','SELECT','BUTTON'].includes(e.target.tagName)) return;
+        pressTimer=setTimeout(()=>toggleDeleteMode(true), 600);
+      };
+      const clear=()=>{if(pressTimer){clearTimeout(pressTimer);pressTimer=null;}};
+      g.addEventListener('pointerdown', start);
+      g.addEventListener('pointerup', clear);
+      g.addEventListener('pointerleave', clear);
+    });
   }
 
   function readProgramEditor(){
-    const {type, level}=editContext;
-    const base=getProgram(type, level);
-    const exs=base.exs.map((e,i)=>({
-      ...e,
-      n:document.getElementById(`ex-name-${i}`).value.trim() || e.n,
-      s:document.getElementById(`ex-sets-${i}`).value.trim() || e.s,
-      r:document.getElementById(`ex-reps-${i}`).value.trim() || e.r,
-      c:document.getElementById(`ex-note-${i}`).value.trim() || e.c
-    }));
-    const label=(document.getElementById('prog-title').value || base.label).trim();
-    return {label, exs};
+    syncProgramEditorState();
+    return {label:editContext.label, exs:editContext.exs};
   }
 
   function saveProgramEdit(){
@@ -1140,6 +1265,7 @@
     renderWeekGrid();
     initToday();
     renderToday();
+    showToast('Program updated');
   }
 
   function resetProgramEdit(){
@@ -1152,6 +1278,7 @@
     renderWeekGrid();
     initToday();
     renderToday();
+    showToast('Program reset');
   }
 
   function saveProgramAs(){
@@ -1163,6 +1290,7 @@
     savedPrograms.unshift({id:Date.now(),name,type,level,data});
     saveSavedPrograms();
     renderSavedPrograms();
+    showToast('Saved to library');
   }
 
   function renderSavedPrograms(){
@@ -1187,6 +1315,17 @@
     }).join('');
   }
 
+  function openSavedPrograms(){
+    renderSavedPrograms();
+    document.getElementById('saved-overlay').classList.add('open');
+    document.getElementById('saved-modal').classList.add('open');
+  }
+
+  function closeSavedPrograms(){
+    document.getElementById('saved-overlay').classList.remove('open');
+    document.getElementById('saved-modal').classList.remove('open');
+  }
+
   function applySavedProgram(id){
     const p=savedPrograms.find(x=>x.id===id);
     if(!p) return;
@@ -1203,12 +1342,15 @@
     renderWeekGrid();
     initToday();
     renderToday();
+    closeSavedPrograms();
+    showToast('Program loaded');
   }
 
   function deleteSavedProgram(id){
     savedPrograms=savedPrograms.filter(p=>p.id!==id);
     saveSavedPrograms();
     renderSavedPrograms();
+    showToast('Program deleted');
   }
 
   function openWeekEditor(focusIdx){
@@ -1284,6 +1426,7 @@
     renderWeekGrid();
     initToday();
     renderToday();
+    showToast('Week updated');
   }
 
   function resetWeekEditor(){
@@ -1293,6 +1436,7 @@
     renderWeekGrid();
     initToday();
     renderToday();
+    showToast('Week reset');
   }
 
   // ── NAV ──────────────────────────────────────────
@@ -1314,7 +1458,8 @@
     swipeNav:true,
     miniTimer:true,
     keepAwake:true,
-    keepAwakeRest:false
+    keepAwakeRest:false,
+    toastDuration:1200
   };
 
   let settings={...DEFAULT_SETTINGS};
@@ -1339,6 +1484,7 @@
     document.getElementById('setting-mini-timer').classList.toggle('on', !!settings.miniTimer);
     document.getElementById('setting-keep-awake').classList.toggle('on', !!settings.keepAwake);
     document.getElementById('setting-keep-awake-rest').classList.toggle('on', !!settings.keepAwakeRest);
+    document.getElementById('setting-toast').value=String(settings.toastDuration || 1200);
     document.getElementById('mini-timer').classList.toggle('active', !!settings.miniTimer);
     updateWakeLock();
   }
@@ -1353,6 +1499,13 @@
     settings.theme=e.target.value;
     saveSettings();
     applySettings();
+  });
+
+  document.getElementById('setting-toast').addEventListener('change', (e)=>{
+    settings.toastDuration=parseInt(e.target.value,10);
+    saveSettings();
+    applySettings();
+    showToast('Toast duration updated');
   });
 
   // ── SWIPE NAV ───────────────────────────────────────
@@ -1635,7 +1788,8 @@
         await Promise.all(regs.map(r=>r.unregister()));
       }
     }catch(e){}
-    location.reload();
+    showToast('App data cleared');
+    setTimeout(()=>location.reload(), settings.toastDuration || 1200);
   }
 
   async function repairApp(){
@@ -1654,7 +1808,8 @@
     if('serviceWorker' in navigator){
       try{await navigator.serviceWorker.register('./sw.js');}catch(e){}
     }
-    location.reload();
+    showToast('Repairing app');
+    setTimeout(()=>location.reload(), settings.toastDuration || 1200);
   }
 
   // ── INIT SETTINGS ──────────────────────────────────
