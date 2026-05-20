@@ -195,6 +195,9 @@
   /* ── WEEK GRID ── */
   .week-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:16px;}
   .day-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:8px 4px;text-align:center;}
+  .week-grid.reorder .day-card{cursor:grab;}
+  .week-grid.reorder .day-card:active{cursor:grabbing;}
+  .week-grid.reorder .day-card{animation:wiggle .7s ease-in-out infinite;transform-origin:center;}
   .day-card.today{border-color:var(--accent-p);background:var(--accent-p-dim);}
   .day-card.fl-day{border-color:var(--accent-fl)40;}
   .day-card.rest-day{opacity:.6;}
@@ -205,6 +208,16 @@
   .day-dot.fl{background:var(--accent-fl);}
   .day-dot.rest{background:var(--border2);}
   .day-dot.active{background:var(--amber);}
+
+  .week-actions{display:none;align-items:center;justify-content:space-between;gap:8px;margin:6px 0 12px;padding:10px 12px;background:var(--surface);border:1px solid var(--border);border-radius:12px;}
+  .week-actions.active{display:flex;}
+  .week-actions .settings-btn{padding:6px 10px;}
+
+  @keyframes wiggle{
+    0%{transform:rotate(-0.6deg) translateY(0);} 
+    50%{transform:rotate(0.6deg) translateY(-1px);} 
+    100%{transform:rotate(-0.6deg) translateY(0);} 
+  }
   .day-skill-text{font-size:8px;color:var(--muted2);line-height:1.3;}
 
   /* ── TODAY TOGGLE ── */
@@ -469,6 +482,13 @@
           <div class="section-label">This Week</div>
           <button class="icon-btn" onclick="openWeekEditor()">Edit</button>
         </div>
+        <div class="week-actions" id="week-actions">
+          <div class="settings-desc">Reorder preview · save to apply</div>
+          <div class="settings-control">
+            <button class="settings-btn" onclick="saveWeekReorder()">Save</button>
+            <button class="settings-btn danger" onclick="restoreWeekReorder()">Restore</button>
+          </div>
+        </div>
         <div class="week-grid" id="week-grid"></div>
         <div id="week-detail"></div>
       </div>
@@ -530,7 +550,7 @@
           </div>
         </div>
 
-        <details class="timer-help">
+        <details class="timer-help" id="timer-help">
           <summary>How the timers work</summary>
           <p><strong>Rest timer</strong> is a simple count-up or preset countdown. It is for breaks between sets.</p>
           <p><strong>Hold timer</strong> records the exact time you are in position. Tap Start when you go up, Stop when you come down.</p>
@@ -581,21 +601,14 @@
           </div>
         </div>
 
-        <div class="section-label">Display</div>
+        <div class="section-label">Timer</div>
         <div class="settings-card">
           <div class="settings-row">
             <div>
-              <div class="settings-title">Keep screen awake</div>
-              <div class="settings-desc">Prevent sleep while timers run.</div>
+              <div class="settings-title">Timer settings</div>
+              <div class="settings-desc">Configure sleep behavior and help tips.</div>
             </div>
-            <div class="toggle" id="setting-keep-awake" onclick="toggleSetting('keepAwake')"></div>
-          </div>
-          <div class="settings-row">
-            <div>
-              <div class="settings-title">Include rest timer</div>
-              <div class="settings-desc">Also keep screen awake for the rest timer.</div>
-            </div>
-            <div class="toggle" id="setting-keep-awake-rest" onclick="toggleSetting('keepAwakeRest')"></div>
+            <button class="settings-btn" onclick="openTimerSettings()">Open</button>
           </div>
         </div>
 
@@ -677,6 +690,39 @@
         <button class="modal-close" onclick="closeSavedPrograms()">×</button>
       </div>
       <div id="saved-programs"></div>
+    </div>
+
+    <!-- TIMER SETTINGS MODAL -->
+    <div class="modal-overlay" id="timer-overlay" onclick="closeTimerSettings()"></div>
+    <div class="edit-modal" id="timer-modal">
+      <div class="modal-handle"></div>
+      <div class="modal-header-row">
+        <div class="modal-day-title">Timer Settings</div>
+        <button class="modal-close" onclick="closeTimerSettings()">×</button>
+      </div>
+      <div class="settings-card">
+        <div class="settings-row">
+          <div>
+            <div class="settings-title">Keep screen awake</div>
+            <div class="settings-desc">Prevent sleep while hold/stopwatch run.</div>
+          </div>
+          <div class="toggle" id="setting-keep-awake" onclick="toggleSetting('keepAwake')"></div>
+        </div>
+        <div class="settings-row">
+          <div>
+            <div class="settings-title">Include rest timer</div>
+            <div class="settings-desc">Also keep screen awake for rest timer.</div>
+          </div>
+          <div class="toggle" id="setting-keep-awake-rest" onclick="toggleSetting('keepAwakeRest')"></div>
+        </div>
+        <div class="settings-row">
+          <div>
+            <div class="settings-title">Show timer help</div>
+            <div class="settings-desc">Expandable explanation in the Timer page.</div>
+          </div>
+          <div class="toggle" id="setting-timer-help" onclick="toggleSetting('showTimerHelp')"></div>
+        </div>
+      </div>
     </div>
 
     <div class="toast" id="toast"></div>
@@ -857,6 +903,19 @@
 
   function escapeHtml(str){
     return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  function haptic(kind){
+    if(!('vibrate' in navigator)) return;
+    const patterns={
+      soft:15,
+      tap:25,
+      success:[20,30,20],
+      warn:[30,40,30],
+      delete:[40,40,40]
+    };
+    const p=patterns[kind]||15;
+    try{navigator.vibrate(p);}catch(e){}
   }
 
   let toastTimer=null;
@@ -1067,16 +1126,102 @@
     document.getElementById('week-detail').innerHTML = renderDayModalContent(d, idx);
   }
 
+  let weekReorderDraft=null;
+  let weekReorderActive=false;
+  let weekLongPressTimer=null;
+
+  function getWeekViewData(){
+    if(!weekReorderDraft) return weekData;
+    return weekReorderDraft.map((p,i)=>({day:weekData[i].day, ...p}));
+  }
+
   function renderWeekGrid(){
     const todayIdx=new Date().getDay(); // 0=Sun
-    document.getElementById('week-grid').innerHTML=weekData.map((d,i)=>`
-      <div class="day-card ${i===todayIdx?'today':d.type==='fl'?'fl-day':d.type==='active'?'active-day':d.type==='rest'?'rest-day':''}" onclick="showDayModal(${i})" style="cursor:pointer;">
+    const data=getWeekViewData();
+    const grid=document.getElementById('week-grid');
+    grid.classList.toggle('reorder', !!weekReorderActive);
+    grid.innerHTML=data.map((d,i)=>`
+      <div class="day-card ${i===todayIdx?'today':d.type==='fl'?'fl-day':d.type==='active'?'active-day':d.type==='rest'?'rest-day':''}" data-week-index="${i}" draggable="${weekReorderActive}" onclick="${weekReorderActive?'return false':'showDayModal('+i+')'}" style="cursor:pointer;">
         <div class="day-name">${d.day}</div>
         <div class="day-dot ${d.type==='p'?'p':d.type==='fl'?'fl':d.type==='active'?'active':'rest'}"></div>
         <div class="day-skill-text">${d.skill}</div>
       </div>`).join('');
 
     renderWeekDetail(todayIdx);
+    wireWeekReorder();
+  }
+
+  function weekPayload(d){
+    return {type:d.type, skill:d.skill, detail:d.detail, restPlan:d.restPlan};
+  }
+
+  function startWeekReorder(){
+    if(weekReorderActive) return;
+    weekReorderDraft=weekData.map(weekPayload);
+    weekReorderActive=true;
+    document.getElementById('week-actions').classList.add('active');
+    renderWeekGrid();
+    haptic('tap');
+    showToast('Reorder mode');
+  }
+
+  function saveWeekReorder(){
+    if(!weekReorderDraft) return;
+    weekData=weekReorderDraft.map((p,i)=>({day:weekData[i].day, ...p}));
+    saveWeekData();
+    weekReorderDraft=null;
+    weekReorderActive=false;
+    document.getElementById('week-actions').classList.remove('active');
+    renderWeekGrid();
+    initToday();
+    renderToday();
+    haptic('success');
+    showToast('Week order saved');
+  }
+
+  function restoreWeekReorder(){
+    weekData=deepClone(BASE_WEEK_DATA);
+    saveWeekData();
+    weekReorderDraft=null;
+    weekReorderActive=false;
+    document.getElementById('week-actions').classList.remove('active');
+    renderWeekGrid();
+    initToday();
+    renderToday();
+    haptic('warn');
+    showToast('Week restored');
+  }
+
+  function wireWeekReorder(){
+    const grid=document.getElementById('week-grid');
+    const cards=grid.querySelectorAll('.day-card');
+    cards.forEach(card=>{
+      card.addEventListener('pointerdown', (e)=>{
+        if(weekReorderActive) return;
+        if(weekLongPressTimer) clearTimeout(weekLongPressTimer);
+        weekLongPressTimer=setTimeout(()=>startWeekReorder(), 1000);
+      });
+      card.addEventListener('pointerup', ()=>{if(weekLongPressTimer) clearTimeout(weekLongPressTimer);});
+      card.addEventListener('pointerleave', ()=>{if(weekLongPressTimer) clearTimeout(weekLongPressTimer);});
+      card.addEventListener('dragstart', (e)=>{
+        if(!weekReorderActive) return;
+        e.dataTransfer.setData('text/plain', card.dataset.weekIndex);
+      });
+      card.addEventListener('dragover', (e)=>{
+        if(!weekReorderActive) return;
+        e.preventDefault();
+      });
+      card.addEventListener('drop', (e)=>{
+        if(!weekReorderActive) return;
+        e.preventDefault();
+        const from=parseInt(e.dataTransfer.getData('text/plain'),10);
+        const to=parseInt(card.dataset.weekIndex,10);
+        if(Number.isNaN(from) || Number.isNaN(to) || from===to) return;
+        const item=weekReorderDraft.splice(from,1)[0];
+        weekReorderDraft.splice(to,0,item);
+        renderWeekGrid();
+      });
+    });
   }
 
   function showDayModal(idx){
@@ -1216,6 +1361,7 @@
     syncProgramEditorState();
     editContext.exs.unshift({n:'New Exercise',p:'hold',s:'3 sets',r:'8 sec',c:'Add notes here.'});
     renderProgramEditor();
+    haptic('success');
     showToast('Workout added');
   }
 
@@ -1225,6 +1371,7 @@
     if(editContext.exs.length<=1){showToast('Keep at least one workout');return;}
     editContext.exs=editContext.exs.filter((_,i)=>i!==idx);
     renderProgramEditor();
+    haptic('delete');
     showToast('Workout removed');
   }
 
@@ -1232,6 +1379,7 @@
     if(!editContext) return;
     editContext.deleteMode=typeof force==='boolean' ? force : !editContext.deleteMode;
     renderProgramEditor();
+    haptic('tap');
     showToast(editContext.deleteMode?'Delete mode on':'Delete mode off');
   }
 
@@ -1265,6 +1413,7 @@
     renderWeekGrid();
     initToday();
     renderToday();
+    haptic('success');
     showToast('Program updated');
   }
 
@@ -1278,6 +1427,7 @@
     renderWeekGrid();
     initToday();
     renderToday();
+    haptic('warn');
     showToast('Program reset');
   }
 
@@ -1290,6 +1440,7 @@
     savedPrograms.unshift({id:Date.now(),name,type,level,data});
     saveSavedPrograms();
     renderSavedPrograms();
+    haptic('success');
     showToast('Saved to library');
   }
 
@@ -1326,6 +1477,16 @@
     document.getElementById('saved-modal').classList.remove('open');
   }
 
+  function openTimerSettings(){
+    document.getElementById('timer-overlay').classList.add('open');
+    document.getElementById('timer-modal').classList.add('open');
+  }
+
+  function closeTimerSettings(){
+    document.getElementById('timer-overlay').classList.remove('open');
+    document.getElementById('timer-modal').classList.remove('open');
+  }
+
   function applySavedProgram(id){
     const p=savedPrograms.find(x=>x.id===id);
     if(!p) return;
@@ -1343,6 +1504,7 @@
     initToday();
     renderToday();
     closeSavedPrograms();
+    haptic('success');
     showToast('Program loaded');
   }
 
@@ -1350,6 +1512,7 @@
     savedPrograms=savedPrograms.filter(p=>p.id!==id);
     saveSavedPrograms();
     renderSavedPrograms();
+    haptic('delete');
     showToast('Program deleted');
   }
 
@@ -1426,6 +1589,7 @@
     renderWeekGrid();
     initToday();
     renderToday();
+    haptic('success');
     showToast('Week updated');
   }
 
@@ -1436,6 +1600,7 @@
     renderWeekGrid();
     initToday();
     renderToday();
+    haptic('warn');
     showToast('Week reset');
   }
 
@@ -1459,7 +1624,8 @@
     miniTimer:true,
     keepAwake:true,
     keepAwakeRest:false,
-    toastDuration:1200
+    toastDuration:1200,
+    showTimerHelp:true
   };
 
   let settings={...DEFAULT_SETTINGS};
@@ -1484,8 +1650,10 @@
     document.getElementById('setting-mini-timer').classList.toggle('on', !!settings.miniTimer);
     document.getElementById('setting-keep-awake').classList.toggle('on', !!settings.keepAwake);
     document.getElementById('setting-keep-awake-rest').classList.toggle('on', !!settings.keepAwakeRest);
+    document.getElementById('setting-timer-help').classList.toggle('on', !!settings.showTimerHelp);
     document.getElementById('setting-toast').value=String(settings.toastDuration || 1200);
     document.getElementById('mini-timer').classList.toggle('active', !!settings.miniTimer);
+    document.getElementById('timer-help').style.display=settings.showTimerHelp ? 'block' : 'none';
     updateWakeLock();
   }
 
@@ -1493,6 +1661,7 @@
     settings[key]=!settings[key];
     saveSettings();
     applySettings();
+    haptic('soft');
   }
 
   document.getElementById('setting-theme').addEventListener('change', (e)=>{
@@ -1789,6 +1958,7 @@
       }
     }catch(e){}
     showToast('App data cleared');
+    haptic('warn');
     setTimeout(()=>location.reload(), settings.toastDuration || 1200);
   }
 
@@ -1809,6 +1979,7 @@
       try{await navigator.serviceWorker.register('./sw.js');}catch(e){}
     }
     showToast('Repairing app');
+    haptic('tap');
     setTimeout(()=>location.reload(), settings.toastDuration || 1200);
   }
 
