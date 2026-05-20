@@ -204,6 +204,25 @@
   .timer-btn.start{background:var(--green);color:#fff;border-color:var(--green);}
   .timer-btn.reset-btn{color:var(--muted);}
 
+  /* ── ADV STOPWATCH ── */
+  .stopwatch-panel{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px 16px;margin-bottom:14px;}
+  .stopwatch-display{font-family:var(--ff-head);font-size:30px;font-weight:800;letter-spacing:.5px;}
+  .stopwatch-sub{font-family:var(--ff-mono);font-size:10px;color:var(--muted);margin-top:2px;}
+  .stopwatch-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
+  .stopwatch-actions .timer-btn{padding:8px 14px;}
+  .stopwatch-actions .timer-btn.lap{border-color:var(--accent-fl);color:var(--accent-fl);}
+  .stopwatch-actions .timer-btn.stop{background:var(--red);border-color:var(--red);color:#fff;}
+  .stopwatch-actions .timer-btn.resume{background:var(--green);border-color:var(--green);color:#fff;}
+  .stopwatch-table{margin-top:12px;border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+  .stopwatch-row{display:grid;grid-template-columns:32px 1fr 1fr 1fr;gap:8px;padding:8px 10px;border-bottom:1px solid var(--border);font-family:var(--ff-mono);font-size:11px;align-items:center;}
+  .stopwatch-row:last-child{border-bottom:none;}
+  .stopwatch-head{background:var(--surface2);color:var(--muted);text-transform:uppercase;letter-spacing:1px;}
+  .stopwatch-body{max-height:180px;overflow-y:auto;background:var(--surface);}
+  .stopwatch-body::-webkit-scrollbar{display:none;}
+  .sw-num{color:var(--muted2);}
+  .sw-best{color:var(--green);}
+  .sw-worst{color:var(--red);}
+
   /* ── DELOAD CARD ── */
   .deload-card{background:var(--amber-dim);border:1px solid var(--amber)30;border-radius:14px;padding:16px;margin-bottom:12px;}
   .deload-title{font-family:var(--ff-mono);font-size:10px;color:var(--amber);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;}
@@ -395,6 +414,26 @@
 
         <div class="section-label">Session log</div>
         <div id="hold-log" style="font-family:var(--ff-mono);font-size:12px;color:var(--muted);"></div>
+
+        <div class="section-label">Advanced Stopwatch</div>
+        <div class="stopwatch-panel">
+          <div class="stopwatch-display" id="sw-main">00:00.00</div>
+          <div class="stopwatch-sub" id="sw-sub">Lap 00:00.00</div>
+          <div class="stopwatch-actions">
+            <button class="timer-btn resume" id="sw-start" onclick="swToggle()">Start</button>
+            <button class="timer-btn lap" id="sw-lap" onclick="swLap()">Lap</button>
+            <button class="timer-btn reset-btn" id="sw-reset" onclick="swReset()">Reset</button>
+          </div>
+          <div class="stopwatch-table">
+            <div class="stopwatch-row stopwatch-head">
+              <div>#</div>
+              <div>Lap</div>
+              <div>Split</div>
+              <div>Total</div>
+            </div>
+            <div class="stopwatch-body" id="sw-rows"></div>
+          </div>
+        </div>
       </div>
 
     </div>
@@ -878,6 +917,88 @@
         </div>`).join('');
     }
   }
+
+  // ── ADV STOPWATCH ──────────────────────────────────
+  let swRunning=false,swStart=0,swElapsed=0,swTick=null,swLaps=[];
+
+  function swFormat(ms){
+    const total=Math.max(0,ms);
+    const m=Math.floor(total/60000).toString().padStart(2,'0');
+    const s=Math.floor((total%60000)/1000).toString().padStart(2,'0');
+    const cs=Math.floor((total%1000)/10).toString().padStart(2,'0');
+    return `${m}:${s}.${cs}`;
+  }
+
+  function swRender(){
+    const now=Date.now();
+    const total=swRunning ? swElapsed + (now - swStart) : swElapsed;
+    const lastLapTotal=swLaps.length ? swLaps[0].total : 0;
+    const lapTime=total - lastLapTotal;
+    document.getElementById('sw-main').textContent=swFormat(total);
+    document.getElementById('sw-sub').textContent='Lap '+swFormat(lapTime);
+  }
+
+  function swStartTick(){
+    if(swTick) clearInterval(swTick);
+    swTick=setInterval(swRender, 35);
+  }
+
+  function swToggle(){
+    const btn=document.getElementById('sw-start');
+    if(swRunning){
+      swElapsed+=Date.now()-swStart;
+      swRunning=false;
+      clearInterval(swTick);
+      btn.textContent='Resume';
+      btn.className='timer-btn resume';
+    } else {
+      swStart=Date.now();
+      swRunning=true;
+      btn.textContent='Pause';
+      btn.className='timer-btn stop';
+      swStartTick();
+    }
+    swRender();
+  }
+
+  function swReset(){
+    swRunning=false;
+    clearInterval(swTick);
+    swElapsed=0;
+    swStart=0;
+    swLaps=[];
+    document.getElementById('sw-start').textContent='Start';
+    document.getElementById('sw-start').className='timer-btn resume';
+    document.getElementById('sw-rows').innerHTML='';
+    swRender();
+  }
+
+  function swLap(){
+    const total=swRunning ? swElapsed + (Date.now() - swStart) : swElapsed;
+    if(total===0) return;
+    const prevTotal=swLaps.length ? swLaps[0].total : 0;
+    const lap=total - prevTotal;
+    const split=swLaps.length ? total - swLaps[swLaps.length-1].total : total;
+    swLaps.unshift({lap,split,total});
+
+    const laps=swLaps.map(l=>l.lap);
+    const best=Math.min(...laps);
+    const worst=Math.max(...laps);
+
+    document.getElementById('sw-rows').innerHTML=swLaps.map((l,i)=>{
+      const cls=l.lap===best?'sw-best':l.lap===worst?'sw-worst':'';
+      return `<div class="stopwatch-row ${cls}">
+        <div class="sw-num">${swLaps.length - i}</div>
+        <div>${swFormat(l.lap)}</div>
+        <div>${swFormat(l.split)}</div>
+        <div>${swFormat(l.total)}</div>
+      </div>`;
+    }).join('');
+
+    swRender();
+  }
+
+  swRender();
 
   // ── SERVICE WORKER ──────────────────────────────────
   if('serviceWorker' in navigator){
