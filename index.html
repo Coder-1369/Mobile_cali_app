@@ -644,6 +644,7 @@
     document.getElementById('planche-exercises').innerHTML=
       `<div class="focus-box p" style="margin-bottom:12px;"><div class="focus-title p">Standard to advance</div><div class="focus-text">${d.std}</div></div>`+
       renderExCards(d.exs);
+    renderToday();
   }
 
   function renderFLTrack(){
@@ -653,6 +654,7 @@
     document.getElementById('fl-exercises').innerHTML=
       `<div class="focus-box fl" style="margin-bottom:12px;"><div class="focus-title fl">Standard to advance</div><div class="focus-text">${d.std}</div></div>`+
       renderExCards(d.exs);
+    renderToday();
   }
 
   // ── TODAY ──────────────────────────────────────────
