@@ -128,6 +128,9 @@
 
   /* ── SECTION ── */
   .section-label{font-family:var(--ff-mono);font-size:10px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;padding:20px 0 10px;}
+  .section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:20px 0 10px;}
+  .section-head .section-label{padding:0;}
+  .icon-btn{font-family:var(--ff-mono);font-size:10px;padding:6px 10px;border-radius:10px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);cursor:pointer;}
 
   /* ── SKILL STAT HEADER ── */
   .skill-header{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:18px 18px 14px;margin-bottom:12px;}
@@ -195,11 +198,13 @@
   .day-card.today{border-color:var(--accent-p);background:var(--accent-p-dim);}
   .day-card.fl-day{border-color:var(--accent-fl)40;}
   .day-card.rest-day{opacity:.6;}
+  .day-card.active-day{border-color:var(--amber);background:var(--amber-dim);}
   .day-name{font-family:var(--ff-mono);font-size:9px;color:var(--muted);font-weight:500;}
   .day-dot{width:6px;height:6px;border-radius:50%;margin:5px auto 3px;}
   .day-dot.p{background:var(--accent-p);}
   .day-dot.fl{background:var(--accent-fl);}
   .day-dot.rest{background:var(--border2);}
+  .day-dot.active{background:var(--amber);}
   .day-skill-text{font-size:8px;color:var(--muted2);line-height:1.3;}
 
   /* ── TODAY TOGGLE ── */
@@ -293,6 +298,19 @@
   .modal-header-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
   .modal-day-title{font-family:var(--ff-head);font-size:20px;font-weight:800;}
   .modal-close{width:32px;height:32px;border-radius:50%;background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-size:20px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+
+  /* ── EDIT MODAL ── */
+  .edit-modal{position:fixed;bottom:0;left:50%;transform:translateX(-50%) translateY(105%);width:100%;max-width:430px;background:var(--bg);border-radius:22px 22px 0 0;z-index:301;transition:transform .32s cubic-bezier(.4,0,.2,1);max-height:88vh;overflow-y:auto;padding:0 16px 100px;}
+  .edit-modal.open{transform:translateX(-50%) translateY(0);}
+  .edit-modal::-webkit-scrollbar{display:none;}
+  .editor-group{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px 16px;margin-bottom:12px;}
+  .editor-row{display:flex;flex-direction:column;gap:6px;margin-bottom:10px;}
+  .editor-row:last-child{margin-bottom:0;}
+  .editor-label{font-family:var(--ff-mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;}
+  .editor-input, .editor-textarea, .editor-select{background:var(--surface2);border:1px solid var(--border2);color:var(--text);font-family:var(--ff-mono);font-size:12px;padding:8px 10px;border-radius:8px;}
+  .editor-textarea{min-height:72px;resize:vertical;}
+  .editor-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}
+  .editor-pill{font-family:var(--ff-mono);font-size:9px;padding:4px 8px;border-radius:20px;background:var(--surface2);border:1px solid var(--border2);color:var(--muted);}
 
   /* ── SPLASH SCREEN ── */
   #splash{position:fixed;inset:0;background:#0c0c0e;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;transition:opacity .7s ease;}
@@ -404,6 +422,7 @@
             <option value="straddle-band">7 — Straddle (Band)</option>
             <option value="straddle">8 — Straddle Planche</option>
           </select>
+          <button class="icon-btn" onclick="openProgramEditor('p')">Edit</button>
         </div>
         <div id="planche-exercises"></div>
       </div>
@@ -423,13 +442,17 @@
             <option value="straddle">7 — Straddle FL</option>
             <option value="full">8 — Full Front Lever</option>
           </select>
+          <button class="icon-btn" onclick="openProgramEditor('fl')">Edit</button>
         </div>
         <div id="fl-exercises"></div>
       </div>
 
       <!-- VIEW: WEEK -->
       <div class="view" id="view-week">
-        <div class="section-label">This Week</div>
+        <div class="section-head">
+          <div class="section-label">This Week</div>
+          <button class="icon-btn" onclick="openWeekEditor()">Edit</button>
+        </div>
         <div class="week-grid" id="week-grid"></div>
         <div id="week-detail"></div>
       </div>
@@ -570,6 +593,9 @@
             <button class="settings-btn warn" onclick="repairApp()">Repair</button>
           </div>
         </div>
+
+        <div class="section-label">Saved Programs</div>
+        <div class="settings-card" id="saved-programs"></div>
       </div>
 
     </div>
@@ -583,6 +609,17 @@
         <button class="modal-close" onclick="closeDayModal()">×</button>
       </div>
       <div id="modal-day-content"></div>
+    </div>
+
+    <!-- EDIT MODAL -->
+    <div class="modal-overlay" id="edit-overlay" onclick="closeEditModal()"></div>
+    <div class="edit-modal" id="edit-modal">
+      <div class="modal-handle"></div>
+      <div class="modal-header-row">
+        <div class="modal-day-title" id="edit-title"></div>
+        <button class="modal-close" onclick="closeEditModal()">×</button>
+      </div>
+      <div id="edit-content"></div>
     </div>
 
     <!-- BOTTOM NAV -->
@@ -623,7 +660,7 @@
 
   <script>
   // ── DATA ──────────────────────────────────────────────
-  const PD={
+  const BASE_PD={
     lean:{label:"Planche Lean",std:"15s hold · all 8 points",prog:12,tag:"solid",exs:[
       {n:"Planche Lean",p:"hold",s:"4 sets",r:"8–12 sec",c:"Shoulders past wrists. Max protraction. Shoulders depressed. Glutes squeezed. Press floor away."},
       {n:"Scapula Push-Up",p:"push",s:"3 sets",r:"10–12 reps",c:"Full protraction at top, flat at bottom. Trains serratus anterior directly."},
@@ -668,7 +705,7 @@
     ]}
   };
 
-  const FD={
+  const BASE_FD={
     hang:{label:"Dead Hang + Scap",std:"30s + 10 scap pulls",prog:10,tag:"solid",exs:[
       {n:"Dead Hang",p:"hold",s:"3 sets",r:"30 sec",c:"Fully relax first, then depress scapulae — DOWN and BACK. No elbow bend at all."},
       {n:"Scapular Pull",p:"pull",s:"3 sets",r:"10 reps",c:"From dead hang, pull blades down and together. Full range. Foundation of every FL hold."}
@@ -710,7 +747,7 @@
     ]}
   };
 
-  const WEEK_DATA=[
+  const BASE_WEEK_DATA=[
     {day:"Sun",type:"p",skill:"Planche",detail:"Hold · Push · Press",restPlan:null},
     {day:"Mon",type:"fl",skill:"FL",detail:"Hold · Pull",restPlan:null},
     {day:"Tue",type:"rest",skill:"Rest",detail:"Mobility",
@@ -726,7 +763,7 @@
     note:"Total: 20–30 min. No skill work today. Connective tissue adapts during rest — this is not optional recovery, it is the recovery."}},
     {day:"Wed",type:"p",skill:"Planche",detail:"Hold · Push · Press",restPlan:null},
     {day:"Thu",type:"fl",skill:"FL",detail:"Hold · Pull",restPlan:null},
-    {day:"Fri",type:"rest",skill:"Active",detail:"Handstand",
+    {day:"Fri",type:"active",skill:"Active",detail:"Handstand",
     restPlan:{title:"Active Rest · Handstand",color:"var(--amber)",chip:"Active Day",
     items:[
       {name:"Wall Kick-Up Practice",detail:"5–8 attempts. Focus on tight body line — hollow, not arched. This is handstand skill work, not cardio."},
@@ -745,6 +782,67 @@
     ],
     note:"Tomorrow is Planche day. Rest today means a better session tomorrow. The workout is already done — now let the body catch up."}}
   ];
+
+  // ── STATE ───────────────────────────────────────────
+  let programOverrides={p:{}, fl:{}};
+  let savedPrograms=[];
+  let weekData=[];
+
+  function deepClone(obj){
+    return JSON.parse(JSON.stringify(obj));
+  }
+
+  function escapeAttr(str){
+    return String(str).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
+  }
+
+  function escapeHtml(str){
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  function loadProgramOverrides(){
+    try{
+      const raw=localStorage.getItem('training_program_overrides');
+      if(raw) programOverrides=JSON.parse(raw);
+    }catch(e){programOverrides={p:{}, fl:{}};}
+  }
+
+  function saveProgramOverrides(){
+    localStorage.setItem('training_program_overrides', JSON.stringify(programOverrides));
+  }
+
+  function loadSavedPrograms(){
+    try{
+      const raw=localStorage.getItem('training_saved_programs');
+      if(raw) savedPrograms=JSON.parse(raw);
+    }catch(e){savedPrograms=[];}
+  }
+
+  function saveSavedPrograms(){
+    localStorage.setItem('training_saved_programs', JSON.stringify(savedPrograms));
+  }
+
+  function loadWeekData(){
+    try{
+      const raw=localStorage.getItem('training_week');
+      if(raw){weekData=JSON.parse(raw);} else {weekData=deepClone(BASE_WEEK_DATA);}
+    }catch(e){weekData=deepClone(BASE_WEEK_DATA);}
+  }
+
+  function saveWeekData(){
+    localStorage.setItem('training_week', JSON.stringify(weekData));
+  }
+
+  function getProgram(type, level){
+    const base=type==='p' ? BASE_PD[level] : BASE_FD[level];
+    const override=(programOverrides[type]||{})[level];
+    if(!override) return base;
+    return {
+      ...base,
+      label: override.label || base.label,
+      exs: override.exs || base.exs
+    };
+  }
 
   // ── RENDER HELPERS ──────────────────────────────────
   const PILLAR_CLASS={hold:"pill-hold",push:"pill-push",pull:"pill-pull",press:"pill-press"};
@@ -780,7 +878,7 @@
 
   function renderPlancheTrack(){
     const v=document.getElementById('planche-level').value;
-    const d=PD[v];
+    const d=getProgram('p', v);
     document.getElementById('planche-skill-header').innerHTML=renderSkillHeader(d,'var(--accent-p)');
     document.getElementById('planche-exercises').innerHTML=
       `<div class="focus-box p" style="margin-bottom:12px;"><div class="focus-title p">Standard to advance</div><div class="focus-text">${d.std}</div></div>`+
@@ -790,7 +888,7 @@
 
   function renderFLTrack(){
     const v=document.getElementById('fl-level').value;
-    const d=FD[v];
+    const d=getProgram('fl', v);
     document.getElementById('fl-skill-header').innerHTML=renderSkillHeader(d,'var(--accent-fl)');
     document.getElementById('fl-exercises').innerHTML=
       `<div class="focus-box fl" style="margin-bottom:12px;"><div class="focus-title fl">Standard to advance</div><div class="focus-text">${d.std}</div></div>`+
@@ -815,16 +913,18 @@
 
   function getRestPlan(type){
     if(type==='rest'){
-      return WEEK_DATA.find(d=>d.restPlan && d.restPlan.chip==='Rest Day');
+      return weekData.find(d=>d.restPlan && d.restPlan.chip==='Rest Day');
     }
     if(type==='active'){
-      return WEEK_DATA.find(d=>d.restPlan && d.restPlan.chip==='Active Day');
+      return weekData.find(d=>d.restPlan && d.restPlan.chip==='Active Day');
     }
     return null;
   }
 
   function renderRestActive(type){
-    const d=getRestPlan(type);
+    const todayIdx=new Date().getDay();
+    const today=weekData[todayIdx];
+    const d=(today && (today.type===type)) ? today : getRestPlan(type);
     if(!d || !d.restPlan){
       return `<div class="focus-box neutral"><div class="focus-title neutral">No plan</div><div class="focus-text">No ${type} plan configured.</div></div>`;
     }
@@ -846,7 +946,7 @@
       document.getElementById('today-content').innerHTML=renderRestActive(todaySkill);
       return;
     }
-    const d=todaySkill==='p'?PD[document.getElementById('planche-level').value]:FD[document.getElementById('fl-level').value];
+    const d=todaySkill==='p'?getProgram('p', document.getElementById('planche-level').value):getProgram('fl', document.getElementById('fl-level').value);
     const color=todaySkill==='p'?'var(--accent-p)':'var(--accent-fl)';
     const cls=todaySkill==='p'?'p':'fl';
     const advice=todaySkill==='p'
@@ -870,22 +970,22 @@
 
   function initToday(){
     const todayIdx=new Date().getDay();
-    const d=WEEK_DATA[todayIdx];
+    const d=weekData[todayIdx];
     const chip=document.getElementById('today-chip');
     const sub=document.getElementById('header-sub');
 
     if(d.type==='p'){
       chip.className='today-chip chip-planche';chip.textContent='Planche Day';
-      sub.textContent='Advanced Tuck · '+d.day+' Session';
+      sub.textContent=getProgram('p', document.getElementById('planche-level').value).label+' · '+d.day+' Session';
       todaySkill='p';
     } else if(d.type==='fl'){
       chip.className='today-chip chip-fl';chip.textContent='FL Day';
-      sub.textContent='Adv Tuck FL · '+d.day+' Session';
+      sub.textContent=getProgram('fl', document.getElementById('fl-level').value).label+' · '+d.day+' Session';
       todaySkill='fl';
     } else {
       chip.className='today-chip chip-rest';chip.textContent=d.restPlan?d.restPlan.chip:'Rest';
       sub.textContent=d.skill+' · '+d.detail;
-      todaySkill = d.restPlan && d.restPlan.chip==='Active Day' ? 'active' : 'rest';
+      todaySkill = d.type==='active' || (d.restPlan && d.restPlan.chip==='Active Day') ? 'active' : 'rest';
     }
 
     switchToday(todaySkill);
@@ -893,16 +993,16 @@
 
   // ── WEEK ──────────────────────────────────────────
   function renderWeekDetail(idx){
-    const d = WEEK_DATA[idx];
+    const d = weekData[idx];
     document.getElementById('week-detail').innerHTML = renderDayModalContent(d, idx);
   }
 
   function renderWeekGrid(){
     const todayIdx=new Date().getDay(); // 0=Sun
-    document.getElementById('week-grid').innerHTML=WEEK_DATA.map((d,i)=>`
-      <div class="day-card ${i===todayIdx?'today':d.type==='fl'?'fl-day':d.type==='rest'?'rest-day':''}" onclick="showDayModal(${i})" style="cursor:pointer;">
+    document.getElementById('week-grid').innerHTML=weekData.map((d,i)=>`
+      <div class="day-card ${i===todayIdx?'today':d.type==='fl'?'fl-day':d.type==='active'?'active-day':d.type==='rest'?'rest-day':''}" onclick="showDayModal(${i})" style="cursor:pointer;">
         <div class="day-name">${d.day}</div>
-        <div class="day-dot ${d.type==='p'?'p':d.type==='fl'?'fl':'rest'}"></div>
+        <div class="day-dot ${d.type==='p'?'p':d.type==='fl'?'fl':d.type==='active'?'active':'rest'}"></div>
         <div class="day-skill-text">${d.skill}</div>
       </div>`).join('');
 
@@ -910,7 +1010,7 @@
   }
 
   function showDayModal(idx){
-    const d=WEEK_DATA[idx];
+    const d=weekData[idx];
     const todayIdx=new Date().getDay();
     const isTodayLabel=idx===todayIdx?' · Today':'';
     document.getElementById('modal-day-title').innerHTML=`${d.day}${isTodayLabel}`;
@@ -923,9 +1023,10 @@
     document.getElementById('day-modal').classList.remove('open');
   }
   function renderDayModalContent(d,idx){
-    if(d.type==='rest'&&d.restPlan){
+    const editBtn=`<div style="display:flex;justify-content:flex-end;margin-bottom:8px;"><button class="icon-btn" onclick="openWeekEditor(${idx})">Edit day</button></div>`;
+    if((d.type==='rest' || d.type==='active') && d.restPlan){
       const p=d.restPlan;
-      return `<div class="focus-box neutral" style="margin-bottom:12px;">
+      return `${editBtn}<div class="focus-box neutral" style="margin-bottom:12px;">
         <div class="focus-title neutral">${p.chip} · ${d.detail}</div>
         <div class="focus-text"><strong>${p.title}</strong></div>
       </div>
@@ -934,15 +1035,264 @@
         <div class="rest-note">${p.note}</div>
       </div>`;
     }
+    if(d.type==='rest' || d.type==='active'){
+      return `${editBtn}<div class="focus-box neutral"><div class="focus-title neutral">Rest</div><div class="focus-text">No rest plan configured.</div></div>`;
+    }
     const isP=d.type==='p';
-    const skillData=isP?PD[document.getElementById('planche-level').value]:FD[document.getElementById('fl-level').value];
+    const skillData=isP?getProgram('p', document.getElementById('planche-level').value):getProgram('fl', document.getElementById('fl-level').value);
     const cls=isP?'p':'fl';
     const sets=countSets(skillData.exs);
-    return `<div class="focus-box ${cls}" style="margin-bottom:12px;">
+    return `${editBtn}<div class="focus-box ${cls}" style="margin-bottom:12px;">
       <div class="focus-title ${cls}">${isP?'Planche Day':'Front Lever Day'} · ${d.detail}</div>
       <div class="focus-text"><strong>${skillData.label}</strong> — ${sets} sets · ~${isP?50:45} min</div>
     </div>
     ${renderExCards(skillData.exs)}`;
+  }
+
+  // ── EDIT MODALS ───────────────────────────────────
+  let editContext=null;
+
+  function openEditModal(title, content){
+    closeDayModal();
+    document.getElementById('edit-title').textContent=title;
+    document.getElementById('edit-content').innerHTML=content;
+    document.getElementById('edit-overlay').classList.add('open');
+    document.getElementById('edit-modal').classList.add('open');
+  }
+
+  function closeEditModal(){
+    document.getElementById('edit-overlay').classList.remove('open');
+    document.getElementById('edit-modal').classList.remove('open');
+    editContext=null;
+  }
+
+  function openProgramEditor(type){
+    const level=type==='p' ? document.getElementById('planche-level').value : document.getElementById('fl-level').value;
+    const d=getProgram(type, level);
+    editContext={type, level};
+
+    const exBlocks=d.exs.map((e,i)=>`
+      <div class="editor-group">
+        <div class="editor-row" style="flex-direction:row;align-items:center;justify-content:space-between;">
+          <div class="editor-label">Exercise ${i+1}</div>
+          <div class="editor-pill">${e.p}</div>
+        </div>
+        <div class="editor-row">
+          <div class="editor-label">Name</div>
+          <input class="editor-input" id="ex-name-${i}" value="${escapeAttr(e.n)}" />
+        </div>
+        <div class="editor-row">
+          <div class="editor-label">Sets</div>
+          <input class="editor-input" id="ex-sets-${i}" value="${escapeAttr(e.s)}" />
+        </div>
+        <div class="editor-row">
+          <div class="editor-label">Reps / Time</div>
+          <input class="editor-input" id="ex-reps-${i}" value="${escapeAttr(e.r)}" />
+        </div>
+        <div class="editor-row">
+          <div class="editor-label">Notes</div>
+          <textarea class="editor-textarea" id="ex-note-${i}">${e.c}</textarea>
+        </div>
+      </div>`).join('');
+
+    const content=`
+      <div class="editor-group">
+        <div class="editor-row">
+          <div class="editor-label">Program title</div>
+          <input class="editor-input" id="prog-title" value="${escapeAttr(d.label)}" />
+        </div>
+        <div class="editor-row">
+          <div class="editor-label">Save as name</div>
+          <input class="editor-input" id="prog-save-name" placeholder="My custom program" />
+        </div>
+        <div class="editor-actions">
+          <button class="settings-btn" onclick="saveProgramEdit()">Save</button>
+          <button class="settings-btn warn" onclick="saveProgramAs()">Save to library</button>
+          <button class="settings-btn danger" onclick="resetProgramEdit()">Reset to default</button>
+        </div>
+      </div>
+      ${exBlocks}`;
+
+    openEditModal(type==='p'?'Edit Planche Program':'Edit Front Lever Program', content);
+  }
+
+  function readProgramEditor(){
+    const {type, level}=editContext;
+    const base=getProgram(type, level);
+    const exs=base.exs.map((e,i)=>({
+      ...e,
+      n:document.getElementById(`ex-name-${i}`).value.trim() || e.n,
+      s:document.getElementById(`ex-sets-${i}`).value.trim() || e.s,
+      r:document.getElementById(`ex-reps-${i}`).value.trim() || e.r,
+      c:document.getElementById(`ex-note-${i}`).value.trim() || e.c
+    }));
+    const label=(document.getElementById('prog-title').value || base.label).trim();
+    return {label, exs};
+  }
+
+  function saveProgramEdit(){
+    if(!editContext) return;
+    const {type, level}=editContext;
+    programOverrides[type]=programOverrides[type]||{};
+    programOverrides[type][level]=readProgramEditor();
+    saveProgramOverrides();
+    if(type==='p'){renderPlancheTrack();} else {renderFLTrack();}
+    renderWeekGrid();
+    initToday();
+    renderToday();
+  }
+
+  function resetProgramEdit(){
+    if(!editContext) return;
+    const {type, level}=editContext;
+    if(programOverrides[type]) delete programOverrides[type][level];
+    saveProgramOverrides();
+    closeEditModal();
+    if(type==='p'){renderPlancheTrack();} else {renderFLTrack();}
+    renderWeekGrid();
+    initToday();
+    renderToday();
+  }
+
+  function saveProgramAs(){
+    if(!editContext) return;
+    const {type, level}=editContext;
+    const name=document.getElementById('prog-save-name').value.trim();
+    if(!name){alert('Enter a name to save this program.');return;}
+    const data=readProgramEditor();
+    savedPrograms.unshift({id:Date.now(),name,type,level,data});
+    saveSavedPrograms();
+    renderSavedPrograms();
+  }
+
+  function renderSavedPrograms(){
+    const host=document.getElementById('saved-programs');
+    if(!host) return;
+    if(!savedPrograms.length){
+      host.innerHTML='<div class="settings-desc">No saved programs yet.</div>';
+      return;
+    }
+    host.innerHTML=savedPrograms.map(p=>{
+      const typeLabel=p.type==='p'?'Planche':'Front Lever';
+      return `<div class="settings-row">
+        <div>
+          <div class="settings-title">${escapeHtml(p.name)}</div>
+          <div class="settings-desc">${escapeHtml(typeLabel)} · ${escapeHtml(p.level)}</div>
+        </div>
+        <div class="settings-control">
+          <button class="settings-btn" onclick="applySavedProgram(${p.id})">Load</button>
+          <button class="settings-btn danger" onclick="deleteSavedProgram(${p.id})">Delete</button>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  function applySavedProgram(id){
+    const p=savedPrograms.find(x=>x.id===id);
+    if(!p) return;
+    programOverrides[p.type]=programOverrides[p.type]||{};
+    programOverrides[p.type][p.level]=p.data;
+    saveProgramOverrides();
+    if(p.type==='p'){
+      document.getElementById('planche-level').value=p.level;
+      renderPlancheTrack();
+    } else {
+      document.getElementById('fl-level').value=p.level;
+      renderFLTrack();
+    }
+    renderWeekGrid();
+    initToday();
+    renderToday();
+  }
+
+  function deleteSavedProgram(id){
+    savedPrograms=savedPrograms.filter(p=>p.id!==id);
+    saveSavedPrograms();
+    renderSavedPrograms();
+  }
+
+  function openWeekEditor(focusIdx){
+    editContext={type:'week'};
+    const options=(selected)=>`
+      <option value="p" ${selected==='p'?'selected':''}>Planche</option>
+      <option value="fl" ${selected==='fl'?'selected':''}>Front Lever</option>
+      <option value="rest" ${selected==='rest'?'selected':''}>Rest</option>
+      <option value="active" ${selected==='active'?'selected':''}>Active</option>`;
+
+    const rows=weekData.map((d,i)=>`
+      <div class="editor-group" id="week-row-${i}">
+        <div class="editor-row" style="flex-direction:row;align-items:center;justify-content:space-between;">
+          <div class="editor-label">${d.day}</div>
+          <div class="editor-pill">${d.type.toUpperCase()}</div>
+        </div>
+        <div class="editor-row">
+          <div class="editor-label">Type</div>
+          <select class="editor-select" id="week-type-${i}">${options(d.type)}</select>
+        </div>
+        <div class="editor-row">
+          <div class="editor-label">Detail</div>
+          <input class="editor-input" id="week-detail-${i}" value="${escapeAttr(d.detail)}" />
+        </div>
+      </div>`).join('');
+
+    const content=`
+      <div class="editor-group">
+        <div class="editor-actions">
+          <button class="settings-btn" onclick="saveWeekEditor()">Save week</button>
+          <button class="settings-btn danger" onclick="resetWeekEditor()">Reset to default</button>
+        </div>
+      </div>
+      ${rows}`;
+
+    openEditModal('Edit Weekly Schedule', content);
+    if(typeof focusIdx==='number'){
+      setTimeout(()=>{
+        const el=document.getElementById(`week-row-${focusIdx}`);
+        if(el) el.scrollIntoView({block:'start'});
+      },50);
+    }
+  }
+
+  function defaultRestPlan(kind){
+    const chip=kind==='active'?'Active Day':'Rest Day';
+    const src=BASE_WEEK_DATA.find(d=>d.restPlan && d.restPlan.chip===chip);
+    return src ? deepClone(src.restPlan) : null;
+  }
+
+  function saveWeekEditor(){
+    weekData=weekData.map((d,i)=>{
+      const type=document.getElementById(`week-type-${i}`).value;
+      const detail=document.getElementById(`week-detail-${i}`).value.trim() || d.detail;
+      const next={...d,type,detail};
+      if(type==='p'){
+        next.skill='Planche';
+        next.restPlan=null;
+      } else if(type==='fl'){
+        next.skill='FL';
+        next.restPlan=null;
+      } else if(type==='active'){
+        next.skill='Active';
+        next.restPlan=defaultRestPlan('active');
+      } else {
+        next.skill='Rest';
+        next.restPlan=defaultRestPlan('rest');
+      }
+      return next;
+    });
+    saveWeekData();
+    closeEditModal();
+    renderWeekGrid();
+    initToday();
+    renderToday();
+  }
+
+  function resetWeekEditor(){
+    weekData=deepClone(BASE_WEEK_DATA);
+    saveWeekData();
+    closeEditModal();
+    renderWeekGrid();
+    initToday();
+    renderToday();
   }
 
   // ── NAV ──────────────────────────────────────────
@@ -1272,6 +1622,9 @@
     const ok=confirm('Clear app data and cached files?');
     if(!ok) return;
     localStorage.removeItem('training_settings');
+    localStorage.removeItem('training_program_overrides');
+    localStorage.removeItem('training_saved_programs');
+    localStorage.removeItem('training_week');
     try{
       if('caches' in window){
         const keys=await caches.keys();
@@ -1305,8 +1658,12 @@
   }
 
   // ── INIT SETTINGS ──────────────────────────────────
+  loadProgramOverrides();
+  loadSavedPrograms();
+  loadWeekData();
   loadSettings();
   applySettings();
+  renderSavedPrograms();
   renderRestTimerDisplay();
   renderRestTimerButtons();
 
