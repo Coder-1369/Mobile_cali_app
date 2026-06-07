@@ -2132,12 +2132,34 @@
 
   // ── NAV ──────────────────────────────────────────
   const VIEWS=['today','workouts','planche','fl','week','timer','settings'];
+  const ROOT_VIEWS=new Set(['today','workouts','week','timer','settings']);
+  const SUB_VIEWS=new Set(['planche','fl']);
   let currentView='today';
+  let pendingHistoryView=null;
   function showView(name, fromHistory=false){
     if(!name) name='today';
     if(currentView===name && !fromHistory) return;
-    if(!fromHistory && history.state?.view!==name){
-      history.pushState({view:name}, '', location.href);
+    if(!fromHistory){
+      if(SUB_VIEWS.has(name)){
+        if(currentView==='workouts'){
+          history.pushState({view:name}, '', location.href);
+        } else {
+          history.replaceState({view:name}, '', location.href);
+        }
+      } else if(name==='today'){
+        history.replaceState({view:name}, '', location.href);
+      } else if(SUB_VIEWS.has(currentView)){
+        pendingHistoryView=name;
+        if(history.length>1){
+          history.back();
+          return;
+        }
+        history.replaceState({view:name}, '', location.href);
+      } else if(currentView==='today'){
+        history.pushState({view:name}, '', location.href);
+      } else {
+        history.replaceState({view:name}, '', location.href);
+      }
     }
     currentView=name;
     VIEWS.forEach(v=>{
@@ -2574,7 +2596,11 @@
   renderCycleStatus();
   history.replaceState({view:'today'}, '', location.href);
   window.addEventListener('popstate', (event)=>{
-    const view=(event.state && event.state.view) ? event.state.view : 'today';
+    const view=pendingHistoryView || ((event.state && event.state.view) ? event.state.view : 'today');
+    if(pendingHistoryView){
+      history.replaceState({view}, '', location.href);
+      pendingHistoryView=null;
+    }
     showView(view, true);
   });
 
