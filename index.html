@@ -136,12 +136,27 @@
   .section-head .section-label{padding:0;}
   .icon-btn{font-family:var(--ff-mono);font-size:10px;padding:6px 10px;border-radius:10px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);cursor:pointer;}
   .header-btn{width:32px;height:32px;padding:0;display:flex;align-items:center;justify-content:center;}
+  .header-icon-btn{width:40px;height:40px;padding:0;border-radius:14px;font-size:18px;display:flex;align-items:center;justify-content:center;}
 
   /* ── WORKOUTS / SESSION / CYCLE ── */
   .workout-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:12px;}
   .workout-card-title{font-family:var(--ff-head);font-size:18px;font-weight:800;margin-bottom:4px;}
   .workout-card-desc{font-size:12px;color:var(--muted);line-height:1.5;max-width:320px;}
   .workout-card-actions{display:flex;gap:8px;align-items:center;flex-shrink:0;}
+  .workout-hub-grid{display:grid;gap:12px;}
+  .workout-select-card{width:100%;border:1px solid var(--border);border-radius:18px;padding:18px;background:var(--surface);color:var(--text);display:flex;align-items:center;justify-content:space-between;gap:14px;cursor:pointer;text-align:left;transition:border-color .2s,transform .2s,background .2s;}
+  .workout-select-card:active{transform:translateY(1px);border-color:var(--border2);}
+  .workout-select-left{display:flex;align-items:center;gap:14px;min-width:0;}
+  .workout-select-icon{width:48px;height:48px;border-radius:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .workout-select-icon svg{width:24px;height:24px;stroke-width:1.8;}
+  .workout-select-copy{min-width:0;}
+  .workout-select-title{font-family:var(--ff-head);font-size:18px;font-weight:800;line-height:1.1;margin-bottom:4px;}
+  .workout-select-desc{font-size:12px;color:var(--muted);line-height:1.45;}
+  .workout-select-arrow{font-family:var(--ff-mono);font-size:18px;color:var(--muted2);flex-shrink:0;}
+  .workout-select-card.planche{background:linear-gradient(180deg,var(--accent-p-dim),var(--surface));}
+  .workout-select-card.front-lever{background:linear-gradient(180deg,var(--accent-fl-dim),var(--surface));}
+  .workout-select-card.planche .workout-select-icon{background:var(--accent-p-dim);color:var(--accent-p);border:1px solid var(--accent-p)40;}
+  .workout-select-card.front-lever .workout-select-icon{background:var(--accent-fl-dim);color:var(--accent-fl);border:1px solid var(--accent-fl)40;}
   .session-bar{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px 16px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:12px;}
   .session-progress{font-family:var(--ff-mono);font-size:11px;color:var(--muted);margin-top:2px;}
   .session-actions{display:flex;gap:8px;flex-shrink:0;}
@@ -330,6 +345,8 @@
   .settings-btn{font-family:var(--ff-mono);font-size:11px;padding:8px 12px;border-radius:8px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);cursor:pointer;}
   .settings-btn.warn{border-color:var(--amber);color:var(--amber);}
   .settings-btn.danger{border-color:var(--red);color:var(--red);}
+  .settings-action-row .settings-control{align-items:center;flex-wrap:wrap;justify-content:flex-end;}
+  .settings-action-row .settings-select{min-width:140px;}
 
   /* ── REDUCE MOTION ── */
   .reduce-motion *{animation:none !important;transition:none !important;}
@@ -456,7 +473,7 @@
         <div class="app-title">Training</div>
         <div style="display:flex;align-items:center;gap:8px;">
           <div class="today-chip chip-planche" id="today-chip">Planche Day</div>
-          <button class="icon-btn" onclick="showView('settings')" aria-label="Open settings">⚙</button>
+          <button class="icon-btn header-icon-btn" onclick="showView('settings')" aria-label="Open settings">⚙</button>
         </div>
       </div>
       <div class="header-sub" id="header-sub">Advanced Tuck · Session 1</div>
@@ -501,30 +518,33 @@
       <div class="view" id="view-workouts">
         <div class="section-head">
           <div class="section-label">Workouts</div>
-          <button class="icon-btn" onclick="showView('settings')">⚙</button>
+          <button class="icon-btn header-icon-btn" onclick="showView('settings')">⚙</button>
         </div>
-        <div class="settings-card">
-          <div class="settings-row">
-            <div>
-              <div class="settings-title">Workout hub</div>
-              <div class="settings-desc">Open the Planche or Front Lever builder from one place.</div>
+        <div class="workout-hub-grid">
+          <button class="workout-select-card planche" type="button" onclick="showView('planche')">
+            <div class="workout-select-left">
+              <div class="workout-select-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 15h16"/><path d="M7 15l4-8h2l4 8"/><circle cx="12" cy="7" r="1.6" fill="currentColor" stroke="none"/></svg>
+              </div>
+              <div class="workout-select-copy">
+                <div class="workout-select-title">Planche</div>
+                <div class="workout-select-desc">Push, lean, and press work for the planche line.</div>
+              </div>
             </div>
-            <div class="settings-control">
-              <button class="settings-btn" onclick="showView('planche')">Planche</button>
-              <button class="settings-btn" onclick="showView('fl')">Front Lever</button>
+            <div class="workout-select-arrow">→</div>
+          </button>
+          <button class="workout-select-card front-lever" type="button" onclick="showView('fl')">
+            <div class="workout-select-left">
+              <div class="workout-select-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 12h16"/><circle cx="7" cy="12" r="1.7" fill="currentColor" stroke="none"/><circle cx="17" cy="12" r="1.7" fill="currentColor" stroke="none"/><path d="M7 12l2 4M17 12l-2 4"/></svg>
+              </div>
+              <div class="workout-select-copy">
+                <div class="workout-select-title">Front Lever</div>
+                <div class="workout-select-desc">Hold, pull, and row progressions for front lever strength.</div>
+              </div>
             </div>
-          </div>
-          <div class="settings-row">
-            <div>
-              <div class="settings-title">Cycle status</div>
-              <div class="settings-desc" id="workout-cycle-summary">Normal week</div>
-            </div>
-            <button class="settings-btn warn" onclick="showView('week')">Open calendar</button>
-          </div>
-        </div>
-        <div class="deload-card" id="workout-hub-banner">
-          <div class="deload-title">Fast access</div>
-          <div class="deload-text">Use the hub to jump into either workout and keep the cycle tracker in view.</div>
+            <div class="workout-select-arrow">→</div>
+          </button>
         </div>
       </div>
 
@@ -774,19 +794,18 @@
 
         <div class="section-label">Storage</div>
         <div class="settings-card">
-          <div class="settings-row">
+          <div class="settings-row settings-action-row">
             <div>
-              <div class="settings-title">Clear app data</div>
-              <div class="settings-desc">Remove saved settings and cached resources.</div>
+              <div class="settings-title">Maintenance action</div>
+              <div class="settings-desc">Choose either clear or repair, then run it.</div>
             </div>
-            <button class="settings-btn danger" onclick="clearAppData()">Clear</button>
-          </div>
-          <div class="settings-row">
-            <div>
-              <div class="settings-title">Repair app</div>
-              <div class="settings-desc">Re-fetch cached files and reload.</div>
+            <div class="settings-control">
+              <select class="settings-select" id="setting-storage-action">
+                <option value="repair">Repair app</option>
+                <option value="clear">Clear app data</option>
+              </select>
+              <button class="settings-btn warn" onclick="runStorageAction()">Run</button>
             </div>
-            <button class="settings-btn warn" onclick="repairApp()">Repair</button>
           </div>
         </div>
 
@@ -2113,7 +2132,14 @@
 
   // ── NAV ──────────────────────────────────────────
   const VIEWS=['today','workouts','planche','fl','week','timer','settings'];
-  function showView(name){
+  let currentView='today';
+  function showView(name, fromHistory=false){
+    if(!name) name='today';
+    if(currentView===name && !fromHistory) return;
+    if(!fromHistory && history.state?.view!==name){
+      history.pushState({view:name}, '', location.href);
+    }
+    currentView=name;
     VIEWS.forEach(v=>{
       document.getElementById('view-'+v).classList.toggle('active',v===name);
       const nav=document.getElementById('nav-'+v);
@@ -2125,6 +2151,10 @@
       const nav=document.getElementById('nav-'+v);
       if(nav) nav.classList.toggle('active', v===activeNav);
     });
+    if(typeof closeDayModal==='function') closeDayModal();
+    if(typeof closeEditModal==='function') closeEditModal();
+    if(typeof closeSavedPrograms==='function') closeSavedPrograms();
+    if(typeof closeTimerSettings==='function') closeTimerSettings();
     document.getElementById('scroll-area').scrollTop=0;
     if(name==='week') renderWeekGrid();
     if(name==='workouts' || name==='planche' || name==='fl') renderWorkoutsHub();
@@ -2201,6 +2231,16 @@
     applySettings();
     showToast('Toast duration updated');
   });
+
+  function runStorageAction(){
+    const select=document.getElementById('setting-storage-action');
+    if(!select) return;
+    if(select.value==='clear'){
+      clearAppData();
+    } else {
+      repairApp();
+    }
+  }
 
   // ── SWIPE NAV ───────────────────────────────────────
   let touchX=0,touchY=0;
@@ -2532,6 +2572,11 @@
   renderRestTimerButtons();
   renderWorkoutsHub();
   renderCycleStatus();
+  history.replaceState({view:'today'}, '', location.href);
+  window.addEventListener('popstate', (event)=>{
+    const view=(event.state && event.state.view) ? event.state.view : 'today';
+    showView(view, true);
+  });
 
   // ── SERVICE WORKER ──────────────────────────────────
   if('serviceWorker' in navigator){
