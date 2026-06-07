@@ -135,6 +135,21 @@
   .section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:20px 0 10px;}
   .section-head .section-label{padding:0;}
   .icon-btn{font-family:var(--ff-mono);font-size:10px;padding:6px 10px;border-radius:10px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);cursor:pointer;}
+  .header-btn{width:32px;height:32px;padding:0;display:flex;align-items:center;justify-content:center;}
+
+  /* ── WORKOUTS / SESSION / CYCLE ── */
+  .workout-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:12px;}
+  .workout-card-title{font-family:var(--ff-head);font-size:18px;font-weight:800;margin-bottom:4px;}
+  .workout-card-desc{font-size:12px;color:var(--muted);line-height:1.5;max-width:320px;}
+  .workout-card-actions{display:flex;gap:8px;align-items:center;flex-shrink:0;}
+  .session-bar{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px 16px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:12px;}
+  .session-progress{font-family:var(--ff-mono);font-size:11px;color:var(--muted);margin-top:2px;}
+  .session-actions{display:flex;gap:8px;flex-shrink:0;}
+  .ex-card.completed{border-color:var(--green);background:linear-gradient(180deg,var(--green-dim),var(--surface));}
+  .ex-complete-btn{margin-top:10px;width:100%;}
+  .cycle-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:10px;}
+  .cycle-select{width:100%;}
+  .cycle-status{font-family:var(--ff-mono);font-size:11px;color:var(--muted);line-height:1.5;margin-top:10px;}
 
   /* ── SKILL STAT HEADER ── */
   .skill-header{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:18px 18px 14px;margin-bottom:12px;}
@@ -306,10 +321,12 @@
   .settings-desc{font-size:12px;color:var(--muted);line-height:1.4;margin-top:2px;}
   .settings-control{display:flex;align-items:center;gap:8px;}
   .settings-select{background:var(--surface2);border:1px solid var(--border2);color:var(--text);font-family:var(--ff-mono);font-size:11px;padding:6px 8px;border-radius:8px;cursor:pointer;}
-  .toggle{width:44px;height:24px;border-radius:14px;border:1px solid var(--border2);background:var(--surface2);position:relative;cursor:pointer;transition:all .2s;}
+  .toggle{width:44px;height:24px;border-radius:14px;border:1px solid var(--border2);background:var(--surface2);position:relative;cursor:pointer;transition:all .2s;flex-shrink:0;box-sizing:border-box;overflow:hidden;}
   .toggle::after{content:'';position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:var(--muted2);transition:all .2s;}
   .toggle.on{background:var(--accent-fl-dim);border-color:var(--accent-fl);}
   .toggle.on::after{left:22px;background:var(--accent-fl);}
+  .toggle.toggle-deload.on{background:var(--amber-dim);border-color:var(--amber);}
+  .toggle.toggle-deload.on::after{background:var(--amber);}
   .settings-btn{font-family:var(--ff-mono);font-size:11px;padding:8px 12px;border-radius:8px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);cursor:pointer;}
   .settings-btn.warn{border-color:var(--amber);color:var(--amber);}
   .settings-btn.danger{border-color:var(--red);color:var(--red);}
@@ -437,7 +454,10 @@
     <div class="app-header">
       <div class="header-row">
         <div class="app-title">Training</div>
-        <div class="today-chip chip-planche" id="today-chip">Planche Day</div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div class="today-chip chip-planche" id="today-chip">Planche Day</div>
+          <button class="icon-btn" onclick="showView('settings')" aria-label="Open settings">⚙</button>
+        </div>
       </div>
       <div class="header-sub" id="header-sub">Advanced Tuck · Session 1</div>
     </div>
@@ -453,6 +473,17 @@
           <button class="toggle-btn" id="btn-rest" onclick="switchToday('rest')">Rest</button>
           <button class="toggle-btn" id="btn-active" onclick="switchToday('active')">Active</button>
         </div>
+        <div class="settings-card" id="today-session-card" style="margin-bottom:12px;">
+          <div class="settings-row">
+            <div>
+              <div class="settings-title" id="today-session-title">Session control</div>
+              <div class="settings-desc" id="today-session-desc">Tap Start to begin checking off sets and workouts.</div>
+            </div>
+            <div class="settings-control">
+              <button class="settings-btn" id="today-session-start" onclick="toggleSession()">Start</button>
+            </div>
+          </div>
+        </div>
         <div class="mini-timer" id="mini-timer">
           <div>
             <div class="timer-label">Quick timer</div>
@@ -464,6 +495,37 @@
           </div>
         </div>
         <div id="today-content"></div>
+      </div>
+
+      <!-- VIEW: WORKOUTS -->
+      <div class="view" id="view-workouts">
+        <div class="section-head">
+          <div class="section-label">Workouts</div>
+          <button class="icon-btn" onclick="showView('settings')">⚙</button>
+        </div>
+        <div class="settings-card">
+          <div class="settings-row">
+            <div>
+              <div class="settings-title">Workout hub</div>
+              <div class="settings-desc">Open the Planche or Front Lever builder from one place.</div>
+            </div>
+            <div class="settings-control">
+              <button class="settings-btn" onclick="showView('planche')">Planche</button>
+              <button class="settings-btn" onclick="showView('fl')">Front Lever</button>
+            </div>
+          </div>
+          <div class="settings-row">
+            <div>
+              <div class="settings-title">Cycle status</div>
+              <div class="settings-desc" id="workout-cycle-summary">Normal week</div>
+            </div>
+            <button class="settings-btn warn" onclick="showView('week')">Open calendar</button>
+          </div>
+        </div>
+        <div class="deload-card" id="workout-hub-banner">
+          <div class="deload-title">Fast access</div>
+          <div class="deload-text">Use the hub to jump into either workout and keep the cycle tracker in view.</div>
+        </div>
       </div>
 
       <!-- VIEW: PLANCHE -->
@@ -511,6 +573,42 @@
         <div class="section-head">
           <div class="section-label">This Week</div>
           <button class="icon-btn" onclick="openWeekEditor()">Edit</button>
+        </div>
+        <div class="settings-card">
+          <div class="settings-row">
+            <div>
+              <div class="settings-title">Week cycle</div>
+              <div class="settings-desc">Complete a week to advance the cycle and trigger deload automatically when the target is reached.</div>
+            </div>
+            <button class="settings-btn warn" onclick="markWeekComplete()">Mark complete</button>
+          </div>
+          <div class="settings-row">
+            <div>
+              <div class="settings-title">Normal weeks before deload</div>
+              <div class="settings-desc">Choose how many normal weeks run before the next deload week.</div>
+            </div>
+            <div class="settings-control">
+              <select class="settings-select cycle-select" id="setting-normal-weeks" onchange="updateCycleSetting()">
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+              </select>
+            </div>
+          </div>
+          <div class="settings-row">
+            <div>
+              <div class="settings-title">Smart deload</div>
+              <div class="settings-desc">Automatically switch the app into deload mode after the selected number of normal weeks.</div>
+            </div>
+            <div class="toggle" id="setting-smart-deload" onclick="toggleSetting('smartDeload')"></div>
+          </div>
+          <div class="cycle-status" id="cycle-status"></div>
+          <div class="cycle-grid">
+            <button class="settings-btn warn" onclick="resetWeekCycle()">Reset cycle</button>
+            <button class="settings-btn" onclick="showView('settings')">More settings</button>
+          </div>
         </div>
         <div class="week-actions" id="week-actions">
           <div class="settings-desc">Hold &amp; drag · save to apply</div>
@@ -634,7 +732,7 @@
               <div class="settings-title">Deload week</div>
               <div class="settings-desc">Show reduced-load workouts across Today, Planche, FL, and Week.</div>
             </div>
-            <div class="toggle" id="setting-deload-week" onclick="toggleSetting('deloadWeek')"></div>
+            <div class="toggle toggle-deload" id="setting-deload-week" onclick="toggleSetting('deloadWeek')"></div>
           </div>
         </div>
 
@@ -771,15 +869,10 @@
         <span class="nav-label">Today</span>
         <div class="nav-dot nav-dot-p"></div>
       </button>
-      <button class="nav-item" id="nav-planche" onclick="showView('planche')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9"/><path d="M8 12h8M12 8l4 4-4 4"/></svg>
-        <span class="nav-label">Planche</span>
+      <button class="nav-item" id="nav-workouts" onclick="showView('workouts')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 8h16M4 16h16"/><circle cx="9" cy="8" r="2"/><circle cx="15" cy="16" r="2"/></svg>
+        <span class="nav-label">Workouts</span>
         <div class="nav-dot nav-dot-p"></div>
-      </button>
-      <button class="nav-item" id="nav-fl" onclick="showView('fl')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 12h16M4 6l6 6-6 6"/></svg>
-        <span class="nav-label">FL</span>
-        <div class="nav-dot nav-dot-fl"></div>
       </button>
       <button class="nav-item" id="nav-week" onclick="showView('week')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
@@ -789,11 +882,6 @@
       <button class="nav-item" id="nav-timer" onclick="showView('timer')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M9 3h6"/></svg>
         <span class="nav-label">Timer</span>
-        <div class="nav-dot nav-dot-w"></div>
-      </button>
-      <button class="nav-item" id="nav-settings" onclick="showView('settings')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1 1 0 0 0 .2 1.1l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1 1 0 0 0-1.1-.2 1 1 0 0 0-.6.9V21a2 2 0 1 1-4 0v-.1a1 1 0 0 0-.6-.9 1 1 0 0 0-1.1.2l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1 1 0 0 0 .2-1.1 1 1 0 0 0-.9-.6H3a2 2 0 1 1 0-4h.1a1 1 0 0 0 .9-.6 1 1 0 0 0-.2-1.1l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1 1 0 0 0 1.1.2 1 1 0 0 0 .6-.9V3a2 2 0 1 1 4 0v.1a1 1 0 0 0 .6.9 1 1 0 0 0 1.1-.2l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1 1 0 0 0-.2 1.1 1 1 0 0 0 .9.6H21a2 2 0 1 1 0 4h-.1a1 1 0 0 0-.9.6z"/></svg>
-        <span class="nav-label">Settings</span>
         <div class="nav-dot nav-dot-w"></div>
       </button>
     </nav>
@@ -929,6 +1017,9 @@
   let programOverrides={p:{}, fl:{}};
   let savedPrograms=[];
   let weekData=[];
+  let workoutSessions={};
+  let cycleState={phase:'normal', normalStreak:0, totalWeeks:0};
+  let openWeekContext=null;
 
   function deepClone(obj){
     return JSON.parse(JSON.stringify(obj));
@@ -988,6 +1079,17 @@
     localStorage.setItem('training_saved_programs', JSON.stringify(savedPrograms));
   }
 
+  function loadWorkoutSessions(){
+    try{
+      const raw=localStorage.getItem('training_workout_sessions');
+      if(raw) workoutSessions=JSON.parse(raw);
+    }catch(e){workoutSessions={};}
+  }
+
+  function saveWorkoutSessions(){
+    localStorage.setItem('training_workout_sessions', JSON.stringify(workoutSessions));
+  }
+
   function loadWeekData(){
     try{
       const raw=localStorage.getItem('training_week');
@@ -997,6 +1099,43 @@
 
   function saveWeekData(){
     localStorage.setItem('training_week', JSON.stringify(weekData));
+  }
+
+  function loadCycleState(){
+    try{
+      const raw=localStorage.getItem('training_cycle');
+      if(raw) cycleState={...cycleState, ...JSON.parse(raw)};
+    }catch(e){cycleState={phase:'normal', normalStreak:0, totalWeeks:0};}
+  }
+
+  function saveCycleState(){
+    localStorage.setItem('training_cycle', JSON.stringify(cycleState));
+  }
+
+  function currentDateKey(){
+    return new Date().toISOString().slice(0,10);
+  }
+
+  function getWorkoutKey(type){
+    const level=document.getElementById(type==='p' ? 'planche-level' : 'fl-level').value;
+    return `${currentDateKey()}|${type}|${level}|${isDeloadMode() ? 'deload' : 'normal'}`;
+  }
+
+  function ensureWorkoutSession(key){
+    if(!workoutSessions[key]){
+      workoutSessions[key]={started:false, completed:{}, finished:false};
+    }
+    return workoutSessions[key];
+  }
+
+  function isDeloadMode(){
+    return !!settings.deloadWeek || (!!settings.smartDeload && cycleState.phase==='deload');
+  }
+
+  function getCurrentWorkoutModeLabel(){
+    if(settings.deloadWeek) return 'Manual deload';
+    if(settings.smartDeload && cycleState.phase==='deload') return 'Smart deload';
+    return 'Normal week';
   }
 
   function getProgram(type, level){
@@ -1037,11 +1176,11 @@
   }
 
   function getSessionProgram(type, level){
-    return settings.deloadWeek ? buildDeloadProgram(type, level) : getProgram(type, level);
+    return isDeloadMode() ? buildDeloadProgram(type, level) : getProgram(type, level);
   }
 
   function renderDeloadBanner(type, label){
-    if(!settings.deloadWeek) return '';
+    if(!isDeloadMode()) return '';
     const focusText=type==='rest' || type==='active'
       ? 'Keep recovery work easy so the reduced-load week can do its job.'
       : `Using ${label} as the base pattern. Cut total work by about 40% and stop every set with gas left.`;
@@ -1054,6 +1193,7 @@
     renderWeekGrid();
     initToday();
     renderToday();
+    renderWorkoutsHub();
     if(openDayModalIndex!==null){
       showDayModal(openDayModalIndex);
     }
@@ -1063,9 +1203,15 @@
   const PILLAR_CLASS={hold:"pill-hold",push:"pill-push",pull:"pill-pull",press:"pill-press"};
   const TAG_CLASS={sloppy:"tag-sloppy",working:"tag-working",solid:"tag-solid",recovery:"tag-recovery"};
 
-  function renderExCards(exs){
-    return exs.map((e,i)=>`
-      <div class="ex-card" style="animation-delay:${i*0.04}s">
+  function renderExCards(exs, options={}){
+    return exs.map((e,i)=>{
+      const completed=!!(options.completed && options.completed[i]);
+      const completeLabel=completed ? 'Completed' : 'Complete workout';
+      const completeClass=completed ? 'warn' : '';
+      const cardClass=completed ? ' completed' : '';
+      const controlMarkup=options.trackComplete ? `<button class="settings-btn ex-complete-btn ${completeClass}" onclick="toggleWorkoutExercise('${options.sessionKey}', ${i})">${completeLabel}</button>` : '';
+      return `
+      <div class="ex-card${cardClass}" style="animation-delay:${i*0.04}s">
         <div class="ex-top">
           <span class="ex-name">${e.n}</span>
           <span class="pillar-pill ${PILLAR_CLASS[e.p]}">${e.p}</span>
@@ -1075,7 +1221,9 @@
           <div class="meta-item"><span class="meta-text">${e.r}</span></div>
         </div>
         <div class="ex-cue">${e.c}</div>
-      </div>`).join('');
+        ${controlMarkup}
+      </div>`;
+    }).join('');
   }
 
   function renderSkillHeader(d,color){
@@ -1100,6 +1248,83 @@
       `<div class="focus-box p${d.deload?' deload':''}" style="margin-bottom:12px;"><div class="focus-title p${d.deload?' deload':''}">Standard to advance</div><div class="focus-text">${d.std}</div></div>`+
       renderExCards(d.exs);
     renderToday();
+  }
+
+  function getActiveWorkoutSession(type){
+    if(type!=='p' && type!=='fl') return null;
+    const key=getWorkoutKey(type);
+    const session=ensureWorkoutSession(key);
+    const total=type==='p'
+      ? getSessionProgram('p', document.getElementById('planche-level').value).exs.length
+      : getSessionProgram('fl', document.getElementById('fl-level').value).exs.length;
+    return {key, session, total};
+  }
+
+  function countCompletedItems(completed){
+    return Object.values(completed || {}).filter(Boolean).length;
+  }
+
+  function toggleSession(){
+    if(todaySkill!=='p' && todaySkill!=='fl') return;
+    const active=getActiveWorkoutSession(todaySkill);
+    if(!active) return;
+    active.session.started=true;
+    saveWorkoutSessions();
+    renderToday();
+    showToast('Session started');
+    haptic('soft');
+  }
+
+  function resetWorkoutSession(key){
+    if(!key || !workoutSessions[key]) return;
+    delete workoutSessions[key];
+    saveWorkoutSessions();
+    renderToday();
+    showToast('Session reset');
+    haptic('warn');
+  }
+
+  function toggleWorkoutExercise(key, idx){
+    if(!key) return;
+    const session=ensureWorkoutSession(key);
+    session.started=true;
+    session.completed[idx]=!session.completed[idx];
+    session.finished=false;
+    saveWorkoutSessions();
+    renderToday();
+    renderWorkoutsHub();
+    haptic(session.completed[idx] ? 'success' : 'tap');
+  }
+
+  function renderTodaySessionCard(){
+    const card=document.getElementById('today-session-card');
+    if(!card) return;
+    const title=document.getElementById('today-session-title');
+    const desc=document.getElementById('today-session-desc');
+    const btn=document.getElementById('today-session-start');
+    const visible=todaySkill==='p' || todaySkill==='fl';
+    card.style.display=visible ? 'block' : 'none';
+    if(!visible) return;
+    const active=getActiveWorkoutSession(todaySkill);
+    const completed=countCompletedItems(active.session.completed);
+    title.textContent=isDeloadMode() ? 'Deload session' : 'Session control';
+    desc.textContent=active.session.started
+      ? `${completed}/${active.total} workouts complete. Tap the cards below to mark progress.`
+      : 'Tap Start to begin checking off sets and workouts.';
+    btn.textContent=active.session.started ? 'Running' : 'Start';
+    btn.classList.toggle('warn', active.session.started);
+  }
+
+  function renderWorkoutsHub(){
+    const summary=document.getElementById('workout-cycle-summary');
+    if(!summary) return;
+    const phaseLabel=isDeloadMode() ? 'Deload week' : 'Normal week';
+    let progress='Smart deload is off';
+    if(settings.smartDeload){
+      const currentStreak=cycleState.phase==='deload' ? 0 : cycleState.normalStreak;
+      progress=`${currentStreak}/${settings.normalWeeksBeforeDeload || 3} normal weeks completed`;
+    }
+    summary.textContent=`${phaseLabel} · ${progress}`;
   }
 
   function renderFLTrack(){
@@ -1161,19 +1386,25 @@
 
   function renderToday(){
     if(todaySkill==='rest' || todaySkill==='active'){
+      const sessionCard=document.getElementById('today-session-card');
+      if(sessionCard) sessionCard.style.display='none';
       document.getElementById('today-content').innerHTML=renderRestActive(todaySkill);
       return;
     }
     const d=todaySkill==='p'?getSessionProgram('p', document.getElementById('planche-level').value):getSessionProgram('fl', document.getElementById('fl-level').value);
+    const active=getActiveWorkoutSession(todaySkill);
     const color=todaySkill==='p'?'var(--accent-p)':'var(--accent-fl)';
     const cls=todaySkill==='p'?'p':'fl';
-    const advice=settings.deloadWeek
+    const advice=isDeloadMode()
       ?"<strong>Deload focus:</strong> leave 2-3 reps in reserve, keep holds crisp, and finish feeling fresh."
       :todaySkill==='p'
       ?"<strong>Today's focus:</strong> Quality over hold time. Start band-assisted. Stop every rep the moment protraction breaks. Film one set — watch it back before you leave."
       :"<strong>Today's focus:</strong> One-leg holds first, build each side to 8s before going bilateral. Rows after. Keep scap depressed and retracted throughout.";
     const sets=countSets(d.exs);
     const mins=d.mins || (todaySkill==='p'?50:45);
+    const sessionControls=active.session.started
+      ? {trackComplete:true, sessionKey:active.key, completed:active.session.completed}
+      : {trackComplete:false};
 
     document.getElementById('today-content').innerHTML=`
       ${renderDeloadBanner(todaySkill, d.label)}
@@ -1186,7 +1417,8 @@
         <div class="sum-card"><div class="sum-num">~${mins}</div><div class="sum-label">Minutes</div></div>
         <div class="sum-card"><div class="sum-num" style="font-size:18px;padding-top:4px">72h</div><div class="sum-label">Next session</div></div>
       </div>
-      ${renderExCards(d.exs)}`;
+      ${renderExCards(d.exs, sessionControls)}`;
+    renderTodaySessionCard();
   }
 
   function initToday(){
@@ -1196,11 +1428,11 @@
     const sub=document.getElementById('header-sub');
 
     if(d.type==='p'){
-      chip.className='today-chip '+(settings.deloadWeek?'chip-deload':'chip-planche');chip.textContent=settings.deloadWeek?'Deload Planche Day':'Planche Day';
+      chip.className='today-chip '+(isDeloadMode()?'chip-deload':'chip-planche');chip.textContent=isDeloadMode()?'Deload Planche Day':'Planche Day';
       sub.textContent=getSessionProgram('p', document.getElementById('planche-level').value).label+' · '+d.day+' Session';
       todaySkill='p';
     } else if(d.type==='fl'){
-      chip.className='today-chip '+(settings.deloadWeek?'chip-deload':'chip-fl');chip.textContent=settings.deloadWeek?'Deload FL Day':'FL Day';
+      chip.className='today-chip '+(isDeloadMode()?'chip-deload':'chip-fl');chip.textContent=isDeloadMode()?'Deload FL Day':'FL Day';
       sub.textContent=getSessionProgram('fl', document.getElementById('fl-level').value).label+' · '+d.day+' Session';
       todaySkill='fl';
     } else {
@@ -1237,12 +1469,91 @@
     grid.innerHTML=data.map((d,i)=>`
       <div class="day-card ${i===todayIdx?'today':d.type==='fl'?'fl-day':d.type==='active'?'active-day':d.type==='rest'?'rest-day':''}" data-week-index="${i}" onclick="showDayModal(${i})" style="cursor:pointer;">
         <div class="day-name">${d.day}</div>
-        <div class="day-dot ${settings.deloadWeek && (d.type==='p' || d.type==='fl') ? 'deload' : d.type==='p'?'p':d.type==='fl'?'fl':d.type==='active'?'active':'rest'}"></div>
-        <div class="day-skill-text">${d.skill}${settings.deloadWeek && (d.type==='p' || d.type==='fl') ? ' · Deload' : ''}</div>
+        <div class="day-dot ${isDeloadMode() && (d.type==='p' || d.type==='fl') ? 'deload' : d.type==='p'?'p':d.type==='fl'?'fl':d.type==='active'?'active':'rest'}"></div>
+        <div class="day-skill-text">${d.skill}${isDeloadMode() && (d.type==='p' || d.type==='fl') ? ' · Deload' : ''}</div>
       </div>`).join('');
 
     renderWeekDetail(todayIdx);
     wireWeekReorder();
+    renderCycleStatus();
+  }
+
+  function renderCycleStatus(){
+    const host=document.getElementById('cycle-status');
+    const hub=document.getElementById('workout-cycle-summary');
+    const normalWeeks=Number(settings.normalWeeksBeforeDeload || 3);
+    const statusText=isDeloadMode()
+      ? `Deload week active. ${settings.smartDeload ? `Smart cycle will return to normal after this week is marked complete.` : 'Manual deload is on.'}`
+      : settings.smartDeload
+        ? `${cycleState.normalStreak}/${normalWeeks} normal weeks completed. Next week will be deload when the target is reached.`
+        : 'Smart deload is off. Manual deload still works from Settings.';
+    if(host){
+      host.textContent=`Current mode: ${getCurrentWorkoutModeLabel()} · ${statusText}`;
+    }
+    if(hub){
+      hub.textContent=`${getCurrentWorkoutModeLabel()} · ${cycleState.normalStreak}/${normalWeeks} normal weeks completed`;
+    }
+    const normalWeeksSelect=document.getElementById('setting-normal-weeks');
+    if(normalWeeksSelect) normalWeeksSelect.value=String(normalWeeks);
+  }
+
+  function updateCycleSetting(){
+    const select=document.getElementById('setting-normal-weeks');
+    if(!select) return;
+    settings.normalWeeksBeforeDeload=parseInt(select.value,10) || 3;
+    saveSettings();
+    renderCycleStatus();
+    renderWorkoutsHub();
+    haptic('soft');
+  }
+
+  function markWeekComplete(){
+    const normalWeeks=Number(settings.normalWeeksBeforeDeload || 3);
+    cycleState.totalWeeks+=1;
+    if(settings.smartDeload){
+      if(cycleState.phase==='deload'){
+        cycleState.phase='normal';
+        cycleState.normalStreak=0;
+        showToast('Deload week completed. Back to normal training.');
+      } else {
+        cycleState.normalStreak+=1;
+        if(cycleState.normalStreak>=normalWeeks){
+          cycleState.phase='deload';
+          cycleState.normalStreak=0;
+          showToast('Deload week unlocked.');
+        } else {
+          showToast(`Week completed. ${cycleState.normalStreak}/${normalWeeks} normal weeks logged.`);
+        }
+      }
+    } else {
+      showToast('Week completed. Smart deload is off.');
+    }
+    saveCycleState();
+    renderCycleStatus();
+    refreshTrainingViews();
+    haptic('success');
+  }
+
+  function resetWeekCycle(){
+    cycleState={phase:'normal', normalStreak:0, totalWeeks:0};
+    saveCycleState();
+    renderCycleStatus();
+    refreshTrainingViews();
+    showToast('Week cycle reset');
+    haptic('warn');
+  }
+
+  function renderWorkoutsHub(){
+    const summary=document.getElementById('workout-cycle-summary');
+    const banner=document.getElementById('workout-hub-banner');
+    if(summary){
+      summary.textContent=`${getCurrentWorkoutModeLabel()} · ${cycleState.normalStreak}/${Number(settings.normalWeeksBeforeDeload || 3)} normal weeks completed`;
+    }
+    if(banner){
+      banner.querySelector('.deload-text').textContent=isDeloadMode()
+        ? 'Deload mode is active. Open Planche or Front Lever to review the lighter workload.'
+        : 'Use the hub to jump into either workout and keep the cycle tracker in view.';
+    }
   }
 
   function weekPayload(d){
@@ -1801,15 +2112,22 @@
   }
 
   // ── NAV ──────────────────────────────────────────
-  const VIEWS=['today','planche','fl','week','timer','settings'];
+  const VIEWS=['today','workouts','planche','fl','week','timer','settings'];
   function showView(name){
     VIEWS.forEach(v=>{
       document.getElementById('view-'+v).classList.toggle('active',v===name);
       const nav=document.getElementById('nav-'+v);
       if(nav) nav.classList.toggle('active',v===name);
     });
+    const navButtons=['today','workouts','week','timer'];
+    const activeNav=(name==='planche' || name==='fl') ? 'workouts' : name;
+    navButtons.forEach(v=>{
+      const nav=document.getElementById('nav-'+v);
+      if(nav) nav.classList.toggle('active', v===activeNav);
+    });
     document.getElementById('scroll-area').scrollTop=0;
     if(name==='week') renderWeekGrid();
+    if(name==='workouts' || name==='planche' || name==='fl') renderWorkoutsHub();
   }
 
   // ── SETTINGS ───────────────────────────────────────
@@ -1819,6 +2137,8 @@
     swipeNav:true,
     miniTimer:true,
     deloadWeek:false,
+    smartDeload:true,
+    normalWeeksBeforeDeload:3,
     keepAwake:true,
     keepAwakeRest:false,
     toastDuration:1200,
@@ -1846,6 +2166,10 @@
     document.getElementById('setting-swipe').classList.toggle('on', !!settings.swipeNav);
     document.getElementById('setting-mini-timer').classList.toggle('on', !!settings.miniTimer);
     document.getElementById('setting-deload-week').classList.toggle('on', !!settings.deloadWeek);
+    const smartDeloadToggle=document.getElementById('setting-smart-deload');
+    if(smartDeloadToggle) smartDeloadToggle.classList.toggle('on', !!settings.smartDeload);
+    const normalWeeksSelect=document.getElementById('setting-normal-weeks');
+    if(normalWeeksSelect) normalWeeksSelect.value=String(settings.normalWeeksBeforeDeload || 3);
     document.getElementById('setting-keep-awake').classList.toggle('on', !!settings.keepAwake);
     document.getElementById('setting-keep-awake-rest').classList.toggle('on', !!settings.keepAwakeRest);
     document.getElementById('setting-timer-help').classList.toggle('on', !!settings.showTimerHelp);
@@ -1853,13 +2177,15 @@
     document.getElementById('mini-timer').classList.toggle('active', !!settings.miniTimer);
     document.getElementById('timer-help').style.display=settings.showTimerHelp ? 'block' : 'none';
     updateWakeLock();
+    renderCycleStatus();
+    renderWorkoutsHub();
   }
 
   function toggleSetting(key){
     settings[key]=!settings[key];
     saveSettings();
     applySettings();
-    if(key==='deloadWeek') refreshTrainingViews();
+    if(key==='deloadWeek' || key==='smartDeload') refreshTrainingViews();
     haptic('soft');
   }
 
@@ -2155,6 +2481,8 @@
     localStorage.removeItem('training_program_overrides');
     localStorage.removeItem('training_saved_programs');
     localStorage.removeItem('training_week');
+    localStorage.removeItem('training_workout_sessions');
+    localStorage.removeItem('training_cycle');
     try{
       if('caches' in window){
         const keys=await caches.keys();
@@ -2195,11 +2523,15 @@
   loadProgramOverrides();
   loadSavedPrograms();
   loadWeekData();
+  loadWorkoutSessions();
+  loadCycleState();
   loadSettings();
   applySettings();
   renderSavedPrograms();
   renderRestTimerDisplay();
   renderRestTimerButtons();
+  renderWorkoutsHub();
+  renderCycleStatus();
 
   // ── SERVICE WORKER ──────────────────────────────────
   if('serviceWorker' in navigator){
