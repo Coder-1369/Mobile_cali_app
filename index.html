@@ -99,6 +99,7 @@
   .today-chip{font-family:var(--ff-mono);font-size:10px;padding:4px 10px;border-radius:20px;font-weight:500;}
   .chip-planche{background:var(--accent-p-dim);color:var(--accent-p);border:1px solid var(--accent-p)40;}
   .chip-fl{background:var(--accent-fl-dim);color:var(--accent-fl);border:1px solid var(--accent-fl)40;}
+  .chip-deload{background:var(--amber-dim);color:var(--amber);border:1px solid var(--amber)40;}
   .chip-rest{background:#2a2a3220;color:var(--muted);border:1px solid var(--border);}
   .header-sub{font-size:12px;color:var(--muted);margin-top:4px;font-family:var(--ff-mono);}
 
@@ -143,6 +144,7 @@
   .tag-sloppy{background:#f5a62318;color:var(--amber);border:1px solid var(--amber)40;}
   .tag-working{background:#3b9eff18;color:var(--accent-fl);border:1px solid var(--accent-fl)40;}
   .tag-solid{background:#2dbd7f18;color:var(--green);border:1px solid var(--green)40;}
+  .tag-recovery{background:var(--amber-dim);color:var(--amber);border:1px solid var(--amber)40;}
   .skill-std{font-family:var(--ff-mono);font-size:11px;color:var(--muted);line-height:1.5;}
   .skill-std span{color:var(--text);}
   .skill-progress{margin-top:14px;}
@@ -174,11 +176,13 @@
   .focus-box.p{border-left-color:var(--accent-p);background:var(--accent-p-dim);}
   .focus-box.fl{border-left-color:var(--accent-fl);background:var(--accent-fl-dim);}
   .focus-box.neutral{border-left-color:var(--muted);background:var(--surface);}
+  .focus-box.deload{border-left-color:var(--amber);background:var(--amber-dim);}
   .focus-box.active{border-left-color:var(--amber);background:var(--amber-dim);}
   .focus-title{font-family:var(--ff-mono);font-size:10px;text-transform:uppercase;letter-spacing:1px;margin-bottom:5px;}
   .focus-title.p{color:var(--accent-p);}
   .focus-title.fl{color:var(--accent-fl);}
   .focus-title.neutral{color:var(--muted);}
+  .focus-title.deload{color:var(--amber);}
   .focus-title.active{color:var(--amber);}
   .focus-text{color:var(--muted);}
   .focus-text strong{color:var(--text);font-weight:500;}
@@ -231,6 +235,7 @@
   .day-dot{width:6px;height:6px;border-radius:50%;margin:5px auto 3px;}
   .day-dot.p{background:var(--accent-p);}
   .day-dot.fl{background:var(--accent-fl);}
+  .day-dot.deload{background:var(--amber);}
   .day-dot.rest{background:var(--border2);}
   .day-dot.active{background:var(--amber);}
 
@@ -624,6 +629,13 @@
             </div>
             <div class="toggle" id="setting-mini-timer" onclick="toggleSetting('miniTimer')"></div>
           </div>
+          <div class="settings-row">
+            <div>
+              <div class="settings-title">Deload week</div>
+              <div class="settings-desc">Show reduced-load workouts across Today, Planche, FL, and Week.</div>
+            </div>
+            <div class="toggle" id="setting-deload-week" onclick="toggleSetting('deloadWeek')"></div>
+          </div>
         </div>
 
         <div class="section-label">Timer</div>
@@ -998,9 +1010,58 @@
     };
   }
 
+  function scaleNumericText(text, factor){
+    return String(text)
+      .replace(/\d+(?:\.\d+)?/g, match=>String(Math.max(1, Math.round(parseFloat(match) * factor))))
+      .replace(/\b1 sets\b/g, '1 set')
+      .replace(/\b1 reps\b/g, '1 rep')
+      .replace(/\b1 secs\b/g, '1 sec')
+      .replace(/\b1 seconds\b/g, '1 second');
+  }
+
+  function buildDeloadProgram(type, level){
+    const base=getProgram(type, level);
+    return {
+      ...base,
+      label:`Deload · ${base.label}`,
+      std:'Reduced-volume week · keep 2-3 reps in reserve',
+      tag:'recovery',
+      deload:true,
+      mins:type==='p' ? 32 : 28,
+      exs:base.exs.map(e=>({
+        ...e,
+        s:scaleNumericText(e.s, 0.6),
+        r:scaleNumericText(e.r, 0.7)
+      }))
+    };
+  }
+
+  function getSessionProgram(type, level){
+    return settings.deloadWeek ? buildDeloadProgram(type, level) : getProgram(type, level);
+  }
+
+  function renderDeloadBanner(type, label){
+    if(!settings.deloadWeek) return '';
+    const focusText=type==='rest' || type==='active'
+      ? 'Keep recovery work easy so the reduced-load week can do its job.'
+      : `Using ${label} as the base pattern. Cut total work by about 40% and stop every set with gas left.`;
+    return `<div class="deload-card"><div class="deload-title">Deload week active</div><div class="deload-text">${focusText}</div></div>`;
+  }
+
+  function refreshTrainingViews(){
+    renderPlancheTrack();
+    renderFLTrack();
+    renderWeekGrid();
+    initToday();
+    renderToday();
+    if(openDayModalIndex!==null){
+      showDayModal(openDayModalIndex);
+    }
+  }
+
   // ── RENDER HELPERS ──────────────────────────────────
   const PILLAR_CLASS={hold:"pill-hold",push:"pill-push",pull:"pill-pull",press:"pill-press"};
-  const TAG_CLASS={sloppy:"tag-sloppy",working:"tag-working",solid:"tag-solid"};
+  const TAG_CLASS={sloppy:"tag-sloppy",working:"tag-working",solid:"tag-solid",recovery:"tag-recovery"};
 
   function renderExCards(exs){
     return exs.map((e,i)=>`
@@ -1032,20 +1093,22 @@
 
   function renderPlancheTrack(){
     const v=document.getElementById('planche-level').value;
-    const d=getProgram('p', v);
+    const d=getSessionProgram('p', v);
     document.getElementById('planche-skill-header').innerHTML=renderSkillHeader(d,'var(--accent-p)');
     document.getElementById('planche-exercises').innerHTML=
-      `<div class="focus-box p" style="margin-bottom:12px;"><div class="focus-title p">Standard to advance</div><div class="focus-text">${d.std}</div></div>`+
+      renderDeloadBanner('p', getProgram('p', v).label)+
+      `<div class="focus-box p${d.deload?' deload':''}" style="margin-bottom:12px;"><div class="focus-title p${d.deload?' deload':''}">Standard to advance</div><div class="focus-text">${d.std}</div></div>`+
       renderExCards(d.exs);
     renderToday();
   }
 
   function renderFLTrack(){
     const v=document.getElementById('fl-level').value;
-    const d=getProgram('fl', v);
+    const d=getSessionProgram('fl', v);
     document.getElementById('fl-skill-header').innerHTML=renderSkillHeader(d,'var(--accent-fl)');
     document.getElementById('fl-exercises').innerHTML=
-      `<div class="focus-box fl" style="margin-bottom:12px;"><div class="focus-title fl">Standard to advance</div><div class="focus-text">${d.std}</div></div>`+
+      renderDeloadBanner('fl', getProgram('fl', v).label)+
+      `<div class="focus-box fl${d.deload?' deload':''}" style="margin-bottom:12px;"><div class="focus-title fl${d.deload?' deload':''}">Standard to advance</div><div class="focus-text">${d.std}</div></div>`+
       renderExCards(d.exs);
     renderToday();
   }
@@ -1085,6 +1148,7 @@
     const p=d.restPlan;
     const cls=type==='active'?'active':'neutral';
     return `
+      ${renderDeloadBanner(type, d.detail)}
       <div class="focus-box ${cls}" style="margin-bottom:12px;">
         <div class="focus-title ${cls}">${p.chip} · ${d.detail}</div>
         <div class="focus-text"><strong>${p.title}</strong></div>
@@ -1100,18 +1164,21 @@
       document.getElementById('today-content').innerHTML=renderRestActive(todaySkill);
       return;
     }
-    const d=todaySkill==='p'?getProgram('p', document.getElementById('planche-level').value):getProgram('fl', document.getElementById('fl-level').value);
+    const d=todaySkill==='p'?getSessionProgram('p', document.getElementById('planche-level').value):getSessionProgram('fl', document.getElementById('fl-level').value);
     const color=todaySkill==='p'?'var(--accent-p)':'var(--accent-fl)';
     const cls=todaySkill==='p'?'p':'fl';
-    const advice=todaySkill==='p'
+    const advice=settings.deloadWeek
+      ?"<strong>Deload focus:</strong> leave 2-3 reps in reserve, keep holds crisp, and finish feeling fresh."
+      :todaySkill==='p'
       ?"<strong>Today's focus:</strong> Quality over hold time. Start band-assisted. Stop every rep the moment protraction breaks. Film one set — watch it back before you leave."
       :"<strong>Today's focus:</strong> One-leg holds first, build each side to 8s before going bilateral. Rows after. Keep scap depressed and retracted throughout.";
     const sets=countSets(d.exs);
-    const mins=todaySkill==='p'?50:45;
+    const mins=d.mins || (todaySkill==='p'?50:45);
 
     document.getElementById('today-content').innerHTML=`
-      <div class="focus-box ${cls}">
-        <div class="focus-title ${cls}">${d.label}</div>
+      ${renderDeloadBanner(todaySkill, d.label)}
+      <div class="focus-box ${cls}${d.deload?' deload':''}">
+        <div class="focus-title ${cls}${d.deload?' deload':''}">${d.label}</div>
         <div class="focus-text">${advice}</div>
       </div>
       <div class="summary-row">
@@ -1129,12 +1196,12 @@
     const sub=document.getElementById('header-sub');
 
     if(d.type==='p'){
-      chip.className='today-chip chip-planche';chip.textContent='Planche Day';
-      sub.textContent=getProgram('p', document.getElementById('planche-level').value).label+' · '+d.day+' Session';
+      chip.className='today-chip '+(settings.deloadWeek?'chip-deload':'chip-planche');chip.textContent=settings.deloadWeek?'Deload Planche Day':'Planche Day';
+      sub.textContent=getSessionProgram('p', document.getElementById('planche-level').value).label+' · '+d.day+' Session';
       todaySkill='p';
     } else if(d.type==='fl'){
-      chip.className='today-chip chip-fl';chip.textContent='FL Day';
-      sub.textContent=getProgram('fl', document.getElementById('fl-level').value).label+' · '+d.day+' Session';
+      chip.className='today-chip '+(settings.deloadWeek?'chip-deload':'chip-fl');chip.textContent=settings.deloadWeek?'Deload FL Day':'FL Day';
+      sub.textContent=getSessionProgram('fl', document.getElementById('fl-level').value).label+' · '+d.day+' Session';
       todaySkill='fl';
     } else {
       chip.className='today-chip chip-rest';chip.textContent=d.restPlan?d.restPlan.chip:'Rest';
@@ -1155,6 +1222,7 @@
   let weekReorderActive=false;
   // activeDrag tracks the in-progress pointer drag
   let activeDrag=null;
+  let openDayModalIndex=null;
 
   function getWeekViewData(){
     if(!weekReorderDraft) return weekData;
@@ -1169,8 +1237,8 @@
     grid.innerHTML=data.map((d,i)=>`
       <div class="day-card ${i===todayIdx?'today':d.type==='fl'?'fl-day':d.type==='active'?'active-day':d.type==='rest'?'rest-day':''}" data-week-index="${i}" onclick="showDayModal(${i})" style="cursor:pointer;">
         <div class="day-name">${d.day}</div>
-        <div class="day-dot ${d.type==='p'?'p':d.type==='fl'?'fl':d.type==='active'?'active':'rest'}"></div>
-        <div class="day-skill-text">${d.skill}</div>
+        <div class="day-dot ${settings.deloadWeek && (d.type==='p' || d.type==='fl') ? 'deload' : d.type==='p'?'p':d.type==='fl'?'fl':d.type==='active'?'active':'rest'}"></div>
+        <div class="day-skill-text">${d.skill}${settings.deloadWeek && (d.type==='p' || d.type==='fl') ? ' · Deload' : ''}</div>
       </div>`).join('');
 
     renderWeekDetail(todayIdx);
@@ -1347,6 +1415,7 @@
 
   function showDayModal(idx){
     if(weekReorderActive) return; // block taps during reorder
+    openDayModalIndex=idx;
     const d=weekData[idx];
     const todayIdx=new Date().getDay();
     const isTodayLabel=idx===todayIdx?' · Today':'';
@@ -1358,12 +1427,13 @@
   function closeDayModal(){
     document.getElementById('modal-overlay').classList.remove('open');
     document.getElementById('day-modal').classList.remove('open');
+    openDayModalIndex=null;
   }
   function renderDayModalContent(d,idx){
     const editBtn=`<div style="display:flex;justify-content:flex-end;margin-bottom:8px;"><button class="icon-btn" onclick="openWeekEditor(${idx})">Edit day</button></div>`;
     if((d.type==='rest' || d.type==='active') && d.restPlan){
       const p=d.restPlan;
-      return `${editBtn}<div class="focus-box neutral" style="margin-bottom:12px;">
+      return `${editBtn}${renderDeloadBanner(d.type, d.detail)}<div class="focus-box neutral" style="margin-bottom:12px;">
         <div class="focus-title neutral">${p.chip} · ${d.detail}</div>
         <div class="focus-text"><strong>${p.title}</strong></div>
       </div>
@@ -1373,15 +1443,16 @@
       </div>`;
     }
     if(d.type==='rest' || d.type==='active'){
-      return `${editBtn}<div class="focus-box neutral"><div class="focus-title neutral">Rest</div><div class="focus-text">No rest plan configured.</div></div>`;
+      return `${editBtn}${renderDeloadBanner(d.type, d.detail)}<div class="focus-box neutral"><div class="focus-title neutral">Rest</div><div class="focus-text">No rest plan configured.</div></div>`;
     }
     const isP=d.type==='p';
-    const skillData=isP?getProgram('p', document.getElementById('planche-level').value):getProgram('fl', document.getElementById('fl-level').value);
+    const skillData=isP?getSessionProgram('p', document.getElementById('planche-level').value):getSessionProgram('fl', document.getElementById('fl-level').value);
     const cls=isP?'p':'fl';
     const sets=countSets(skillData.exs);
-    return `${editBtn}<div class="focus-box ${cls}" style="margin-bottom:12px;">
-      <div class="focus-title ${cls}">${isP?'Planche Day':'Front Lever Day'} · ${d.detail}</div>
-      <div class="focus-text"><strong>${skillData.label}</strong> — ${sets} sets · ~${isP?50:45} min</div>
+    const minutes=skillData.mins || (isP?50:45);
+    return `${editBtn}${renderDeloadBanner(d.type, skillData.label)}<div class="focus-box ${cls}${skillData.deload?' deload':''}" style="margin-bottom:12px;">
+      <div class="focus-title ${cls}${skillData.deload?' deload':''}">${skillData.label} · ${d.detail}</div>
+      <div class="focus-text"><strong>${skillData.label}</strong> — ${sets} sets · ~${minutes} min</div>
     </div>
     ${renderExCards(skillData.exs)}`;
   }
@@ -1747,6 +1818,7 @@
     reduceMotion:false,
     swipeNav:true,
     miniTimer:true,
+    deloadWeek:false,
     keepAwake:true,
     keepAwakeRest:false,
     toastDuration:1200,
@@ -1773,6 +1845,7 @@
     document.getElementById('setting-reduce-motion').classList.toggle('on', !!settings.reduceMotion);
     document.getElementById('setting-swipe').classList.toggle('on', !!settings.swipeNav);
     document.getElementById('setting-mini-timer').classList.toggle('on', !!settings.miniTimer);
+    document.getElementById('setting-deload-week').classList.toggle('on', !!settings.deloadWeek);
     document.getElementById('setting-keep-awake').classList.toggle('on', !!settings.keepAwake);
     document.getElementById('setting-keep-awake-rest').classList.toggle('on', !!settings.keepAwakeRest);
     document.getElementById('setting-timer-help').classList.toggle('on', !!settings.showTimerHelp);
@@ -1786,6 +1859,7 @@
     settings[key]=!settings[key];
     saveSettings();
     applySettings();
+    if(key==='deloadWeek') refreshTrainingViews();
     haptic('soft');
   }
 
