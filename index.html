@@ -357,6 +357,7 @@
   .export-action{width:100%;margin-top:10px;}
   .export-note{font-size:12px;color:var(--muted);line-height:1.5;margin-top:10px;}
   .session-progress-wrap{margin-top:12px;display:flex;flex-direction:column;gap:6px;}
+  .session-hint{font-family:var(--ff-mono);font-size:11px;color:var(--muted);margin-top:8px;line-height:1.5;padding-top:8px;border-top:1px dashed var(--border);}
   .session-progress-bar{height:8px;background:var(--surface2);border:1px solid var(--border);border-radius:999px;overflow:hidden;box-shadow:inset 0 1px 0 #ffffff10;}
   .session-progress-fill{height:100%;width:0%;border-radius:inherit;transition:width .35s ease;background:linear-gradient(90deg,var(--accent-p),var(--accent-fl));box-shadow:0 0 14px #00000022;}
   .session-progress-meta{display:flex;align-items:center;justify-content:space-between;gap:10px;font-family:var(--ff-mono);font-size:10px;color:var(--muted);}
@@ -366,24 +367,38 @@
   .session-kpi{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:10px 8px;text-align:center;}
   .session-kpi-value{font-family:var(--ff-head);font-size:18px;font-weight:800;line-height:1.1;}
   .session-kpi-label{font-family:var(--ff-mono);font-size:9px;color:var(--muted);margin-top:2px;letter-spacing:.5px;text-transform:uppercase;}
-  .workout-float-timer{position:fixed;right:12px;bottom:110px;width:min(260px,calc(100vw - 24px));background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:12px;z-index:160;box-shadow:0 18px 42px #00000055;display:none;backdrop-filter:blur(12px);}
+  .workout-float-timer{position:fixed;right:12px;bottom:110px;width:min(260px,calc(100vw - 24px));background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:12px;z-index:160;box-shadow:0 18px 42px #00000055;display:none;backdrop-filter:blur(12px);transition:width .22s ease,padding .22s ease,border-radius .22s ease;}
   .workout-float-timer.active{display:block;animation:timerFloatIn .24s ease both;}
-  .workout-float-header{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
+  .workout-float-timer.pulse{animation:timerFloatPulse .5s ease;}
+  .workout-float-header{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+  .workout-float-heading{flex:1;min-width:0;}
   .workout-float-label{font-family:var(--ff-mono);font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;}
-  .workout-float-title{font-family:var(--ff-head);font-size:14px;font-weight:800;line-height:1.2;margin-top:2px;}
+  .workout-float-title{font-family:var(--ff-head);font-size:14px;font-weight:800;line-height:1.2;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .workout-float-pill-time{display:none;font-family:var(--ff-head);font-size:15px;font-weight:800;letter-spacing:.3px;white-space:nowrap;}
+  .workout-float-body{overflow:hidden;max-height:400px;transition:max-height .22s ease,opacity .18s ease;opacity:1;}
   .workout-float-display{font-family:var(--ff-head);font-size:26px;font-weight:800;margin-top:8px;letter-spacing:.4px;}
   .workout-float-sub{font-family:var(--ff-mono);font-size:10px;color:var(--muted);margin-top:4px;line-height:1.4;}
   .workout-float-progress{height:8px;background:var(--surface2);border:1px solid var(--border);border-radius:999px;overflow:hidden;margin-top:10px;}
   .workout-float-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--accent-p),var(--accent-fl));transition:width .35s ease;}
   .workout-float-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;}
   .workout-float-actions .timer-btn{flex:1 1 70px;padding:8px 10px;font-size:10px;}
+  .workout-float-timer.collapsed{width:auto;padding:8px 10px;border-radius:999px;}
+  .workout-float-timer.collapsed .workout-float-body{max-height:0;opacity:0;margin:0;pointer-events:none;}
+  .workout-float-timer.collapsed .workout-float-pill-time{display:block;}
+  .workout-float-timer.collapsed .workout-float-header{gap:8px;}
+  .workout-float-timer.collapsed #workout-float-toggle{transform:rotate(180deg);}
+  @keyframes timerFloatPulse{0%{box-shadow:0 18px 42px #00000055,0 0 0 0 #ff5c3555;}70%{box-shadow:0 18px 42px #00000055,0 0 0 14px #ff5c3500;}100%{box-shadow:0 18px 42px #00000055,0 0 0 0 #ff5c3500;}}
   @keyframes timerFloatIn{from{opacity:0;transform:translateY(10px) scale(.98);}to{opacity:1;transform:translateY(0) scale(1);}}
   .workout-summary-modal{position:fixed;left:50%;top:50%;transform:translate(-50%,-45%) scale(.98);width:min(420px,calc(100vw - 22px));max-height:84vh;overflow-y:auto;background:var(--bg);border:1px solid var(--border);border-radius:22px;z-index:401;opacity:0;pointer-events:none;transition:opacity .24s ease, transform .24s ease;box-shadow:0 30px 90px #00000070;padding:0 14px 14px;}
   .workout-summary-modal.open{opacity:1;pointer-events:all;transform:translate(-50%,-50%) scale(1);}
   .workout-summary-hero{display:flex;gap:12px;align-items:stretch;margin-top:4px;}
-  .workout-summary-figure{flex:0 0 132px;border-radius:18px;background:linear-gradient(160deg,var(--surface),var(--surface2));border:1px solid var(--border);padding:10px;position:relative;overflow:hidden;perspective:900px;}
-  .workout-summary-figure::before{content:'';position:absolute;inset:-40% -24% auto auto;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,var(--accent-p-dim),transparent 68%);opacity:.8;transform:translateZ(0);}
-  .workout-summary-figure svg{width:100%;height:auto;transform:rotateY(-18deg) rotateX(8deg);filter:drop-shadow(0 10px 18px #00000030);}
+  .workout-summary-figure{flex:0 0 168px;border-radius:18px;background:linear-gradient(160deg,var(--surface),var(--surface2));border:1px solid var(--border);padding:10px 8px 8px;position:relative;overflow:hidden;display:flex;gap:6px;}
+  .muscle-diagram-pane{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;}
+  .muscle-diagram-fig{width:100%;}
+  .muscle-diagram-fig svg{width:100%;height:auto;display:block;}
+  .muscle-diagram-tag{font-family:var(--ff-mono);font-size:9px;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);}
+  .muscle-region{transition:fill .25s ease;}
+  .muscle-region.hi{filter:drop-shadow(0 0 4px #ff5c3560) drop-shadow(0 0 4px #3b9eff40);}
   .workout-summary-meta{flex:1;display:flex;flex-direction:column;gap:8px;}
   .workout-summary-stat{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:10px;}
   .workout-summary-stat-label{font-family:var(--ff-mono);font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;}
@@ -547,7 +562,7 @@
             </div>
             <div class="settings-control">
               <button class="settings-btn" id="today-session-start" onclick="toggleSession()">Start workout</button>
-              <button class="settings-btn warn" id="today-session-finish" onclick="finishWorkout()">Finish workout</button>
+              <button class="settings-btn" id="today-session-jump" onclick="jumpToWorkoutTimer()" style="display:none;">Open timer</button>
             </div>
           </div>
           <div class="session-progress-wrap">
@@ -557,6 +572,7 @@
               <span id="today-session-progress-xp">0 XP</span>
             </div>
           </div>
+          <div class="session-hint" id="today-session-hint" style="display:none;">Use the floating workout timer to pause, resume, or finish this session.</div>
           <div class="session-kpi-row">
             <div class="session-kpi">
               <div class="session-kpi-value" id="today-session-time">00:00</div>
@@ -1017,19 +1033,22 @@
     <!-- WORKOUT TIMER DOCK -->
     <div class="workout-float-timer" id="workout-float-timer">
       <div class="workout-float-header">
-        <div>
+        <div class="workout-float-heading">
           <div class="workout-float-label">Workout timer</div>
           <div class="workout-float-title" id="workout-float-title">Session clock</div>
         </div>
-        <button class="icon-btn header-btn" onclick="toggleWorkoutTimerDock()" aria-label="Collapse timer">−</button>
+        <div class="workout-float-pill-time" id="workout-float-pill-time">00:00</div>
+        <button class="icon-btn header-btn" id="workout-float-toggle" onclick="event.stopPropagation();toggleWorkoutTimerDock()" aria-label="Minimize timer">−</button>
       </div>
-      <div class="workout-float-display" id="workout-float-display">00:00</div>
-      <div class="workout-float-sub" id="workout-float-sub">Start a workout to begin tracking time.</div>
-      <div class="workout-float-progress"><div class="workout-float-fill" id="workout-float-fill"></div></div>
-      <div class="workout-float-actions">
-        <button class="timer-btn start" id="workout-float-start" onclick="toggleWorkoutClock()">Start</button>
-        <button class="timer-btn reset-btn" onclick="resetWorkoutClock()">Reset</button>
-        <button class="timer-btn" onclick="finishWorkout()">Finish</button>
+      <div class="workout-float-body" id="workout-float-body">
+        <div class="workout-float-display" id="workout-float-display">00:00</div>
+        <div class="workout-float-sub" id="workout-float-sub">Start a workout to begin tracking time.</div>
+        <div class="workout-float-progress"><div class="workout-float-fill" id="workout-float-fill"></div></div>
+        <div class="workout-float-actions">
+          <button class="timer-btn start" id="workout-float-start" onclick="event.stopPropagation();toggleWorkoutClock()">Pause</button>
+          <button class="timer-btn reset-btn" onclick="event.stopPropagation();resetWorkoutClock()">Reset</button>
+          <button class="timer-btn warn" onclick="event.stopPropagation();finishWorkout()">Finish</button>
+        </div>
       </div>
     </div>
 
@@ -1412,6 +1431,107 @@
     return WORKOUT_MUSCLES[type] ? [...WORKOUT_MUSCLES[type]] : [];
   }
 
+  // Maps a plain-language muscle name (as stored in WORKOUT_MUSCLES) to one or
+  // more region ids drawn in the 2D front/back body diagram below.
+  const MUSCLE_REGION_MAP={
+    'shoulders':['f-delt-l','f-delt-r','b-deltr-l','b-deltr-r'],
+    'chest':['f-chest'],
+    'triceps':['b-tri-l','b-tri-r'],
+    'serratus anterior':['f-oblique-l','f-oblique-r'],
+    'core':['f-abs'],
+    'forearms':['f-fore-l','f-fore-r','b-fore-l','b-fore-r'],
+    'wrists':['f-fore-l','f-fore-r','b-fore-l','b-fore-r'],
+    'lats':['b-lat-l','b-lat-r'],
+    'rear delts':['b-deltr-l','b-deltr-r'],
+    'scapular depressors':['b-lat-l','b-lat-r','b-trap'],
+    'biceps':['f-bi-l','f-bi-r'],
+    'glutes':['b-glutes'],
+    'hip flexors':['f-quad-l','f-quad-r'],
+    'balance':[],
+    'mobility':[],
+    'recovery':[]
+  };
+
+  function getHighlightedRegions(muscles){
+    const set=new Set();
+    (muscles || []).forEach(m=>{
+      const key=String(m || '').toLowerCase().trim();
+      (MUSCLE_REGION_MAP[key] || []).forEach(r=>set.add(r));
+    });
+    return set;
+  }
+
+  // Builds a flat, 2D front + back anatomical body diagram and highlights the
+  // regions that match the workout's target muscles.
+  function buildMuscleDiagramMarkup(muscles, accent){
+    const hi=getHighlightedRegions(muscles);
+    const base='var(--surface2)';
+    const stroke='var(--border)';
+    const cls=id=>hi.has(id) ? 'muscle-region hi' : 'muscle-region';
+    const fillFor=id=>hi.has(id) ? accent : base;
+    const region=(id, shape)=>shape.replace('__FILL__', fillFor(id)).replace(/__CLASS__/g, cls(id));
+
+    const front=`
+      <svg viewBox="0 0 100 210" xmlns="http://www.w3.org/2000/svg" aria-label="Front muscle diagram">
+        <ellipse cx="50" cy="14" rx="10" ry="12" fill="${base}" stroke="${stroke}" stroke-width="1"/>
+        <rect x="45" y="24" width="10" height="8" rx="3" fill="${base}" stroke="${stroke}" stroke-width="1"/>
+        ${region('f-delt-l', `<ellipse cx="26" cy="42" rx="9" ry="11" fill="__FILL__" stroke="${stroke}" stroke-width="1" class="__CLASS__"/>`)}
+        ${region('f-delt-r', `<ellipse cx="74" cy="42" rx="9" ry="11" fill="__FILL__" stroke="${stroke}" stroke-width="1" class="__CLASS__"/>`)}
+        ${region('f-chest', `<rect x="34" y="35" width="32" height="23" rx="9" fill="__FILL__" stroke="${stroke}" stroke-width="1" class="__CLASS__"/>`)}
+        ${region('f-bi-l', `<rect x="15" y="48" width="10" height="25" rx="5" fill="__FILL__" stroke="${stroke}" stroke-width="1" class="__CLASS__"/>`)}
+        ${region('f-bi-r', `<rect x="75" y="48" width="10" height="25" rx="5" fill="__FILL__" stroke="${stroke}" stroke-width="1" class="__CLASS__"/>`)}
+        ${region('f-fore-l', `<rect x="13" y="75" width="9" height="25" rx="4" fill="__FILL__" stroke="${stroke}" stroke-width="1" class="__CLASS__"/>`)}
+        ${region('f-fore-r', `<rect x="78" y="75" width="9" height="25" rx="4" fill="__FILL__" stroke="${stroke}" stroke-width="1" class="__CLASS__"/>`)}
+        <ellipse cx="17" cy="103" rx="5" ry="6" fill="${base}" stroke="${stroke}" stroke-width="1"/>
+        <ellipse cx="83" cy="103" rx="5" ry="6" fill="${base}" stroke="${stroke}" stroke-width="1"/>
+        ${region('f-oblique-l', `<rect x="31" y="60" width="6" height="24" rx="3" fill="__FILL__" stroke="${stroke}" stroke-width="1" class="__CLASS__"/>`)}
+        ${region('f-oblique-r', `<rect x="63" y="60" width="6" height="24" rx="3" fill="__FILL__" stroke="${stroke}" stroke-width="1" class="__CLASS__"/>`)}
+        ${region('f-abs', `<rect x="38" y="59" width="24" height="27" rx="6" fill="__FILL__" stroke="${stroke}" stroke-width="1" class="__CLASS__"/>`)}
+        <path d="M32 88 L68 88 L64 100 L36 100 Z" fill="${base}" stroke="${stroke}" stroke-width="1"/>
+        ${region('f-quad-l', `<rect x="33" y="101" width="14" height="44" rx="6" fill="__FILL__" stroke="${stroke}" stroke-width="1" class="__CLASS__"/>`)}
+        ${region('f-quad-r', `<rect x="53" y="101" width="14" height="44" rx="6" fill="__FILL__" stroke="${stroke}" stroke-width="1" class="__CLASS__"/>`)}
+        <rect x="34" y="147" width="12" height="42" rx="5" fill="${base}" stroke="${stroke}" stroke-width="1"/>
+        <rect x="54" y="147" width="12" height="42" rx="5" fill="${base}" stroke="${stroke}" stroke-width="1"/>
+        <ellipse cx="40" cy="196" rx="7" ry="5" fill="${base}" stroke="${stroke}" stroke-width="1"/>
+        <ellipse cx="60" cy="196" rx="7" ry="5" fill="${base}" stroke="${stroke}" stroke-width="1"/>
+      </svg>`;
+
+    const back=`
+      <svg viewBox="0 0 100 210" xmlns="http://www.w3.org/2000/svg" aria-label="Back muscle diagram">
+        <ellipse cx="50" cy="14" rx="10" ry="12" fill="${base}" stroke="${stroke}" stroke-width="1"/>
+        <rect x="45" y="24" width="10" height="8" rx="3" fill="${base}" stroke="${stroke}" stroke-width="1"/>
+        ${region('b-trap', `<path d="M40 32 L60 32 L68 44 L50 40 L32 44 Z" fill="__FILL__" stroke="${stroke}" stroke-width="1" class="__CLASS__"/>`)}
+        ${region('b-deltr-l', `<ellipse cx="26" cy="42" rx="9" ry="11" fill="__FILL__" stroke="${stroke}" stroke-width="1" class="__CLASS__"/>`)}
+        ${region('b-deltr-r', `<ellipse cx="74" cy="42" rx="9" ry="11" fill="__FILL__" stroke="${stroke}" stroke-width="1" class="__CLASS__"/>`)}
+        ${region('b-lat-l', `<path d="M32 38 C24 46 22 66 28 84 L40 80 C36 66 36 50 40 38 Z" fill="__FILL__" stroke="${stroke}" stroke-width="1" class="__CLASS__"/>`)}
+        ${region('b-lat-r', `<path d="M68 38 C76 46 78 66 72 84 L60 80 C64 66 64 50 60 38 Z" fill="__FILL__" stroke="${stroke}" stroke-width="1" class="__CLASS__"/>`)}
+        ${region('b-tri-l', `<rect x="15" y="48" width="10" height="25" rx="5" fill="__FILL__" stroke="${stroke}" stroke-width="1" class="__CLASS__"/>`)}
+        ${region('b-tri-r', `<rect x="75" y="48" width="10" height="25" rx="5" fill="__FILL__" stroke="${stroke}" stroke-width="1" class="__CLASS__"/>`)}
+        ${region('b-fore-l', `<rect x="13" y="75" width="9" height="25" rx="4" fill="__FILL__" stroke="${stroke}" stroke-width="1" class="__CLASS__"/>`)}
+        ${region('b-fore-r', `<rect x="78" y="75" width="9" height="25" rx="4" fill="__FILL__" stroke="${stroke}" stroke-width="1" class="__CLASS__"/>`)}
+        <ellipse cx="17" cy="103" rx="5" ry="6" fill="${base}" stroke="${stroke}" stroke-width="1"/>
+        <ellipse cx="83" cy="103" rx="5" ry="6" fill="${base}" stroke="${stroke}" stroke-width="1"/>
+        <rect x="40" y="84" width="20" height="10" rx="4" fill="${base}" stroke="${stroke}" stroke-width="1"/>
+        ${region('b-glutes', `<path d="M32 94 L68 94 L65 110 C58 114 42 114 35 110 Z" fill="__FILL__" stroke="${stroke}" stroke-width="1" class="__CLASS__"/>`)}
+        <rect x="33" y="109" width="14" height="38" rx="6" fill="${base}" stroke="${stroke}" stroke-width="1"/>
+        <rect x="53" y="109" width="14" height="38" rx="6" fill="${base}" stroke="${stroke}" stroke-width="1"/>
+        <ellipse cx="40" cy="168" rx="8" ry="16" fill="${base}" stroke="${stroke}" stroke-width="1"/>
+        <ellipse cx="60" cy="168" rx="8" ry="16" fill="${base}" stroke="${stroke}" stroke-width="1"/>
+        <ellipse cx="40" cy="196" rx="7" ry="5" fill="${base}" stroke="${stroke}" stroke-width="1"/>
+        <ellipse cx="60" cy="196" rx="7" ry="5" fill="${base}" stroke="${stroke}" stroke-width="1"/>
+      </svg>`;
+
+    return `
+      <div class="muscle-diagram-pane">
+        <div class="muscle-diagram-fig">${front}</div>
+        <div class="muscle-diagram-tag">Front</div>
+      </div>
+      <div class="muscle-diagram-pane">
+        <div class="muscle-diagram-fig">${back}</div>
+        <div class="muscle-diagram-tag">Back</div>
+      </div>`;
+  }
+
   function stripHtmlTags(text){
     return String(text || '').replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
   }
@@ -1754,8 +1874,10 @@
     return {key, session, total, progress:getWorkoutSessionProgress(type, key), elapsed:getWorkoutSessionElapsed(key)};
   }
 
-  function getWorkoutCaloriesForSession(type, minutes, deload=false){
-    return estimateWorkoutCalories({minutes, type, deload});
+  function getWorkoutCaloriesForSession(type, elapsedSeconds, deload=false){
+    const seconds=Number(elapsedSeconds || 0);
+    if(!Number.isFinite(seconds) || seconds <= 0) return 0;
+    return estimateWorkoutCalories({minutes:seconds / 60, type, deload});
   }
 
   function getWorkoutModeLabelForSession(session){
@@ -2023,15 +2145,14 @@
     session.mode=deload ? 'deload' : 'normal';
     saveWorkoutSessions();
     const progress=getWorkoutSessionProgress(type, activeWorkoutSessionKey);
-    const minutes=Math.max(1, Math.round(workoutTimerElapsed / 60) || getSessionProgram(type, level).mins || 45);
-    const calories=getWorkoutCaloriesForSession(type, minutes, deload);
+    const calories=getWorkoutCaloriesForSession(type, workoutTimerElapsed, deload);
     const muscles=getWorkoutMuscles(type);
     const summary={
       type,
       level,
       label:getWorkoutSessionLabel(type),
       progress,
-      minutes,
+      minutes:workoutTimerElapsed / 60,
       calories,
       muscles,
       elapsed:workoutTimerElapsed,
@@ -2082,7 +2203,8 @@
     const title=document.getElementById('today-session-title');
     const desc=document.getElementById('today-session-desc');
     const btn=document.getElementById('today-session-start');
-    const finishBtn=document.getElementById('today-session-finish');
+    const jumpBtn=document.getElementById('today-session-jump');
+    const hint=document.getElementById('today-session-hint');
     const progressFill=document.getElementById('today-session-progress-fill');
     const progressLabel=document.getElementById('today-session-progress-label');
     const xpLabel=document.getElementById('today-session-progress-xp');
@@ -2095,8 +2217,9 @@
     const active=getActiveWorkoutSession(todaySkill);
     const completed=active.progress.completed;
     const percent=active.progress.percent;
-    const timerMinutes=Math.max(1, Math.round(active.elapsed / 60) || 1);
-    const calories=getWorkoutCaloriesForSession(todaySkill, timerMinutes, active.session.mode==='deload' || isDeloadMode());
+    const calories=active.session.started && !active.session.finished
+      ? getWorkoutCaloriesForSession(todaySkill, active.elapsed, active.session.mode==='deload' || isDeloadMode())
+      : 0;
     title.textContent=isDeloadMode() ? 'Deload session' : 'Session control';
     desc.textContent=active.session.finished
       ? `${completed}/${active.total} workouts complete. Review the summary or restart from the floating timer.`
@@ -2105,7 +2228,9 @@
       : 'Tap Start to begin checking off sets and workouts.';
     btn.textContent=active.session.finished ? 'Restart workout' : (active.session.started ? (workoutTimerRunning ? 'Workout running' : 'Resume workout') : 'Start workout');
     btn.disabled=!!(active.session.started && workoutTimerRunning && !active.session.finished);
-    finishBtn.style.display=active.session.started && !active.session.finished ? 'inline-flex' : 'none';
+    const sessionInFlight=active.session.started && !active.session.finished;
+    if(jumpBtn) jumpBtn.style.display=sessionInFlight ? 'inline-flex' : 'none';
+    if(hint) hint.style.display=sessionInFlight ? 'block' : 'none';
     if(progressFill) progressFill.style.width=`${percent}%`;
     if(progressLabel) progressLabel.textContent=`${completed} of ${active.total} complete`;
     if(xpLabel) xpLabel.textContent=`${Math.max(0, completed * 20)} XP`;
@@ -2120,8 +2245,7 @@
     if(!active || !active.session.started || active.session.finished) return '';
     const level=type==='p' ? document.getElementById('planche-level').value : document.getElementById('fl-level').value;
     const program=getSessionProgram(type, level);
-    const minutes=Math.max(1, Math.round(active.elapsed / 60) || program.mins || 45);
-    const calories=getWorkoutCaloriesForSession(type, minutes, active.session.mode==='deload');
+    const calories=getWorkoutCaloriesForSession(type, active.elapsed, active.session.mode==='deload');
     const running=workoutTimerRunning && activeWorkoutSessionKey===active.key;
     const progress=active.progress;
     return `
@@ -2132,8 +2256,7 @@
             <div class="settings-desc">${progress.completed}/${progress.total} complete · ${active.session.mode==='deload' ? 'Deload mode' : 'Normal mode'} · ${calories} cal</div>
           </div>
           <div class="settings-control">
-            <button class="settings-btn ${running ? 'warn' : ''}" onclick="toggleWorkoutClock()">${running ? 'Pause timer' : 'Resume timer'}</button>
-            <button class="settings-btn warn" onclick="finishWorkout()">Finish workout</button>
+            <button class="settings-btn ${running ? 'warn' : ''}" onclick="jumpToWorkoutTimer()">${running ? 'Pause / finish' : 'Resume timer'}</button>
           </div>
         </div>
         <div class="session-progress-wrap">
@@ -2160,29 +2283,51 @@
     })() : null);
     const hasActive=!!(active && active.session && active.session.started && !active.session.finished);
     dock.classList.toggle('active', hasActive);
+    dock.classList.toggle('collapsed', hasActive && workoutTimerDockCollapsed);
     if(!hasActive) return;
     const type=active.session.type || active.type || (active.key.includes('|p|') ? 'p' : 'fl');
     const program=getSessionProgram(type, type==='p' ? document.getElementById('planche-level').value : document.getElementById('fl-level').value);
     const level=active.session.level || (type==='p' ? document.getElementById('planche-level').value : document.getElementById('fl-level').value);
     const title=document.getElementById('workout-float-title');
     const display=document.getElementById('workout-float-display');
+    const pillTime=document.getElementById('workout-float-pill-time');
     const sub=document.getElementById('workout-float-sub');
     const fill=document.getElementById('workout-float-fill');
     const start=document.getElementById('workout-float-start');
+    const toggleBtn=document.getElementById('workout-float-toggle');
     if(title) title.textContent=`${type==='p' ? 'Planche' : 'Front Lever'} · ${program.label}`;
     if(display) display.textContent=formatClock(active.elapsed);
+    if(pillTime) pillTime.textContent=formatClock(active.elapsed);
     if(sub){
-      const cals=getWorkoutCaloriesForSession(type, Math.max(1, Math.round(active.elapsed / 60) || program.mins || 45), active.session.mode==='deload');
+      const cals=getWorkoutCaloriesForSession(type, active.elapsed, active.session.mode==='deload');
       sub.textContent=`${active.progress.completed}/${active.progress.total} complete · ${active.session.mode==='deload' ? 'Deload' : 'Normal'} · ${level} · ${cals} cal`;
     }
     if(fill) fill.style.width=`${active.progress.percent}%`;
     if(start) start.textContent=workoutTimerRunning ? 'Pause' : 'Resume';
+    if(toggleBtn){
+      toggleBtn.textContent=workoutTimerDockCollapsed ? '+' : '−';
+      toggleBtn.setAttribute('aria-label', workoutTimerDockCollapsed ? 'Expand timer' : 'Minimize timer');
+    }
   }
 
   function toggleWorkoutTimerDock(){
     workoutTimerDockCollapsed=!workoutTimerDockCollapsed;
-    showToast('Workout timer stays pinned while the session is active');
     renderWorkoutTimerDock();
+  }
+
+  function jumpToWorkoutTimer(){
+    if(!activeWorkoutSessionKey){
+      if(todaySkill==='p' || todaySkill==='fl') startWorkoutSession(todaySkill);
+    }
+    workoutTimerDockCollapsed=false;
+    renderWorkoutTimerDock();
+    const dock=document.getElementById('workout-float-timer');
+    if(dock){
+      dock.classList.remove('pulse');
+      void dock.offsetWidth;
+      dock.classList.add('pulse');
+      if(typeof dock.scrollIntoView==='function') dock.scrollIntoView({block:'nearest', behavior:'smooth'});
+    }
   }
 
   function ensureWorkoutTimerTicker(){
@@ -2203,23 +2348,11 @@
       const muscles=summary.muscles || [];
       const primary=muscles.slice(0,3);
       const secondary=muscles.slice(3);
+      const accent=summary.type==='p' ? '#ff5c35' : '#3b9eff';
       content.innerHTML=`
         <div class="workout-summary-hero">
           <div class="workout-summary-figure" aria-label="Muscle diagram">
-            <svg viewBox="0 0 120 180" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <defs>
-                <linearGradient id="bodyGrad" x1="30" y1="20" x2="90" y2="170" gradientUnits="userSpaceOnUse">
-                  <stop stop-color="${summary.type==='p' ? '#ff5c35' : '#3b9eff'}" stop-opacity="0.92"/>
-                  <stop offset="1" stop-color="#f0f0f5" stop-opacity="0.12"/>
-                </linearGradient>
-              </defs>
-              <ellipse cx="60" cy="28" rx="14" ry="16" fill="url(#bodyGrad)" opacity="0.95"/>
-              <path d="M44 42C36 53 32 68 33 84C34 100 40 117 44 131C49 145 48 160 51 171H69C72 160 71 145 76 131C80 117 86 100 87 84C88 68 84 53 76 42C71 35 65 31 60 31C55 31 49 35 44 42Z" fill="url(#bodyGrad)"/>
-              <path d="M29 63C22 72 19 84 19 96C19 110 23 123 28 132C31 136 37 137 40 134C44 131 44 126 42 122C39 115 38 106 39 97C40 87 44 78 49 72" fill="url(#bodyGrad)" opacity="0.86"/>
-              <path d="M91 63C98 72 101 84 101 96C101 110 97 123 92 132C89 136 83 137 80 134C76 131 76 126 78 122C81 115 82 106 81 97C80 87 76 78 71 72" fill="url(#bodyGrad)" opacity="0.86"/>
-              <ellipse cx="60" cy="58" rx="18" ry="12" fill="#ffffff" opacity="0.11"/>
-              <ellipse cx="60" cy="95" rx="15" ry="20" fill="#ffffff" opacity="0.06"/>
-            </svg>
+            ${buildMuscleDiagramMarkup(muscles, accent)}
           </div>
           <div class="workout-summary-meta">
             <div class="workout-summary-stat">
