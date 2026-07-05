@@ -161,7 +161,13 @@
   .session-progress{font-family:var(--ff-mono);font-size:11px;color:var(--muted);margin-top:2px;}
   .session-actions{display:flex;gap:8px;flex-shrink:0;}
   .ex-card.completed{border-color:var(--green);background:linear-gradient(180deg,var(--green-dim),var(--surface));}
-  .ex-complete-btn{margin-top:10px;width:100%;}
+  .ex-complete-btn{margin-top:0;flex:1;}
+  .ex-control-row{margin-top:10px;display:flex;flex-direction:column;gap:6px;}
+  .ex-control-actions{display:flex;gap:8px;align-items:center;}
+  .ex-set-chip{align-self:flex-start;font-family:var(--ff-mono);font-size:10px;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:999px;padding:3px 9px;}
+  .ex-set-chip.done{color:var(--green);border-color:var(--green);}
+  .ex-reset-btn{flex:0 0 auto;width:36px;height:36px;border-radius:10px;background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-size:15px;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+  .ex-reset-btn:active{border-color:var(--border2);}
   .cycle-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:10px;}
   .cycle-select{width:100%;}
   .cycle-status{font-family:var(--ff-mono);font-size:11px;color:var(--muted);line-height:1.5;margin-top:10px;}
@@ -343,6 +349,7 @@
   .toggle.toggle-deload.on{background:var(--amber-dim);border-color:var(--amber);}
   .toggle.toggle-deload.on::after{background:var(--amber);}
   .settings-btn{font-family:var(--ff-mono);font-size:11px;padding:8px 12px;border-radius:8px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);cursor:pointer;}
+  .settings-btn:disabled{opacity:.55;cursor:default;}
   .settings-btn.warn{border-color:var(--amber);color:var(--amber);}
   .settings-btn.danger{border-color:var(--red);color:var(--red);}
   .settings-action-row .settings-control{align-items:center;flex-wrap:wrap;justify-content:flex-end;}
@@ -367,26 +374,31 @@
   .session-kpi{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:10px 8px;text-align:center;}
   .session-kpi-value{font-family:var(--ff-head);font-size:18px;font-weight:800;line-height:1.1;}
   .session-kpi-label{font-family:var(--ff-mono);font-size:9px;color:var(--muted);margin-top:2px;letter-spacing:.5px;text-transform:uppercase;}
-  .workout-float-timer{position:fixed;right:12px;bottom:110px;width:min(260px,calc(100vw - 24px));background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:12px;z-index:160;box-shadow:0 18px 42px #00000055;display:none;backdrop-filter:blur(12px);transition:width .22s ease,padding .22s ease,border-radius .22s ease;}
+  .workout-float-timer{position:fixed;right:14px;bottom:120px;width:min(260px,calc(100vw - 28px));background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:12px;z-index:160;box-shadow:0 18px 42px #00000055;display:none;backdrop-filter:blur(12px);transform-origin:bottom right;transition:width .3s cubic-bezier(.32,1.4,.5,1),height .3s cubic-bezier(.32,1.4,.5,1),padding .28s ease,border-radius .28s ease,box-shadow .3s ease;}
   .workout-float-timer.active{display:block;animation:timerFloatIn .24s ease both;}
   .workout-float-timer.pulse{animation:timerFloatPulse .5s ease;}
+  .workout-bubble{display:none;width:60px;height:60px;align-items:center;justify-content:center;position:relative;}
+  .workout-panel{display:block;}
   .workout-float-header{display:flex;align-items:center;justify-content:space-between;gap:10px;}
   .workout-float-heading{flex:1;min-width:0;}
   .workout-float-label{font-family:var(--ff-mono);font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;}
   .workout-float-title{font-family:var(--ff-head);font-size:14px;font-weight:800;line-height:1.2;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .workout-float-pill-time{display:none;font-family:var(--ff-head);font-size:15px;font-weight:800;letter-spacing:.3px;white-space:nowrap;}
-  .workout-float-body{overflow:hidden;max-height:400px;transition:max-height .22s ease,opacity .18s ease;opacity:1;}
+  .workout-float-body{overflow:hidden;}
   .workout-float-display{font-family:var(--ff-head);font-size:26px;font-weight:800;margin-top:8px;letter-spacing:.4px;}
   .workout-float-sub{font-family:var(--ff-mono);font-size:10px;color:var(--muted);margin-top:4px;line-height:1.4;}
   .workout-float-progress{height:8px;background:var(--surface2);border:1px solid var(--border);border-radius:999px;overflow:hidden;margin-top:10px;}
   .workout-float-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--accent-p),var(--accent-fl));transition:width .35s ease;}
   .workout-float-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;}
   .workout-float-actions .timer-btn{flex:1 1 70px;padding:8px 10px;font-size:10px;}
-  .workout-float-timer.collapsed{width:auto;padding:8px 10px;border-radius:999px;}
-  .workout-float-timer.collapsed .workout-float-body{max-height:0;opacity:0;margin:0;pointer-events:none;}
-  .workout-float-timer.collapsed .workout-float-pill-time{display:block;}
-  .workout-float-timer.collapsed .workout-float-header{gap:8px;}
-  .workout-float-timer.collapsed #workout-float-toggle{transform:rotate(180deg);}
+  /* Collapsed = a small round "bubble", like a floating chat-head widget */
+  .workout-float-timer.collapsed{width:60px;height:60px;padding:0;border-radius:50%;overflow:visible;cursor:pointer;box-shadow:0 10px 26px #00000060;animation:bubbleGlow 2.4s ease-in-out infinite;}
+  .workout-float-timer.collapsed .workout-panel{display:none;}
+  .workout-float-timer.collapsed .workout-bubble{display:flex;}
+  .bubble-ring{position:absolute;inset:0;width:60px;height:60px;transform:rotate(-90deg);}
+  .bubble-ring-bg{fill:none;stroke:var(--border);stroke-width:3;}
+  .bubble-ring-fill{fill:none;stroke:url(#bubbleRingGrad);stroke-width:3;stroke-linecap:round;stroke-dasharray:163.36;stroke-dashoffset:163.36;transition:stroke-dashoffset .35s ease;}
+  .bubble-time{position:relative;z-index:1;font-family:var(--ff-mono);font-size:11px;font-weight:600;color:var(--text);letter-spacing:.2px;}
+  @keyframes bubbleGlow{0%,100%{box-shadow:0 10px 26px #00000060,0 0 0 0 #ff5c3555;}50%{box-shadow:0 10px 26px #00000060,0 0 0 8px #ff5c3500;}}
   @keyframes timerFloatPulse{0%{box-shadow:0 18px 42px #00000055,0 0 0 0 #ff5c3555;}70%{box-shadow:0 18px 42px #00000055,0 0 0 14px #ff5c3500;}100%{box-shadow:0 18px 42px #00000055,0 0 0 0 #ff5c3500;}}
   @keyframes timerFloatIn{from{opacity:0;transform:translateY(10px) scale(.98);}to{opacity:1;transform:translateY(0) scale(1);}}
   .workout-summary-modal{position:fixed;left:50%;top:50%;transform:translate(-50%,-45%) scale(.98);width:min(420px,calc(100vw - 22px));max-height:84vh;overflow-y:auto;background:var(--bg);border:1px solid var(--border);border-radius:22px;z-index:401;opacity:0;pointer-events:none;transition:opacity .24s ease, transform .24s ease;box-shadow:0 30px 90px #00000070;padding:0 14px 14px;}
@@ -1031,23 +1043,37 @@
     <div class="toast" id="toast"></div>
 
     <!-- WORKOUT TIMER DOCK -->
-    <div class="workout-float-timer" id="workout-float-timer">
-      <div class="workout-float-header">
-        <div class="workout-float-heading">
-          <div class="workout-float-label">Workout timer</div>
-          <div class="workout-float-title" id="workout-float-title">Session clock</div>
-        </div>
-        <div class="workout-float-pill-time" id="workout-float-pill-time">00:00</div>
-        <button class="icon-btn header-btn" id="workout-float-toggle" onclick="event.stopPropagation();toggleWorkoutTimerDock()" aria-label="Minimize timer">−</button>
+    <div class="workout-float-timer" id="workout-float-timer" onclick="expandWorkoutTimerDockIfCollapsed(event)">
+      <div class="workout-bubble" id="workout-bubble">
+        <svg class="bubble-ring" viewBox="0 0 60 60" aria-hidden="true">
+          <defs>
+            <linearGradient id="bubbleRingGrad" x1="0" y1="0" x2="60" y2="60">
+              <stop offset="0%" stop-color="var(--accent-p)"/>
+              <stop offset="100%" stop-color="var(--accent-fl)"/>
+            </linearGradient>
+          </defs>
+          <circle class="bubble-ring-bg" cx="30" cy="30" r="26"/>
+          <circle class="bubble-ring-fill" id="workout-bubble-ring" cx="30" cy="30" r="26"/>
+        </svg>
+        <div class="bubble-time" id="workout-bubble-time">00:00</div>
       </div>
-      <div class="workout-float-body" id="workout-float-body">
-        <div class="workout-float-display" id="workout-float-display">00:00</div>
-        <div class="workout-float-sub" id="workout-float-sub">Start a workout to begin tracking time.</div>
-        <div class="workout-float-progress"><div class="workout-float-fill" id="workout-float-fill"></div></div>
-        <div class="workout-float-actions">
-          <button class="timer-btn start" id="workout-float-start" onclick="event.stopPropagation();toggleWorkoutClock()">Pause</button>
-          <button class="timer-btn reset-btn" onclick="event.stopPropagation();resetWorkoutClock()">Reset</button>
-          <button class="timer-btn warn" onclick="event.stopPropagation();finishWorkout()">Finish</button>
+      <div class="workout-panel" id="workout-panel">
+        <div class="workout-float-header">
+          <div class="workout-float-heading">
+            <div class="workout-float-label">Workout timer</div>
+            <div class="workout-float-title" id="workout-float-title">Session clock</div>
+          </div>
+          <button class="icon-btn header-btn" id="workout-float-toggle" onclick="event.stopPropagation();toggleWorkoutTimerDock()" aria-label="Minimize timer">−</button>
+        </div>
+        <div class="workout-float-body" id="workout-float-body">
+          <div class="workout-float-display" id="workout-float-display">00:00</div>
+          <div class="workout-float-sub" id="workout-float-sub">Start a workout to begin tracking time.</div>
+          <div class="workout-float-progress"><div class="workout-float-fill" id="workout-float-fill"></div></div>
+          <div class="workout-float-actions">
+            <button class="timer-btn start" id="workout-float-start" onclick="event.stopPropagation();toggleWorkoutClock()">Pause</button>
+            <button class="timer-btn reset-btn" onclick="event.stopPropagation();resetWorkoutClock()">Reset</button>
+            <button class="timer-btn warn" onclick="event.stopPropagation();finishWorkout()">Finish</button>
+          </div>
         </div>
       </div>
     </div>
@@ -1831,10 +1857,11 @@
     const session=key ? ensureWorkoutSession(key) : null;
     if(!session) return {completed:0,total:0,percent:0};
     const level=session.level || (type==='p' ? document.getElementById('planche-level').value : document.getElementById('fl-level').value);
-    const total=type==='p'
-      ? getSessionProgram('p', level).exs.length
-      : getSessionProgram('fl', level).exs.length;
-    const completed=countCompletedItems(session.completed);
+    const exs=type==='p'
+      ? getSessionProgram('p', level).exs
+      : getSessionProgram('fl', level).exs;
+    const total=exs.length;
+    const completed=countCompletedItems(session.completed, exs);
     const percent=total ? Math.round((completed/total)*100) : 0;
     return {completed,total,percent};
   }
@@ -1961,11 +1988,30 @@
 
   function renderExCards(exs, options={}){
     return exs.map((e,i)=>{
-      const completed=!!(options.completed && options.completed[i]);
-      const completeLabel=completed ? 'Completed' : 'Complete workout';
-      const completeClass=completed ? 'warn' : '';
-      const cardClass=completed ? ' completed' : '';
-      const controlMarkup=options.trackComplete ? `<button class="settings-btn ex-complete-btn ${completeClass}" onclick="toggleWorkoutExercise('${options.sessionKey}', ${i})">${completeLabel}</button>` : '';
+      const totalSets=parseSetsCount(e.s);
+      const doneRaw=getExerciseSetsDone(options.completed, i);
+      const doneCount=Number.isFinite(doneRaw) ? doneRaw : totalSets;
+      const isDone=doneCount >= totalSets;
+      const cardClass=isDone ? ' completed' : '';
+      let controlMarkup='';
+      if(options.trackComplete){
+        const completeLabel=isDone ? 'Completed' : (totalSets>1 ? `Log set ${Math.min(doneCount+1,totalSets)}/${totalSets}` : 'Complete workout');
+        const completeClass=isDone ? 'warn' : '';
+        const resetBtn=doneCount>0
+          ? `<button class="icon-btn ex-reset-btn" onclick="resetWorkoutExerciseSets('${options.sessionKey}', ${i})" aria-label="Reset sets">↺</button>`
+          : '';
+        const setChip=totalSets>1
+          ? `<span class="ex-set-chip${isDone ? ' done' : ''}">Set ${Math.min(doneCount,totalSets)}/${totalSets}</span>`
+          : '';
+        controlMarkup=`
+          <div class="ex-control-row">
+            ${setChip}
+            <div class="ex-control-actions">
+              <button class="settings-btn ex-complete-btn ${completeClass}" ${isDone ? 'disabled' : ''} onclick="logWorkoutExerciseSet('${options.sessionKey}', ${i})">${completeLabel}</button>
+              ${resetBtn}
+            </div>
+          </div>`;
+      }
       return `
       <div class="ex-card${cardClass}" style="animation-delay:${i*0.04}s">
         <div class="ex-top">
@@ -2008,8 +2054,26 @@
     renderWorkoutTimerDock();
   }
 
-  function countCompletedItems(completed){
-    return Object.values(completed || {}).filter(Boolean).length;
+  function parseSetsCount(label){
+    const m=String(label || '').match(/(\d+)/);
+    return m ? Math.max(1, parseInt(m[1], 10)) : 1;
+  }
+
+  function getExerciseSetsDone(completed, idx){
+    const raw=completed ? completed[idx] : undefined;
+    if(typeof raw==='number') return raw;
+    return raw ? Infinity : 0;
+  }
+
+  function countCompletedItems(completed, exs){
+    if(!completed) return 0;
+    if(!exs) return Object.values(completed).filter(Boolean).length;
+    let n=0;
+    exs.forEach((e, i)=>{
+      const total=parseSetsCount(e.s);
+      if(getExerciseSetsDone(completed, i) >= total) n++;
+    });
+    return n;
   }
 
   function toggleSession(){
@@ -2171,7 +2235,7 @@
     updateWakeLock();
   }
 
-  function toggleWorkoutExercise(key, idx){
+  function logWorkoutExerciseSet(key, idx){
     if(!key) return;
     const session=ensureWorkoutSession(key);
     session.started=true;
@@ -2181,7 +2245,11 @@
     if(!session.level){
       session.level=session.type==='p' ? document.getElementById('planche-level').value : document.getElementById('fl-level').value;
     }
-    session.completed[idx]=!session.completed[idx];
+    const exs=getSessionProgram(session.type, session.level).exs;
+    const totalSets=parseSetsCount(exs[idx] && exs[idx].s);
+    const current=getExerciseSetsDone(session.completed, idx);
+    const next=Math.min(totalSets, (Number.isFinite(current) ? current : 0) + 1);
+    session.completed[idx]=next;
     session.finished=false;
     if(!session.startedAt && !workoutTimerRunning){
       activeWorkoutSessionKey=key;
@@ -2194,7 +2262,20 @@
     renderWorkoutsHub();
     renderWorkoutTimerDock();
     renderTodaySessionCard();
-    haptic(session.completed[idx] ? 'success' : 'tap');
+    haptic(next>=totalSets ? 'success' : 'tap');
+  }
+
+  function resetWorkoutExerciseSets(key, idx){
+    if(!key) return;
+    const session=ensureWorkoutSession(key);
+    session.completed[idx]=0;
+    session.finished=false;
+    saveWorkoutSessions();
+    renderToday();
+    renderWorkoutsHub();
+    renderWorkoutTimerDock();
+    renderTodaySessionCard();
+    haptic('warn');
   }
 
   function renderTodaySessionCard(){
@@ -2290,14 +2371,21 @@
     const level=active.session.level || (type==='p' ? document.getElementById('planche-level').value : document.getElementById('fl-level').value);
     const title=document.getElementById('workout-float-title');
     const display=document.getElementById('workout-float-display');
-    const pillTime=document.getElementById('workout-float-pill-time');
+    const bubbleTime=document.getElementById('workout-bubble-time');
+    const bubbleRing=document.getElementById('workout-bubble-ring');
     const sub=document.getElementById('workout-float-sub');
     const fill=document.getElementById('workout-float-fill');
     const start=document.getElementById('workout-float-start');
     const toggleBtn=document.getElementById('workout-float-toggle');
     if(title) title.textContent=`${type==='p' ? 'Planche' : 'Front Lever'} · ${program.label}`;
     if(display) display.textContent=formatClock(active.elapsed);
-    if(pillTime) pillTime.textContent=formatClock(active.elapsed);
+    if(bubbleTime) bubbleTime.textContent=formatClock(active.elapsed);
+    if(bubbleRing){
+      const circumference=2 * Math.PI * 26;
+      const offset=circumference * (1 - (active.progress.percent || 0) / 100);
+      bubbleRing.style.strokeDasharray=String(circumference);
+      bubbleRing.style.strokeDashoffset=String(offset);
+    }
     if(sub){
       const cals=getWorkoutCaloriesForSession(type, active.elapsed, active.session.mode==='deload');
       sub.textContent=`${active.progress.completed}/${active.progress.total} complete · ${active.session.mode==='deload' ? 'Deload' : 'Normal'} · ${level} · ${cals} cal`;
@@ -2312,6 +2400,14 @@
 
   function toggleWorkoutTimerDock(){
     workoutTimerDockCollapsed=!workoutTimerDockCollapsed;
+    renderWorkoutTimerDock();
+  }
+
+  function expandWorkoutTimerDockIfCollapsed(event){
+    const dock=document.getElementById('workout-float-timer');
+    if(!dock || !dock.classList.contains('collapsed')) return;
+    if(event) event.stopPropagation();
+    workoutTimerDockCollapsed=false;
     renderWorkoutTimerDock();
   }
 
@@ -3553,7 +3649,9 @@
   function swLap(){
     const total=swRunning ? swElapsed + (Date.now() - swStart) : swElapsed;
     if(total===0) return;
-    const prevTotal=swLaps.length ? swLaps[0].total : 0;
+    const prevTotal=swLaps.lengt
+    
+    h ? swLaps[0].total : 0;
     const lap=total - prevTotal;
     const split=swLaps.length ? total - swLaps[swLaps.length-1].total : total;
     swLaps.unshift({lap,split,total});
