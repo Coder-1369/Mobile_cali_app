@@ -348,6 +348,55 @@
   .settings-action-row .settings-control{align-items:center;flex-wrap:wrap;justify-content:flex-end;}
   .settings-action-row .settings-select{min-width:140px;}
 
+  /* ── PROFILE / EXPORT / SUMMARY ── */
+  .profile-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+  .profile-field{display:flex;flex-direction:column;gap:6px;}
+  .profile-input{width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);font-family:var(--ff-mono);font-size:12px;padding:8px 10px;border-radius:8px;}
+  .profile-note{font-size:12px;color:var(--muted);line-height:1.5;margin-top:10px;}
+  .export-row{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;}
+  .export-action{width:100%;margin-top:10px;}
+  .export-note{font-size:12px;color:var(--muted);line-height:1.5;margin-top:10px;}
+  .session-progress-wrap{margin-top:12px;display:flex;flex-direction:column;gap:6px;}
+  .session-progress-bar{height:8px;background:var(--surface2);border:1px solid var(--border);border-radius:999px;overflow:hidden;box-shadow:inset 0 1px 0 #ffffff10;}
+  .session-progress-fill{height:100%;width:0%;border-radius:inherit;transition:width .35s ease;background:linear-gradient(90deg,var(--accent-p),var(--accent-fl));box-shadow:0 0 14px #00000022;}
+  .session-progress-meta{display:flex;align-items:center;justify-content:space-between;gap:10px;font-family:var(--ff-mono);font-size:10px;color:var(--muted);}
+  .session-actions-inline{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
+  .session-actions-inline .settings-btn{flex:1 1 130px;}
+  .session-kpi-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px;}
+  .session-kpi{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:10px 8px;text-align:center;}
+  .session-kpi-value{font-family:var(--ff-head);font-size:18px;font-weight:800;line-height:1.1;}
+  .session-kpi-label{font-family:var(--ff-mono);font-size:9px;color:var(--muted);margin-top:2px;letter-spacing:.5px;text-transform:uppercase;}
+  .workout-float-timer{position:fixed;right:12px;bottom:110px;width:min(260px,calc(100vw - 24px));background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:12px;z-index:160;box-shadow:0 18px 42px #00000055;display:none;backdrop-filter:blur(12px);}
+  .workout-float-timer.active{display:block;animation:timerFloatIn .24s ease both;}
+  .workout-float-header{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
+  .workout-float-label{font-family:var(--ff-mono);font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;}
+  .workout-float-title{font-family:var(--ff-head);font-size:14px;font-weight:800;line-height:1.2;margin-top:2px;}
+  .workout-float-display{font-family:var(--ff-head);font-size:26px;font-weight:800;margin-top:8px;letter-spacing:.4px;}
+  .workout-float-sub{font-family:var(--ff-mono);font-size:10px;color:var(--muted);margin-top:4px;line-height:1.4;}
+  .workout-float-progress{height:8px;background:var(--surface2);border:1px solid var(--border);border-radius:999px;overflow:hidden;margin-top:10px;}
+  .workout-float-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--accent-p),var(--accent-fl));transition:width .35s ease;}
+  .workout-float-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;}
+  .workout-float-actions .timer-btn{flex:1 1 70px;padding:8px 10px;font-size:10px;}
+  @keyframes timerFloatIn{from{opacity:0;transform:translateY(10px) scale(.98);}to{opacity:1;transform:translateY(0) scale(1);}}
+  .workout-summary-modal{position:fixed;left:50%;top:50%;transform:translate(-50%,-45%) scale(.98);width:min(420px,calc(100vw - 22px));max-height:84vh;overflow-y:auto;background:var(--bg);border:1px solid var(--border);border-radius:22px;z-index:401;opacity:0;pointer-events:none;transition:opacity .24s ease, transform .24s ease;box-shadow:0 30px 90px #00000070;padding:0 14px 14px;}
+  .workout-summary-modal.open{opacity:1;pointer-events:all;transform:translate(-50%,-50%) scale(1);}
+  .workout-summary-hero{display:flex;gap:12px;align-items:stretch;margin-top:4px;}
+  .workout-summary-figure{flex:0 0 132px;border-radius:18px;background:linear-gradient(160deg,var(--surface),var(--surface2));border:1px solid var(--border);padding:10px;position:relative;overflow:hidden;perspective:900px;}
+  .workout-summary-figure::before{content:'';position:absolute;inset:-40% -24% auto auto;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,var(--accent-p-dim),transparent 68%);opacity:.8;transform:translateZ(0);}
+  .workout-summary-figure svg{width:100%;height:auto;transform:rotateY(-18deg) rotateX(8deg);filter:drop-shadow(0 10px 18px #00000030);}
+  .workout-summary-meta{flex:1;display:flex;flex-direction:column;gap:8px;}
+  .workout-summary-stat{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:10px;}
+  .workout-summary-stat-label{font-family:var(--ff-mono);font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;}
+  .workout-summary-stat-value{font-family:var(--ff-head);font-size:20px;font-weight:800;margin-top:2px;}
+  .workout-summary-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;}
+  .workout-summary-chip{font-family:var(--ff-mono);font-size:9px;padding:4px 8px;border-radius:20px;background:var(--surface2);border:1px solid var(--border);color:var(--text);}
+  .workout-summary-chip.primary{background:var(--accent-p-dim);border-color:var(--accent-p)40;color:var(--accent-p);}
+  .workout-summary-chip.secondary{background:var(--accent-fl-dim);border-color:var(--accent-fl)40;color:var(--accent-fl);}
+  .workout-summary-list{display:grid;gap:8px;margin-top:12px;}
+  .workout-summary-item{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:10px 12px;}
+  .workout-summary-item-title{font-family:var(--ff-mono);font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;}
+  .workout-summary-item-copy{font-size:13px;color:var(--text);line-height:1.55;margin-top:4px;}
+
   /* ── REDUCE MOTION ── */
   .reduce-motion *{animation:none !important;transition:none !important;}
 
@@ -497,7 +546,29 @@
               <div class="settings-desc" id="today-session-desc">Tap Start to begin checking off sets and workouts.</div>
             </div>
             <div class="settings-control">
-              <button class="settings-btn" id="today-session-start" onclick="toggleSession()">Start</button>
+              <button class="settings-btn" id="today-session-start" onclick="toggleSession()">Start workout</button>
+              <button class="settings-btn warn" id="today-session-finish" onclick="finishWorkout()">Finish workout</button>
+            </div>
+          </div>
+          <div class="session-progress-wrap">
+            <div class="session-progress-bar"><div class="session-progress-fill" id="today-session-progress-fill"></div></div>
+            <div class="session-progress-meta">
+              <span id="today-session-progress-label">0 of 0 complete</span>
+              <span id="today-session-progress-xp">0 XP</span>
+            </div>
+          </div>
+          <div class="session-kpi-row">
+            <div class="session-kpi">
+              <div class="session-kpi-value" id="today-session-time">00:00</div>
+              <div class="session-kpi-label">Workout time</div>
+            </div>
+            <div class="session-kpi">
+              <div class="session-kpi-value" id="today-session-cals">0</div>
+              <div class="session-kpi-label">Calories</div>
+            </div>
+            <div class="session-kpi">
+              <div class="session-kpi-value" id="today-session-mode">Normal</div>
+              <div class="session-kpi-label">Cycle mode</div>
             </div>
           </div>
         </div>
@@ -792,6 +863,68 @@
           </div>
         </div>
 
+        <div class="section-label">Profile</div>
+        <div class="settings-card">
+          <div class="settings-row">
+            <div>
+              <div class="settings-title">Body profile</div>
+              <div class="settings-desc">Store gender, height, and weight on this device for calorie estimates and exports.</div>
+            </div>
+          </div>
+          <div class="profile-grid">
+            <div class="profile-field">
+              <div class="settings-label">Gender</div>
+              <select class="settings-select" id="profile-gender">
+                <option value="unspecified">Unspecified</option>
+                <option value="female">Female</option>
+                <option value="male">Male</option>
+                <option value="nonbinary">Non-binary</option>
+                <option value="prefer-not">Prefer not to say</option>
+              </select>
+            </div>
+            <div class="profile-field">
+              <div class="settings-label">Height (cm)</div>
+              <input class="profile-input" id="profile-height" type="number" inputmode="numeric" min="100" max="250" step="1" placeholder="170" />
+            </div>
+            <div class="profile-field">
+              <div class="settings-label">Weight (kg)</div>
+              <input class="profile-input" id="profile-weight" type="number" inputmode="decimal" min="30" max="250" step="0.1" placeholder="70" />
+            </div>
+          </div>
+          <div class="profile-note">Calorie estimates use the standard MET formula, so weight and duration drive the number most. Gender and height are stored for future personalization and export metadata.</div>
+        </div>
+
+        <div class="section-label">Export</div>
+        <div class="settings-card">
+          <div class="settings-row">
+            <div>
+              <div class="settings-title">Export format</div>
+              <div class="settings-desc">Choose a scope and a format that other fitness apps or GPTs can ingest.</div>
+            </div>
+          </div>
+          <div class="export-row">
+            <div class="profile-field">
+              <div class="settings-label">Scope</div>
+              <select class="settings-select" id="export-scope">
+                <option value="today">Today’s workout plan</option>
+                <option value="week">This week’s plan</option>
+                <option value="deload">Deload week plan</option>
+                <option value="archive">Everything (normal + deload)</option>
+              </select>
+            </div>
+            <div class="profile-field">
+              <div class="settings-label">Format</div>
+              <select class="settings-select" id="export-format">
+                <option value="json">JSON</option>
+                <option value="csv">CSV</option>
+                <option value="md">Markdown</option>
+              </select>
+            </div>
+          </div>
+          <button class="settings-btn warn export-action" onclick="exportWorkoutData()">Export workout data</button>
+          <div class="export-note">JSON is best for GPTs and integrations. CSV is best for spreadsheets and general fitness apps. Markdown is best for easy reading.</div>
+        </div>
+
         <div class="section-label">Storage</div>
         <div class="settings-card">
           <div class="settings-row settings-action-row">
@@ -880,6 +1013,36 @@
     </div>
 
     <div class="toast" id="toast"></div>
+
+    <!-- WORKOUT TIMER DOCK -->
+    <div class="workout-float-timer" id="workout-float-timer">
+      <div class="workout-float-header">
+        <div>
+          <div class="workout-float-label">Workout timer</div>
+          <div class="workout-float-title" id="workout-float-title">Session clock</div>
+        </div>
+        <button class="icon-btn header-btn" onclick="toggleWorkoutTimerDock()" aria-label="Collapse timer">−</button>
+      </div>
+      <div class="workout-float-display" id="workout-float-display">00:00</div>
+      <div class="workout-float-sub" id="workout-float-sub">Start a workout to begin tracking time.</div>
+      <div class="workout-float-progress"><div class="workout-float-fill" id="workout-float-fill"></div></div>
+      <div class="workout-float-actions">
+        <button class="timer-btn start" id="workout-float-start" onclick="toggleWorkoutClock()">Start</button>
+        <button class="timer-btn reset-btn" onclick="resetWorkoutClock()">Reset</button>
+        <button class="timer-btn" onclick="finishWorkout()">Finish</button>
+      </div>
+    </div>
+
+    <!-- WORKOUT SUMMARY POPUP -->
+    <div class="modal-overlay" id="summary-overlay" onclick="closeWorkoutSummary()"></div>
+    <div class="workout-summary-modal" id="summary-modal">
+      <div class="modal-handle"></div>
+      <div class="modal-header-row">
+        <div class="modal-day-title" id="summary-title">Workout summary</div>
+        <button class="modal-close" onclick="closeWorkoutSummary()">×</button>
+      </div>
+      <div id="summary-content"></div>
+    </div>
 
     <!-- BOTTOM NAV -->
     <nav class="bottom-nav" id="bottom-nav">
@@ -1038,7 +1201,29 @@
   let weekData=[];
   let workoutSessions={};
   let cycleState={phase:'normal', normalStreak:0, totalWeeks:0};
+  let profile={gender:'unspecified', heightCm:'', weightKg:''};
+  let exportPrefs={scope:'today', format:'json'};
+  let activeWorkoutSessionKey=null;
+  let workoutTimerElapsed=0;
+  let workoutTimerRunning=false;
+  let workoutTimerStartedAt=null;
+  let workoutTimerDockCollapsed=false;
+  let workoutSummaryCache=null;
   let openWeekContext=null;
+
+  const WORKOUT_MET={
+    p:7.6,
+    fl:7.2,
+    rest:1.8,
+    active:3.2
+  };
+
+  const WORKOUT_MUSCLES={
+    p:['Shoulders','Chest','Triceps','Serratus anterior','Core','Forearms','Wrists'],
+    fl:['Lats','Rear delts','Biceps','Scapular depressors','Core','Glutes','Forearms'],
+    rest:['Mobility','Recovery'],
+    active:['Shoulders','Core','Balance','Hip flexors']
+  };
 
   function deepClone(obj){
     return JSON.parse(JSON.stringify(obj));
@@ -1131,6 +1316,366 @@
     localStorage.setItem('training_cycle', JSON.stringify(cycleState));
   }
 
+  function loadProfile(){
+    try{
+      const raw=localStorage.getItem('training_profile');
+      if(raw) profile={...profile, ...JSON.parse(raw)};
+    }catch(e){profile={gender:'unspecified', heightCm:'', weightKg:''};}
+  }
+
+  function saveProfile(){
+    localStorage.setItem('training_profile', JSON.stringify(profile));
+  }
+
+  function loadExportPrefs(){
+    try{
+      const raw=localStorage.getItem('training_export_prefs');
+      if(raw) exportPrefs={...exportPrefs, ...JSON.parse(raw)};
+    }catch(e){exportPrefs={scope:'today', format:'json'};}
+  }
+
+  function saveExportPrefs(){
+    localStorage.setItem('training_export_prefs', JSON.stringify(exportPrefs));
+  }
+
+  function syncProfileInputs(){
+    const gender=document.getElementById('profile-gender');
+    const height=document.getElementById('profile-height');
+    const weight=document.getElementById('profile-weight');
+    const scope=document.getElementById('export-scope');
+    const format=document.getElementById('export-format');
+    if(gender) gender.value=profile.gender || 'unspecified';
+    if(height) height.value=profile.heightCm ?? '';
+    if(weight) weight.value=profile.weightKg ?? '';
+    if(scope) scope.value=exportPrefs.scope || 'today';
+    if(format) format.value=exportPrefs.format || 'json';
+  }
+
+  function saveProfileFromInputs(){
+    const gender=document.getElementById('profile-gender');
+    const height=document.getElementById('profile-height');
+    const weight=document.getElementById('profile-weight');
+    if(gender) profile.gender=gender.value || 'unspecified';
+    if(height) profile.heightCm=height.value === '' ? '' : Math.max(100, Math.min(250, Number(height.value) || 0));
+    if(weight) profile.weightKg=weight.value === '' ? '' : Math.max(30, Math.min(250, Number(weight.value) || 0));
+    saveProfile();
+    renderTodaySessionCard();
+    renderWorkoutTimerDock();
+    if(todaySkill==='p' || todaySkill==='fl') renderToday();
+  }
+
+  function saveExportPrefsFromInputs(){
+    const scope=document.getElementById('export-scope');
+    const format=document.getElementById('export-format');
+    if(scope) exportPrefs.scope=scope.value;
+    if(format) exportPrefs.format=format.value;
+    saveExportPrefs();
+  }
+
+  function getProfileWeightKg(){
+    const raw=Number(profile.weightKg);
+    return Number.isFinite(raw) && raw>0 ? raw : 70;
+  }
+
+  function getProfileHeightCm(){
+    const raw=Number(profile.heightCm);
+    return Number.isFinite(raw) && raw>0 ? raw : null;
+  }
+
+  function getProfileSummary(){
+    const parts=[];
+    if(profile.gender && profile.gender!=='unspecified') parts.push(profile.gender.replace(/-/g,' '));
+    if(getProfileHeightCm()) parts.push(`${getProfileHeightCm()} cm`);
+    parts.push(`${getProfileWeightKg()} kg`);
+    return parts.join(' · ');
+  }
+
+  function formatClock(seconds){
+    const total=Math.max(0, Math.round(seconds || 0));
+    const minutes=Math.floor(total/60).toString().padStart(2,'0');
+    const secs=(total%60).toString().padStart(2,'0');
+    return `${minutes}:${secs}`;
+  }
+
+  function getWorkoutMet(type, deload=false){
+    const base=WORKOUT_MET[type] || 4.0;
+    return deload ? Math.max(2.6, base-1.2) : base;
+  }
+
+  function estimateWorkoutCalories({minutes, type, deload=false}){
+    const kg=getProfileWeightKg();
+    const met=getWorkoutMet(type, deload);
+    return Math.max(0, Math.round((met * 3.5 * kg / 200) * Math.max(0, minutes || 0)));
+  }
+
+  function getWorkoutMuscles(type){
+    return WORKOUT_MUSCLES[type] ? [...WORKOUT_MUSCLES[type]] : [];
+  }
+
+  function stripHtmlTags(text){
+    return String(text || '').replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
+  }
+
+  function csvEscape(value){
+    const text=String(value ?? '');
+    return /[",\n]/.test(text) ? `"${text.replace(/"/g,'""')}"` : text;
+  }
+
+  function downloadTextFile(fileName, mime, content){
+    const blob=new Blob([content], {type:mime});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url;
+    a.download=fileName;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url), 2500);
+  }
+
+  function getWorkoutSelection(type, level, mode='normal'){
+    const isDeload=mode==='deload';
+    const program=isDeload ? buildDeloadProgram(type, level) : getProgram(type, level);
+    return {
+      type,
+      level,
+      mode,
+      deload: isDeload,
+      label: program.label,
+      standard: program.std,
+      tag: program.tag,
+      minutes: program.mins || (type==='p' ? 50 : 45),
+      exercises: program.exs.map((e, index)=>({
+        index:index+1,
+        name:e.n,
+        pattern:e.p,
+        sets:e.s,
+        repsOrTime:e.r,
+        cues:stripHtmlTags(e.c)
+      })),
+      targetMuscles:getWorkoutMuscles(type)
+    };
+  }
+
+  function getTodayWorkoutSelection(mode='normal'){
+    const todayIdx=new Date().getDay();
+    const d=weekData[todayIdx];
+    if(!d || (d.type!=='p' && d.type!=='fl')){
+      return {
+        kind:d ? d.type : 'rest',
+        day:d ? d.day : 'Today',
+        detail:d ? d.detail : 'Rest day',
+        restPlan:d && d.restPlan ? deepClone(d.restPlan) : null,
+        type:d ? d.type : 'rest',
+        mode,
+        deload:mode==='deload',
+        label:d ? d.skill : 'Rest',
+        minutes:0,
+        exercises:[],
+        targetMuscles:getWorkoutMuscles(d ? d.type : 'rest')
+      };
+    }
+    const type=d.type;
+    const level=type==='p' ? document.getElementById('planche-level').value : document.getElementById('fl-level').value;
+    return {
+      day:d.day,
+      detail:d.detail,
+      ...getWorkoutSelection(type, level, mode)
+    };
+  }
+
+  function getWeekExport(mode='normal'){
+    return weekData.map(d=>{
+      if(d.type==='p' || d.type==='fl'){
+        const level=d.type==='p' ? document.getElementById('planche-level').value : document.getElementById('fl-level').value;
+        return {
+          day:d.day,
+          detail:d.detail,
+          kind:d.type,
+          ...getWorkoutSelection(d.type, level, mode)
+        };
+      }
+      return {
+        day:d.day,
+        detail:d.detail,
+        kind:d.type,
+        type:d.type,
+        mode,
+        deload:mode==='deload',
+        label:d.restPlan ? d.restPlan.chip : d.skill,
+        standard:d.restPlan ? d.restPlan.title : d.skill,
+        minutes: d.type==='active' ? 40 : 30,
+        exercises:d.restPlan ? d.restPlan.items.map((item, index)=>({index:index+1, name:item.name, pattern:d.type, sets:'', repsOrTime:'', cues:item.detail})) : [],
+        targetMuscles:getWorkoutMuscles(d.type)
+      };
+    });
+  }
+
+  function getArchiveExport(){
+    return {
+      normalWeek:getWeekExport('normal'),
+      deloadWeek:getWeekExport('deload'),
+      library:{
+        plancheLevels:Object.keys(BASE_PD),
+        frontLeverLevels:Object.keys(BASE_FD)
+      }
+    };
+  }
+
+  function buildExportPayload(scope){
+    const todayLabel=new Date().toISOString().slice(0,10);
+    if(scope==='today'){
+      return {
+        schema:'training-app/export@1',
+        generatedAt:new Date().toISOString(),
+        scope:'today',
+        profile:{...profile, weightKg:getProfileWeightKg(), heightCm:getProfileHeightCm()},
+        mode:getCurrentWorkoutModeLabel(),
+        plan:getTodayWorkoutSelection(isDeloadMode() ? 'deload' : 'normal')
+      };
+    }
+    if(scope==='week'){
+      return {
+        schema:'training-app/export@1',
+        generatedAt:new Date().toISOString(),
+        scope:'week',
+        profile:{...profile, weightKg:getProfileWeightKg(), heightCm:getProfileHeightCm()},
+        mode:'normal',
+        plan:weekData.map(d=>d.type==='p' || d.type==='fl'
+          ? {day:d.day, detail:d.detail, ...getWorkoutSelection(d.type, d.type==='p' ? document.getElementById('planche-level').value : document.getElementById('fl-level').value, 'normal')}
+          : {day:d.day, detail:d.detail, kind:d.type, type:d.type, mode:'normal', label:d.restPlan ? d.restPlan.chip : d.skill, standard:d.restPlan ? d.restPlan.title : d.skill, minutes:d.type==='active'?40:30, exercises:d.restPlan ? d.restPlan.items.map((item, index)=>({index:index+1, name:item.name, pattern:d.type, sets:'', repsOrTime:'', cues:item.detail})) : [], targetMuscles:getWorkoutMuscles(d.type)})
+      };
+    }
+    if(scope==='deload'){
+      return {
+        schema:'training-app/export@1',
+        generatedAt:new Date().toISOString(),
+        scope:'deload',
+        profile:{...profile, weightKg:getProfileWeightKg(), heightCm:getProfileHeightCm()},
+        mode:'deload week',
+        plan:weekData.map(d=>d.type==='p' || d.type==='fl'
+          ? {day:d.day, detail:d.detail, ...getWorkoutSelection(d.type, d.type==='p' ? document.getElementById('planche-level').value : document.getElementById('fl-level').value, 'deload')}
+          : {day:d.day, detail:d.detail, kind:d.type, type:d.type, mode:'deload', deload:true, label:d.restPlan ? d.restPlan.chip : d.skill, standard:d.restPlan ? d.restPlan.title : d.skill, minutes:d.type==='active'?40:30, exercises:d.restPlan ? d.restPlan.items.map((item, index)=>({index:index+1, name:item.name, pattern:d.type, sets:'', repsOrTime:'', cues:item.detail})) : [], targetMuscles:getWorkoutMuscles(d.type)})
+      };
+    }
+    return {
+      schema:'training-app/export@1',
+      generatedAt:new Date().toISOString(),
+      scope:'archive',
+      profile:{...profile, weightKg:getProfileWeightKg(), heightCm:getProfileHeightCm()},
+      archive:getArchiveExport()
+    };
+  }
+
+  function flattenExportRows(payload, scope){
+    const rows=[];
+    const sections=scope==='archive'
+      ? [
+          {bundle:'normal', days:payload.archive.normalWeek},
+          {bundle:'deload', days:payload.archive.deloadWeek}
+        ]
+      : [{bundle:scope, days:payload.plan || []}];
+    sections.forEach(section=>{
+      section.days.forEach(day=>{
+        if(day.exercises && day.exercises.length){
+          day.exercises.forEach(ex=>{
+            rows.push({
+              bundle:section.bundle,
+              day:day.day,
+              kind:day.kind || day.type,
+              mode:day.mode || section.bundle,
+              label:day.label || '',
+              standard:day.standard || '',
+              level:day.level || '',
+              exercise:ex.name,
+              pattern:ex.pattern,
+              sets:ex.sets || '',
+              reps_or_time:ex.repsOrTime || '',
+              cues:ex.cues || '',
+              target_muscles:(day.targetMuscles || []).join(' | '),
+              estimated_minutes:day.minutes || '',
+              estimated_calories:estimateWorkoutCalories({minutes:day.minutes || 0, type:day.type || day.kind, deload:!!day.deload})
+            });
+          });
+        } else {
+          rows.push({
+            bundle:section.bundle,
+            day:day.day,
+            kind:day.kind || day.type,
+            mode:day.mode || section.bundle,
+            label:day.label || '',
+            standard:day.standard || '',
+            level:'',
+            exercise:day.standard || day.label || '',
+            pattern:'rest',
+            sets:'',
+            reps_or_time:'',
+            cues:day.detail || '',
+            target_muscles:(day.targetMuscles || []).join(' | '),
+            estimated_minutes:day.minutes || '',
+            estimated_calories:estimateWorkoutCalories({minutes:day.minutes || 0, type:day.type || day.kind, deload:!!day.deload})
+          });
+        }
+      });
+    });
+    return rows;
+  }
+
+  function exportPayloadAsJson(payload, scope){
+    const label=scope==='archive' ? 'all-workouts' : scope;
+    const fileName=`training-${label}-${currentDateKey()}.json`;
+    downloadTextFile(fileName, 'application/json;charset=utf-8', JSON.stringify(payload, null, 2));
+  }
+
+  function exportPayloadAsMarkdown(payload, scope){
+    const rows=flattenExportRows(payload, scope);
+    const titleMap={today:'Today', week:'Week', deload:'Deload Week', archive:'Full Archive'};
+    const headerLines=[
+      `# Training Export - ${titleMap[scope] || scope}`,
+      '',
+      `Generated: ${new Date(payload.generatedAt).toLocaleString()}`,
+      `Profile: ${getProfileSummary() || 'Unspecified'}`,
+      ''
+    ];
+    const sectionLines=rows.map(row=>[
+      `## ${row.day} · ${row.label || row.standard || row.exercise}`,
+      `- Bundle: ${row.bundle}`,
+      `- Mode: ${row.mode}`,
+      `- Exercise: ${row.exercise}`,
+      `- Sets: ${row.sets || 'n/a'}`,
+      `- Reps / Time: ${row.reps_or_time || 'n/a'}`,
+      `- Muscles: ${row.target_muscles || 'n/a'}`,
+      `- Estimated calories: ${row.estimated_calories}`,
+      `- Notes: ${row.cues || 'n/a'}`,
+      ''
+    ].join('\n')).join('\n');
+    const fileName=`training-${scope}-${currentDateKey()}.md`;
+    downloadTextFile(fileName, 'text/markdown;charset=utf-8', headerLines.join('\n') + sectionLines);
+  }
+
+  function exportPayloadAsCsv(payload, scope){
+    const rows=flattenExportRows(payload, scope);
+    const header=['bundle','day','kind','mode','label','standard','level','exercise','pattern','sets','reps_or_time','cues','target_muscles','estimated_minutes','estimated_calories'];
+    const csv=[header.join(',')]
+      .concat(rows.map(row=>header.map(key=>csvEscape(row[key])).join(',')))
+      .join('\n');
+    const fileName=`training-${scope}-${currentDateKey()}.csv`;
+    downloadTextFile(fileName, 'text/csv;charset=utf-8', csv);
+  }
+
+  function exportWorkoutData(){
+    saveProfileFromInputs();
+    saveExportPrefsFromInputs();
+    const scope=exportPrefs.scope || 'today';
+    const format=exportPrefs.format || 'json';
+    const payload=buildExportPayload(scope);
+    if(format==='csv') exportPayloadAsCsv(payload, scope);
+    else if(format==='md') exportPayloadAsMarkdown(payload, scope);
+    else exportPayloadAsJson(payload, scope);
+    showToast('Export downloaded');
+    haptic('success');
+  }
+
   function currentDateKey(){
     return new Date().toISOString().slice(0,10);
   }
@@ -1142,9 +1687,79 @@
 
   function ensureWorkoutSession(key){
     if(!workoutSessions[key]){
-      workoutSessions[key]={started:false, completed:{}, finished:false};
+      workoutSessions[key]={started:false, completed:{}, finished:false, elapsedSec:0, startedAt:null, finishedAt:null, mode:isDeloadMode() ? 'deload' : 'normal'};
+    } else {
+      workoutSessions[key].completed=workoutSessions[key].completed || {};
+      workoutSessions[key].elapsedSec=Number(workoutSessions[key].elapsedSec || 0);
+      workoutSessions[key].started=!!workoutSessions[key].started;
+      workoutSessions[key].finished=!!workoutSessions[key].finished;
+      workoutSessions[key].startedAt=workoutSessions[key].startedAt || null;
+      workoutSessions[key].finishedAt=workoutSessions[key].finishedAt || null;
+      workoutSessions[key].mode=workoutSessions[key].mode || (isDeloadMode() ? 'deload' : 'normal');
     }
     return workoutSessions[key];
+  }
+
+  function getWorkoutSessionElapsed(key){
+    const session=key ? ensureWorkoutSession(key) : null;
+    if(!session) return 0;
+    const live=session.startedAt && !session.finished ? Math.max(0, Math.floor((Date.now() - session.startedAt) / 1000)) : 0;
+    return Number(session.elapsedSec || 0) + live;
+  }
+
+  function getWorkoutSessionProgress(type, key){
+    const session=key ? ensureWorkoutSession(key) : null;
+    if(!session) return {completed:0,total:0,percent:0};
+    const level=session.level || (type==='p' ? document.getElementById('planche-level').value : document.getElementById('fl-level').value);
+    const total=type==='p'
+      ? getSessionProgram('p', level).exs.length
+      : getSessionProgram('fl', level).exs.length;
+    const completed=countCompletedItems(session.completed);
+    const percent=total ? Math.round((completed/total)*100) : 0;
+    return {completed,total,percent};
+  }
+
+  function getWorkoutSessionLabel(type){
+    if(type==='p') return 'Planche session';
+    if(type==='fl') return 'Front lever session';
+    return 'Workout session';
+  }
+
+  function syncWorkoutTimerState(key){
+    if(!key) return;
+    const session=ensureWorkoutSession(key);
+    activeWorkoutSessionKey=key;
+    workoutTimerElapsed=Number(session.elapsedSec || 0);
+    workoutTimerRunning=!!session.startedAt && !session.finished;
+    workoutTimerStartedAt=session.startedAt || null;
+  }
+
+  function captureWorkoutTimerState(key){
+    if(!key) return;
+    const session=ensureWorkoutSession(key);
+    session.elapsedSec=workoutTimerElapsed;
+    session.startedAt=workoutTimerRunning ? workoutTimerStartedAt : null;
+    session.started=!!(workoutTimerRunning || workoutTimerElapsed>0 || session.completed && Object.keys(session.completed).length);
+    saveWorkoutSessions();
+  }
+
+  function getActiveWorkoutSession(type){
+    if(type!=='p' && type!=='fl') return null;
+    const key=getWorkoutKey(type);
+    const session=ensureWorkoutSession(key);
+    syncWorkoutTimerState(key);
+    const total=type==='p'
+      ? getSessionProgram('p', document.getElementById('planche-level').value).exs.length
+      : getSessionProgram('fl', document.getElementById('fl-level').value).exs.length;
+    return {key, session, total, progress:getWorkoutSessionProgress(type, key), elapsed:getWorkoutSessionElapsed(key)};
+  }
+
+  function getWorkoutCaloriesForSession(type, minutes, deload=false){
+    return estimateWorkoutCalories({minutes, type, deload});
+  }
+
+  function getWorkoutModeLabelForSession(session){
+    return session && session.mode==='deload' ? 'Deload' : 'Normal';
   }
 
   function isDeloadMode(){
@@ -1263,20 +1878,12 @@
     const d=getSessionProgram('p', v);
     document.getElementById('planche-skill-header').innerHTML=renderSkillHeader(d,'var(--accent-p)');
     document.getElementById('planche-exercises').innerHTML=
+      renderWorkoutSessionHud('p')+
       renderDeloadBanner('p', getProgram('p', v).label)+
       `<div class="focus-box p${d.deload?' deload':''}" style="margin-bottom:12px;"><div class="focus-title p${d.deload?' deload':''}">Standard to advance</div><div class="focus-text">${d.std}</div></div>`+
       renderExCards(d.exs);
     renderToday();
-  }
-
-  function getActiveWorkoutSession(type){
-    if(type!=='p' && type!=='fl') return null;
-    const key=getWorkoutKey(type);
-    const session=ensureWorkoutSession(key);
-    const total=type==='p'
-      ? getSessionProgram('p', document.getElementById('planche-level').value).exs.length
-      : getSessionProgram('fl', document.getElementById('fl-level').value).exs.length;
-    return {key, session, total};
+    renderWorkoutTimerDock();
   }
 
   function countCompletedItems(completed){
@@ -1285,33 +1892,187 @@
 
   function toggleSession(){
     if(todaySkill!=='p' && todaySkill!=='fl') return;
-    const active=getActiveWorkoutSession(todaySkill);
-    if(!active) return;
-    active.session.started=true;
-    saveWorkoutSessions();
-    renderToday();
-    showToast('Session started');
-    haptic('soft');
+    startWorkoutSession(todaySkill);
   }
 
   function resetWorkoutSession(key){
     if(!key || !workoutSessions[key]) return;
     delete workoutSessions[key];
     saveWorkoutSessions();
+    if(activeWorkoutSessionKey===key){
+      activeWorkoutSessionKey=null;
+      workoutTimerElapsed=0;
+      workoutTimerRunning=false;
+      workoutTimerStartedAt=null;
+    }
     renderToday();
+    renderWorkoutTimerDock();
     showToast('Session reset');
     haptic('warn');
+  }
+
+  function startWorkoutSession(type){
+    if(type!=='p' && type!=='fl') return;
+    const active=getActiveWorkoutSession(type);
+    if(!active) return;
+    const {key, session}=active;
+    if(session.finished){
+      session.completed={};
+      session.elapsedSec=0;
+      session.startedAt=null;
+      session.finishedAt=null;
+      workoutTimerElapsed=0;
+      workoutTimerRunning=false;
+      workoutTimerStartedAt=null;
+    }
+    session.type=type;
+    session.level=type==='p' ? document.getElementById('planche-level').value : document.getElementById('fl-level').value;
+    session.day=weekData[new Date().getDay()]?.day || 'Today';
+    session.label=getWorkoutSessionLabel(type);
+    session.started=true;
+    session.finished=false;
+    session.finishedAt=null;
+    if(!session.startedAt && !workoutTimerRunning){
+      workoutTimerStartedAt=Date.now();
+      workoutTimerRunning=true;
+      session.startedAt=workoutTimerStartedAt;
+    } else if(workoutTimerRunning && !session.startedAt){
+      session.startedAt=workoutTimerStartedAt || Date.now();
+    }
+    if(workoutTimerElapsed===0 && Number(session.elapsedSec || 0) > 0){
+      workoutTimerElapsed=Number(session.elapsedSec || 0);
+    }
+    activeWorkoutSessionKey=key;
+    session.elapsedSec=workoutTimerElapsed;
+    saveWorkoutSessions();
+    syncWorkoutTimerState(key);
+    ensureWorkoutTimerTicker();
+    renderToday();
+    renderWorkoutTimerDock();
+    renderWorkoutsHub();
+    showToast('Workout started');
+    haptic('soft');
+  }
+
+  function toggleWorkoutClock(){
+    if(!activeWorkoutSessionKey){
+      if(todaySkill==='p' || todaySkill==='fl') startWorkoutSession(todaySkill);
+      return;
+    }
+    const session=ensureWorkoutSession(activeWorkoutSessionKey);
+    if(session.finished) return;
+    if(workoutTimerRunning){
+      workoutTimerElapsed=getWorkoutSessionElapsed(activeWorkoutSessionKey);
+      workoutTimerRunning=false;
+      workoutTimerStartedAt=null;
+      session.elapsedSec=workoutTimerElapsed;
+      session.startedAt=null;
+      saveWorkoutSessions();
+      showToast('Workout timer paused');
+    } else {
+      workoutTimerStartedAt=Date.now();
+      workoutTimerRunning=true;
+      session.started=true;
+      session.startedAt=workoutTimerStartedAt;
+      saveWorkoutSessions();
+      ensureWorkoutTimerTicker();
+      showToast('Workout timer resumed');
+    }
+    renderWorkoutTimerDock();
+    renderTodaySessionCard();
+    haptic('tap');
+    updateWakeLock();
+  }
+
+  function resetWorkoutClock(){
+    workoutTimerElapsed=0;
+    workoutTimerRunning=false;
+    workoutTimerStartedAt=null;
+    if(activeWorkoutSessionKey){
+      const session=ensureWorkoutSession(activeWorkoutSessionKey);
+      session.elapsedSec=0;
+      session.startedAt=null;
+      saveWorkoutSessions();
+    }
+    renderWorkoutTimerDock();
+    renderTodaySessionCard();
+    showToast('Workout timer reset');
+    haptic('warn');
+    updateWakeLock();
+  }
+
+  function finishWorkout(){
+    if(!activeWorkoutSessionKey){
+      if(todaySkill==='p' || todaySkill==='fl') startWorkoutSession(todaySkill);
+      if(!activeWorkoutSessionKey) return;
+    }
+    const session=ensureWorkoutSession(activeWorkoutSessionKey);
+    const type=session.type || (activeWorkoutSessionKey.includes('|p|') ? 'p' : 'fl');
+    const level=session.level || (type==='p' ? document.getElementById('planche-level').value : document.getElementById('fl-level').value);
+    const deload=session.mode==='deload' || isDeloadMode();
+    workoutTimerElapsed=getWorkoutSessionElapsed(activeWorkoutSessionKey);
+    workoutTimerRunning=false;
+    workoutTimerStartedAt=null;
+    session.elapsedSec=workoutTimerElapsed;
+    session.started=true;
+    session.finished=true;
+    session.finishedAt=new Date().toISOString();
+    session.startedAt=null;
+    session.type=type;
+    session.level=level;
+    session.mode=deload ? 'deload' : 'normal';
+    saveWorkoutSessions();
+    const progress=getWorkoutSessionProgress(type, activeWorkoutSessionKey);
+    const minutes=Math.max(1, Math.round(workoutTimerElapsed / 60) || getSessionProgram(type, level).mins || 45);
+    const calories=getWorkoutCaloriesForSession(type, minutes, deload);
+    const muscles=getWorkoutMuscles(type);
+    const summary={
+      type,
+      level,
+      label:getWorkoutSessionLabel(type),
+      progress,
+      minutes,
+      calories,
+      muscles,
+      elapsed:workoutTimerElapsed,
+      deload,
+      profile:getProfileSummary(),
+      completedLabel:`${progress.completed}/${progress.total}`,
+      modeLabel:getWorkoutModeLabelForSession(session)
+    };
+    session.summary=summary;
+    saveWorkoutSessions();
+    renderToday();
+    renderWorkoutTimerDock();
+    showWorkoutSummary(summary);
+    showToast('Workout finished');
+    haptic('success');
+    updateWakeLock();
   }
 
   function toggleWorkoutExercise(key, idx){
     if(!key) return;
     const session=ensureWorkoutSession(key);
     session.started=true;
+    if(!session.type){
+      session.type=key.includes('|p|') ? 'p' : 'fl';
+    }
+    if(!session.level){
+      session.level=session.type==='p' ? document.getElementById('planche-level').value : document.getElementById('fl-level').value;
+    }
     session.completed[idx]=!session.completed[idx];
     session.finished=false;
+    if(!session.startedAt && !workoutTimerRunning){
+      activeWorkoutSessionKey=key;
+      workoutTimerStartedAt=Date.now();
+      workoutTimerRunning=true;
+      session.startedAt=workoutTimerStartedAt;
+    }
     saveWorkoutSessions();
     renderToday();
     renderWorkoutsHub();
+    renderWorkoutTimerDock();
+    renderTodaySessionCard();
     haptic(session.completed[idx] ? 'success' : 'tap');
   }
 
@@ -1321,17 +2082,185 @@
     const title=document.getElementById('today-session-title');
     const desc=document.getElementById('today-session-desc');
     const btn=document.getElementById('today-session-start');
+    const finishBtn=document.getElementById('today-session-finish');
+    const progressFill=document.getElementById('today-session-progress-fill');
+    const progressLabel=document.getElementById('today-session-progress-label');
+    const xpLabel=document.getElementById('today-session-progress-xp');
+    const timeLabel=document.getElementById('today-session-time');
+    const caloriesLabel=document.getElementById('today-session-cals');
+    const modeLabel=document.getElementById('today-session-mode');
     const visible=todaySkill==='p' || todaySkill==='fl';
     card.style.display=visible ? 'block' : 'none';
     if(!visible) return;
     const active=getActiveWorkoutSession(todaySkill);
-    const completed=countCompletedItems(active.session.completed);
+    const completed=active.progress.completed;
+    const percent=active.progress.percent;
+    const timerMinutes=Math.max(1, Math.round(active.elapsed / 60) || 1);
+    const calories=getWorkoutCaloriesForSession(todaySkill, timerMinutes, active.session.mode==='deload' || isDeloadMode());
     title.textContent=isDeloadMode() ? 'Deload session' : 'Session control';
-    desc.textContent=active.session.started
+    desc.textContent=active.session.finished
+      ? `${completed}/${active.total} workouts complete. Review the summary or restart from the floating timer.`
+      : active.session.started
       ? `${completed}/${active.total} workouts complete. Tap the cards below to mark progress.`
       : 'Tap Start to begin checking off sets and workouts.';
-    btn.textContent=active.session.started ? 'Running' : 'Start';
-    btn.classList.toggle('warn', active.session.started);
+    btn.textContent=active.session.finished ? 'Restart workout' : (active.session.started ? (workoutTimerRunning ? 'Workout running' : 'Resume workout') : 'Start workout');
+    btn.disabled=!!(active.session.started && workoutTimerRunning && !active.session.finished);
+    finishBtn.style.display=active.session.started && !active.session.finished ? 'inline-flex' : 'none';
+    if(progressFill) progressFill.style.width=`${percent}%`;
+    if(progressLabel) progressLabel.textContent=`${completed} of ${active.total} complete`;
+    if(xpLabel) xpLabel.textContent=`${Math.max(0, completed * 20)} XP`;
+    if(timeLabel) timeLabel.textContent=formatClock(active.elapsed);
+    if(caloriesLabel) caloriesLabel.textContent=String(calories);
+    if(modeLabel) modeLabel.textContent=active.session.mode==='deload' || isDeloadMode() ? 'Deload' : 'Normal';
+    btn.classList.toggle('warn', active.session.started && workoutTimerRunning && !active.session.finished);
+  }
+
+  function renderWorkoutSessionHud(type){
+    const active=getActiveWorkoutSession(type);
+    if(!active || !active.session.started || active.session.finished) return '';
+    const level=type==='p' ? document.getElementById('planche-level').value : document.getElementById('fl-level').value;
+    const program=getSessionProgram(type, level);
+    const minutes=Math.max(1, Math.round(active.elapsed / 60) || program.mins || 45);
+    const calories=getWorkoutCaloriesForSession(type, minutes, active.session.mode==='deload');
+    const running=workoutTimerRunning && activeWorkoutSessionKey===active.key;
+    const progress=active.progress;
+    return `
+      <div class="settings-card" style="margin-bottom:12px;">
+        <div class="settings-row">
+          <div>
+            <div class="settings-title">${getWorkoutSessionLabel(type)}</div>
+            <div class="settings-desc">${progress.completed}/${progress.total} complete · ${active.session.mode==='deload' ? 'Deload mode' : 'Normal mode'} · ${calories} cal</div>
+          </div>
+          <div class="settings-control">
+            <button class="settings-btn ${running ? 'warn' : ''}" onclick="toggleWorkoutClock()">${running ? 'Pause timer' : 'Resume timer'}</button>
+            <button class="settings-btn warn" onclick="finishWorkout()">Finish workout</button>
+          </div>
+        </div>
+        <div class="session-progress-wrap">
+          <div class="session-progress-bar"><div class="session-progress-fill" style="width:${progress.percent}%"></div></div>
+          <div class="session-progress-meta">
+            <span>${progress.completed} of ${progress.total} complete</span>
+            <span>${formatClock(active.elapsed)} · ${Math.max(0, Math.round(progress.completed * 20))} XP</span>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  function renderWorkoutTimerDock(){
+    const dock=document.getElementById('workout-float-timer');
+    if(!dock) return;
+    const activeSession=activeWorkoutSessionKey && workoutSessions[activeWorkoutSessionKey] ? ensureWorkoutSession(activeWorkoutSessionKey) : null;
+    const activeType=activeSession && activeSession.started && !activeSession.finished
+      ? (activeSession.type || (activeWorkoutSessionKey.includes('|p|') ? 'p' : 'fl'))
+      : ((todaySkill==='p' || todaySkill==='fl') ? todaySkill : null);
+    const active=activeType ? getActiveWorkoutSession(activeType) : (activeWorkoutSessionKey ? (()=>{
+      const session=ensureWorkoutSession(activeWorkoutSessionKey);
+      const type=session.type || (activeWorkoutSessionKey.includes('|p|') ? 'p' : 'fl');
+      return {key:activeWorkoutSessionKey, session, total:0, progress:getWorkoutSessionProgress(type, activeWorkoutSessionKey), elapsed:getWorkoutSessionElapsed(activeWorkoutSessionKey), type};
+    })() : null);
+    const hasActive=!!(active && active.session && active.session.started && !active.session.finished);
+    dock.classList.toggle('active', hasActive);
+    if(!hasActive) return;
+    const type=active.session.type || active.type || (active.key.includes('|p|') ? 'p' : 'fl');
+    const program=getSessionProgram(type, type==='p' ? document.getElementById('planche-level').value : document.getElementById('fl-level').value);
+    const level=active.session.level || (type==='p' ? document.getElementById('planche-level').value : document.getElementById('fl-level').value);
+    const title=document.getElementById('workout-float-title');
+    const display=document.getElementById('workout-float-display');
+    const sub=document.getElementById('workout-float-sub');
+    const fill=document.getElementById('workout-float-fill');
+    const start=document.getElementById('workout-float-start');
+    if(title) title.textContent=`${type==='p' ? 'Planche' : 'Front Lever'} · ${program.label}`;
+    if(display) display.textContent=formatClock(active.elapsed);
+    if(sub){
+      const cals=getWorkoutCaloriesForSession(type, Math.max(1, Math.round(active.elapsed / 60) || program.mins || 45), active.session.mode==='deload');
+      sub.textContent=`${active.progress.completed}/${active.progress.total} complete · ${active.session.mode==='deload' ? 'Deload' : 'Normal'} · ${level} · ${cals} cal`;
+    }
+    if(fill) fill.style.width=`${active.progress.percent}%`;
+    if(start) start.textContent=workoutTimerRunning ? 'Pause' : 'Resume';
+  }
+
+  function toggleWorkoutTimerDock(){
+    workoutTimerDockCollapsed=!workoutTimerDockCollapsed;
+    showToast('Workout timer stays pinned while the session is active');
+    renderWorkoutTimerDock();
+  }
+
+  function ensureWorkoutTimerTicker(){
+    if(window.__workoutTimerTick) return;
+    window.__workoutTimerTick=setInterval(()=>{
+      if(!activeWorkoutSessionKey || !workoutTimerRunning) return;
+      renderWorkoutTimerDock();
+      renderTodaySessionCard();
+    }, 1000);
+  }
+
+  function showWorkoutSummary(summary){
+    workoutSummaryCache=summary;
+    const title=document.getElementById('summary-title');
+    const content=document.getElementById('summary-content');
+    if(title) title.textContent=`${summary.label} complete`;
+    if(content){
+      const muscles=summary.muscles || [];
+      const primary=muscles.slice(0,3);
+      const secondary=muscles.slice(3);
+      content.innerHTML=`
+        <div class="workout-summary-hero">
+          <div class="workout-summary-figure" aria-label="Muscle diagram">
+            <svg viewBox="0 0 120 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="bodyGrad" x1="30" y1="20" x2="90" y2="170" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="${summary.type==='p' ? '#ff5c35' : '#3b9eff'}" stop-opacity="0.92"/>
+                  <stop offset="1" stop-color="#f0f0f5" stop-opacity="0.12"/>
+                </linearGradient>
+              </defs>
+              <ellipse cx="60" cy="28" rx="14" ry="16" fill="url(#bodyGrad)" opacity="0.95"/>
+              <path d="M44 42C36 53 32 68 33 84C34 100 40 117 44 131C49 145 48 160 51 171H69C72 160 71 145 76 131C80 117 86 100 87 84C88 68 84 53 76 42C71 35 65 31 60 31C55 31 49 35 44 42Z" fill="url(#bodyGrad)"/>
+              <path d="M29 63C22 72 19 84 19 96C19 110 23 123 28 132C31 136 37 137 40 134C44 131 44 126 42 122C39 115 38 106 39 97C40 87 44 78 49 72" fill="url(#bodyGrad)" opacity="0.86"/>
+              <path d="M91 63C98 72 101 84 101 96C101 110 97 123 92 132C89 136 83 137 80 134C76 131 76 126 78 122C81 115 82 106 81 97C80 87 76 78 71 72" fill="url(#bodyGrad)" opacity="0.86"/>
+              <ellipse cx="60" cy="58" rx="18" ry="12" fill="#ffffff" opacity="0.11"/>
+              <ellipse cx="60" cy="95" rx="15" ry="20" fill="#ffffff" opacity="0.06"/>
+            </svg>
+          </div>
+          <div class="workout-summary-meta">
+            <div class="workout-summary-stat">
+              <div class="workout-summary-stat-label">Calories burnt</div>
+              <div class="workout-summary-stat-value">${summary.calories}</div>
+              <div class="workout-summary-chips">
+                <span class="workout-summary-chip primary">${summary.modeLabel}</span>
+                <span class="workout-summary-chip">${summary.completedLabel}</span>
+              </div>
+            </div>
+            <div class="workout-summary-stat">
+              <div class="workout-summary-stat-label">Workout time</div>
+              <div class="workout-summary-stat-value">${formatClock(summary.elapsed)}</div>
+              <div class="workout-summary-chips">
+                <span class="workout-summary-chip secondary">${summary.profile || 'Device profile'}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="workout-summary-list">
+          <div class="workout-summary-item">
+            <div class="workout-summary-item-title">Target muscles</div>
+            <div class="workout-summary-item-copy">${muscles.length ? muscles.join(', ') : 'Recovery and mobility'}</div>
+          </div>
+          <div class="workout-summary-item">
+            <div class="workout-summary-item-title">Primary emphasis</div>
+            <div class="workout-summary-item-copy">${primary.length ? primary.join(', ') : 'General recovery'}</div>
+          </div>
+          <div class="workout-summary-item">
+            <div class="workout-summary-item-title">Secondary emphasis</div>
+            <div class="workout-summary-item-copy">${secondary.length ? secondary.join(', ') : 'No secondary emphasis recorded'}</div>
+          </div>
+        </div>`;
+    }
+    document.getElementById('summary-overlay').classList.add('open');
+    document.getElementById('summary-modal').classList.add('open');
+  }
+
+  function closeWorkoutSummary(){
+    document.getElementById('summary-overlay').classList.remove('open');
+    document.getElementById('summary-modal').classList.remove('open');
   }
 
   function renderWorkoutsHub(){
@@ -1351,10 +2280,12 @@
     const d=getSessionProgram('fl', v);
     document.getElementById('fl-skill-header').innerHTML=renderSkillHeader(d,'var(--accent-fl)');
     document.getElementById('fl-exercises').innerHTML=
+      renderWorkoutSessionHud('fl')+
       renderDeloadBanner('fl', getProgram('fl', v).label)+
       `<div class="focus-box fl${d.deload?' deload':''}" style="margin-bottom:12px;"><div class="focus-title fl${d.deload?' deload':''}">Standard to advance</div><div class="focus-text">${d.std}</div></div>`+
       renderExCards(d.exs);
     renderToday();
+    renderWorkoutTimerDock();
   }
 
   // ── TODAY ──────────────────────────────────────────
@@ -1408,6 +2339,7 @@
       const sessionCard=document.getElementById('today-session-card');
       if(sessionCard) sessionCard.style.display='none';
       document.getElementById('today-content').innerHTML=renderRestActive(todaySkill);
+      renderWorkoutTimerDock();
       return;
     }
     const d=todaySkill==='p'?getSessionProgram('p', document.getElementById('planche-level').value):getSessionProgram('fl', document.getElementById('fl-level').value);
@@ -1438,6 +2370,7 @@
       </div>
       ${renderExCards(d.exs, sessionControls)}`;
     renderTodaySessionCard();
+    renderWorkoutTimerDock();
   }
 
   function initToday(){
@@ -2177,6 +3110,7 @@
     if(typeof closeEditModal==='function') closeEditModal();
     if(typeof closeSavedPrograms==='function') closeSavedPrograms();
     if(typeof closeTimerSettings==='function') closeTimerSettings();
+    if(typeof closeWorkoutSummary==='function') closeWorkoutSummary();
     document.getElementById('scroll-area').scrollTop=0;
     if(name==='week') renderWeekGrid();
     if(name==='workouts' || name==='planche' || name==='fl') renderWorkoutsHub();
@@ -2228,6 +3162,7 @@
     document.getElementById('setting-toast').value=String(settings.toastDuration || 1200);
     document.getElementById('mini-timer').classList.toggle('active', !!settings.miniTimer);
     document.getElementById('timer-help').style.display=settings.showTimerHelp ? 'block' : 'none';
+    syncProfileInputs();
     updateWakeLock();
     renderCycleStatus();
     renderWorkoutsHub();
@@ -2252,6 +3187,16 @@
     saveSettings();
     applySettings();
     showToast('Toast duration updated');
+  });
+
+  ['profile-gender','profile-height','profile-weight'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.addEventListener('change', ()=>saveProfileFromInputs());
+  });
+
+  ['export-scope','export-format'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.addEventListener('change', ()=>saveExportPrefsFromInputs());
   });
 
   function runStorageAction(){
@@ -2540,6 +3485,8 @@
     const ok=confirm('Clear app data and cached files?');
     if(!ok) return;
     localStorage.removeItem('training_settings');
+    localStorage.removeItem('training_profile');
+    localStorage.removeItem('training_export_prefs');
     localStorage.removeItem('training_program_overrides');
     localStorage.removeItem('training_saved_programs');
     localStorage.removeItem('training_week');
@@ -2587,6 +3534,8 @@
   loadWeekData();
   loadWorkoutSessions();
   loadCycleState();
+  loadProfile();
+  loadExportPrefs();
   loadSettings();
   applySettings();
   renderSavedPrograms();
@@ -2594,6 +3543,7 @@
   renderRestTimerButtons();
   renderWorkoutsHub();
   renderCycleStatus();
+  renderWorkoutTimerDock();
   history.replaceState({view:'today'}, '', location.href);
   window.addEventListener('popstate', (event)=>{
     const view=pendingHistoryView || ((event.state && event.state.view) ? event.state.view : 'today');
@@ -2621,6 +3571,7 @@
   renderFLTrack();
   initToday();
   renderWeekGrid();
+  ensureWorkoutTimerTicker();
   </script>
   <script>
     document.documentElement.style.background = 'var(--bg)';
