@@ -435,10 +435,14 @@
   /* ── REST DAY CARD ── */
   .rest-day-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:18px;margin-bottom:12px;}
   .rest-day-title{font-family:var(--ff-head);font-size:18px;font-weight:800;margin-bottom:4px;}
-  .rest-item{padding:10px 0;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:3px;}
+  .rest-item{padding:10px 0;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
   .rest-item:last-child{border-bottom:none;}
+  .rest-item-main{flex:1;display:flex;flex-direction:column;gap:3px;min-width:0;}
   .rest-item-name{font-family:var(--ff-mono);font-size:12px;color:var(--text);font-weight:500;}
   .rest-item-detail{font-size:12px;color:var(--muted);line-height:1.5;}
+  .rest-item.done .rest-item-name{color:var(--green);}
+  .rest-item-check{flex:0 0 auto;width:30px;height:30px;border-radius:9px;background:var(--surface2);border:1px solid var(--border2);color:var(--green);font-size:15px;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+  .rest-item-check.done{background:var(--green-dim);border-color:var(--green);}
   .rest-note{margin-top:12px;font-size:12px;color:var(--muted);font-style:italic;line-height:1.5;}
 
   /* ── DAY MODAL ── */
@@ -1822,8 +1826,9 @@
     haptic('success');
   }
 
-  function currentDateKey(){
-    return new Date().toISOString().slice(0,10);
+  function getWorkoutKey(type){
+    const level=(type==='p' || type==='fl') ? document.getElementById(type==='p' ? 'planche-level' : 'fl-level').value : 'default';
+    return `${currentDateKey()}|${type}|${level}|${isDeloadMode() ? 'deload' : 'normal'}`;
   }
 
   function getWorkoutKey(type){
@@ -1856,10 +1861,8 @@
   function getWorkoutSessionProgress(type, key){
     const session=key ? ensureWorkoutSession(key) : null;
     if(!session) return {completed:0,total:0,percent:0};
-    const level=session.level || (type==='p' ? document.getElementById('planche-level').value : document.getElementById('fl-level').value);
-    const exs=type==='p'
-      ? getSessionProgram('p', level).exs
-      : getSessionProgram('fl', level).exs;
+    const level=session.level || ((type==='p' || type==='fl') ? document.getElementById(type==='p' ? 'planche-level' : 'fl-level').value : 'default');
+    const exs=getWorkoutProgramForType(type, level).exs;
     const total=exs.length;
     const completed=countCompletedItems(session.completed, exs);
     const percent=total ? Math.round((completed/total)*100) : 0;
@@ -1869,6 +1872,8 @@
   function getWorkoutSessionLabel(type){
     if(type==='p') return 'Planche session';
     if(type==='fl') return 'Front lever session';
+    if(type==='active') return 'Active recovery session';
+    if(type==='rest') return 'Rest day session';
     return 'Workout session';
   }
 
@@ -1891,13 +1896,12 @@
   }
 
   function getActiveWorkoutSession(type){
-    if(type!=='p' && type!=='fl') return null;
+    if(type!=='p' && type!=='fl' && type!=='rest' && type!=='active') return null;
     const key=getWorkoutKey(type);
     const session=ensureWorkoutSession(key);
     syncWorkoutTimerState(key);
-    const total=type==='p'
-      ? getSessionProgram('p', document.getElementById('planche-level').value).exs.length
-      : getSessionProgram('fl', document.getElementById('fl-level').value).exs.length;
+    const level=(type==='p' || type==='fl') ? document.getElementById(type==='p' ? 'planche-level' : 'fl-level').value : 'default';
+    const total=getWorkoutProgramForType(type, level).exs.length;
     return {key, session, total, progress:getWorkoutSessionProgress(type, key), elapsed:getWorkoutSessionElapsed(key)};
   }
 
@@ -1960,6 +1964,23 @@
 
   function getSessionProgram(type, level){
     return isDeloadMode() ? buildDeloadProgram(type, level) : getProgram(type, level);
+  }
+
+  function getRestActiveProgram(type){
+    const todayIdx=new Date().getDay();
+    const today=weekData[todayIdx];
+    const d=(today && today.type===type) ? today : getRestPlan(type);
+    const plan=d && d.restPlan;
+    const items=plan ? plan.items : [];
+    return {
+      label: plan ? plan.title : (type==='active' ? 'Active Recovery' : 'Rest Day'),
+      mins: type==='active' ? 40 : 25,
+      exs: items.map(it=>({n:it.name, s:'', r:'', c:it.detail, p:null}))
+    };
+  }
+
+  function getWorkoutProgramForType(type, level){
+    return (type==='rest' || type==='active') ? getRestActiveProgram(type) : getSessionProgram(type, level);
   }
 
   function renderDeloadBanner(type, label){
@@ -2077,7 +2098,7 @@
   }
 
   function toggleSession(){
-    if(todaySkill!=='p' && todaySkill!=='fl') return;
+    if(todaySkill!=='p' && todaySkill!=='fl' && todaySkill!=='rest' && todaySkill!=='active') return;
     startWorkoutSession(todaySkill);
   }
 
@@ -2098,7 +2119,7 @@
   }
 
   function startWorkoutSession(type){
-    if(type!=='p' && type!=='fl') return;
+    if(type!=='p' && type!=='fl' && type!=='rest' && type!=='active') return;
     const active=getActiveWorkoutSession(type);
     if(!active) return;
     const {key, session}=active;
@@ -2112,7 +2133,7 @@
       workoutTimerStartedAt=null;
     }
     session.type=type;
-    session.level=type==='p' ? document.getElementById('planche-level').value : document.getElementById('fl-level').value;
+    session.level=(type==='p' || type==='fl') ? document.getElementById(type==='p' ? 'planche-level' : 'fl-level').value : 'default';
     session.day=weekData[new Date().getDay()]?.day || 'Today';
     session.label=getWorkoutSessionLabel(type);
     session.started=true;
@@ -2142,7 +2163,7 @@
 
   function toggleWorkoutClock(){
     if(!activeWorkoutSessionKey){
-      if(todaySkill==='p' || todaySkill==='fl') startWorkoutSession(todaySkill);
+      if(todaySkill==='p' || todaySkill==='fl' || todaySkill==='rest' || todaySkill==='active') startWorkoutSession(todaySkill);
       return;
     }
     const session=ensureWorkoutSession(activeWorkoutSessionKey);
@@ -2189,12 +2210,12 @@
 
   function finishWorkout(){
     if(!activeWorkoutSessionKey){
-      if(todaySkill==='p' || todaySkill==='fl') startWorkoutSession(todaySkill);
+      if(todaySkill==='p' || todaySkill==='fl' || todaySkill==='rest' || todaySkill==='active') startWorkoutSession(todaySkill);
       if(!activeWorkoutSessionKey) return;
     }
     const session=ensureWorkoutSession(activeWorkoutSessionKey);
-    const type=session.type || (activeWorkoutSessionKey.includes('|p|') ? 'p' : 'fl');
-    const level=session.level || (type==='p' ? document.getElementById('planche-level').value : document.getElementById('fl-level').value);
+    const type=session.type || activeWorkoutSessionKey.split('|')[1] || 'p';
+    const level=session.level || ((type==='p' || type==='fl') ? document.getElementById(type==='p' ? 'planche-level' : 'fl-level').value : 'default');
     const deload=session.mode==='deload' || isDeloadMode();
     workoutTimerElapsed=getWorkoutSessionElapsed(activeWorkoutSessionKey);
     workoutTimerRunning=false;
@@ -2240,12 +2261,12 @@
     const session=ensureWorkoutSession(key);
     session.started=true;
     if(!session.type){
-      session.type=key.includes('|p|') ? 'p' : 'fl';
+      session.type=key.split('|')[1] || 'p';
     }
     if(!session.level){
-      session.level=session.type==='p' ? document.getElementById('planche-level').value : document.getElementById('fl-level').value;
+      session.level=(session.type==='p' || session.type==='fl') ? document.getElementById(session.type==='p' ? 'planche-level' : 'fl-level').value : 'default';
     }
-    const exs=getSessionProgram(session.type, session.level).exs;
+    const exs=getWorkoutProgramForType(session.type, session.level).exs;
     const totalSets=parseSetsCount(exs[idx] && exs[idx].s);
     const current=getExerciseSetsDone(session.completed, idx);
     const next=Math.min(totalSets, (Number.isFinite(current) ? current : 0) + 1);
@@ -2278,6 +2299,17 @@
     haptic('warn');
   }
 
+  function toggleRestItem(key, idx){
+    if(!key) return;
+    const session=ensureWorkoutSession(key);
+    const done=getExerciseSetsDone(session.completed, idx) >= 1;
+    if(done){
+      resetWorkoutExerciseSets(key, idx);
+    } else {
+      logWorkoutExerciseSet(key, idx);
+    }
+  }
+
   function renderTodaySessionCard(){
     const card=document.getElementById('today-session-card');
     if(!card) return;
@@ -2292,7 +2324,7 @@
     const timeLabel=document.getElementById('today-session-time');
     const caloriesLabel=document.getElementById('today-session-cals');
     const modeLabel=document.getElementById('today-session-mode');
-    const visible=todaySkill==='p' || todaySkill==='fl';
+    const visible=todaySkill==='p' || todaySkill==='fl' || todaySkill==='rest' || todaySkill==='active';
     card.style.display=visible ? 'block' : 'none';
     if(!visible) return;
     const active=getActiveWorkoutSession(todaySkill);
@@ -2355,20 +2387,21 @@
     if(!dock) return;
     const activeSession=activeWorkoutSessionKey && workoutSessions[activeWorkoutSessionKey] ? ensureWorkoutSession(activeWorkoutSessionKey) : null;
     const activeType=activeSession && activeSession.started && !activeSession.finished
-      ? (activeSession.type || (activeWorkoutSessionKey.includes('|p|') ? 'p' : 'fl'))
-      : ((todaySkill==='p' || todaySkill==='fl') ? todaySkill : null);
+      ? (activeSession.type || activeWorkoutSessionKey.split('|')[1])
+      : (['p','fl','rest','active'].includes(todaySkill) ? todaySkill : null);
     const active=activeType ? getActiveWorkoutSession(activeType) : (activeWorkoutSessionKey ? (()=>{
       const session=ensureWorkoutSession(activeWorkoutSessionKey);
-      const type=session.type || (activeWorkoutSessionKey.includes('|p|') ? 'p' : 'fl');
+      const type=session.type || activeWorkoutSessionKey.split('|')[1];
       return {key:activeWorkoutSessionKey, session, total:0, progress:getWorkoutSessionProgress(type, activeWorkoutSessionKey), elapsed:getWorkoutSessionElapsed(activeWorkoutSessionKey), type};
     })() : null);
     const hasActive=!!(active && active.session && active.session.started && !active.session.finished);
     dock.classList.toggle('active', hasActive);
     dock.classList.toggle('collapsed', hasActive && workoutTimerDockCollapsed);
     if(!hasActive) return;
-    const type=active.session.type || active.type || (active.key.includes('|p|') ? 'p' : 'fl');
-    const program=getSessionProgram(type, type==='p' ? document.getElementById('planche-level').value : document.getElementById('fl-level').value);
-    const level=active.session.level || (type==='p' ? document.getElementById('planche-level').value : document.getElementById('fl-level').value);
+    const type=active.session.type || active.type || active.key.split('|')[1];
+    const level=active.session.level || ((type==='p' || type==='fl') ? document.getElementById(type==='p' ? 'planche-level' : 'fl-level').value : 'default');
+    const program=getWorkoutProgramForType(type, level);
+    const TYPE_LABEL={p:'Planche', fl:'Front Lever', rest:'Rest Day', active:'Active Day'};
     const title=document.getElementById('workout-float-title');
     const display=document.getElementById('workout-float-display');
     const bubbleTime=document.getElementById('workout-bubble-time');
@@ -2377,7 +2410,7 @@
     const fill=document.getElementById('workout-float-fill');
     const start=document.getElementById('workout-float-start');
     const toggleBtn=document.getElementById('workout-float-toggle');
-    if(title) title.textContent=`${type==='p' ? 'Planche' : 'Front Lever'} · ${program.label}`;
+    if(title) title.textContent=`${TYPE_LABEL[type] || 'Workout'} · ${program.label}`;
     if(display) display.textContent=formatClock(active.elapsed);
     if(bubbleTime) bubbleTime.textContent=formatClock(active.elapsed);
     if(bubbleRing){
@@ -2388,7 +2421,8 @@
     }
     if(sub){
       const cals=getWorkoutCaloriesForSession(type, active.elapsed, active.session.mode==='deload');
-      sub.textContent=`${active.progress.completed}/${active.progress.total} complete · ${active.session.mode==='deload' ? 'Deload' : 'Normal'} · ${level} · ${cals} cal`;
+      const levelPart=(type==='p' || type==='fl') ? ` · ${level}` : '';
+      sub.textContent=`${active.progress.completed}/${active.progress.total} complete · ${active.session.mode==='deload' ? 'Deload' : 'Normal'}${levelPart} · ${cals} cal`;
     }
     if(fill) fill.style.width=`${active.progress.percent}%`;
     if(start) start.textContent=workoutTimerRunning ? 'Pause' : 'Resume';
@@ -2397,6 +2431,7 @@
       toggleBtn.setAttribute('aria-label', workoutTimerDockCollapsed ? 'Expand timer' : 'Minimize timer');
     }
   }
+
 
   function toggleWorkoutTimerDock(){
     workoutTimerDockCollapsed=!workoutTimerDockCollapsed;
@@ -2413,7 +2448,7 @@
 
   function jumpToWorkoutTimer(){
     if(!activeWorkoutSessionKey){
-      if(todaySkill==='p' || todaySkill==='fl') startWorkoutSession(todaySkill);
+      if(todaySkill==='p' || todaySkill==='fl' || todaySkill==='rest' || todaySkill==='active') startWorkoutSession(todaySkill);
     }
     workoutTimerDockCollapsed=false;
     renderWorkoutTimerDock();
@@ -2444,7 +2479,8 @@
       const muscles=summary.muscles || [];
       const primary=muscles.slice(0,3);
       const secondary=muscles.slice(3);
-      const accent=summary.type==='p' ? '#ff5c35' : '#3b9eff';
+      const ACCENT_BY_TYPE={p:'#ff5c35', fl:'#3b9eff', active:'#f5a623', rest:'#2dbd7f'};
+      const accent=ACCENT_BY_TYPE[summary.type] || '#3b9eff';
       content.innerHTML=`
         <div class="workout-summary-hero">
           <div class="workout-summary-figure" aria-label="Muscle diagram">
@@ -2551,6 +2587,9 @@
     }
     const p=d.restPlan;
     const cls=type==='active'?'active':'neutral';
+    const active=getActiveWorkoutSession(type);
+    const sessionKey=active ? active.key : null;
+    const completed=active ? active.session.completed : {};
     return `
       ${renderDeloadBanner(type, d.detail)}
       <div class="focus-box ${cls}" style="margin-bottom:12px;">
@@ -2558,16 +2597,26 @@
         <div class="focus-text"><strong>${p.title}</strong></div>
       </div>
       <div class="rest-day-card">
-        ${p.items.map(it=>`<div class="rest-item"><div class="rest-item-name">${it.name}</div><div class="rest-item-detail">${it.detail}</div></div>`).join('')}
+        ${p.items.map((it,i)=>{
+          const done=getExerciseSetsDone(completed, i) >= 1;
+          return `
+          <div class="rest-item${done ? ' done' : ''}">
+            <div class="rest-item-main">
+              <div class="rest-item-name">${it.name}</div>
+              <div class="rest-item-detail">${it.detail}</div>
+            </div>
+            <button class="rest-item-check${done ? ' done' : ''}" onclick="toggleRestItem('${sessionKey}', ${i})" aria-label="${done ? 'Mark not done' : 'Mark done'}">${done ? '✓' : ''}</button>
+          </div>`;
+        }).join('')}
         <div class="rest-note">${p.note}</div>
       </div>`;
   }
 
+
   function renderToday(){
     if(todaySkill==='rest' || todaySkill==='active'){
-      const sessionCard=document.getElementById('today-session-card');
-      if(sessionCard) sessionCard.style.display='none';
       document.getElementById('today-content').innerHTML=renderRestActive(todaySkill);
+      renderTodaySessionCard();
       renderWorkoutTimerDock();
       return;
     }
@@ -3649,9 +3698,7 @@
   function swLap(){
     const total=swRunning ? swElapsed + (Date.now() - swStart) : swElapsed;
     if(total===0) return;
-    const prevTotal=swLaps.lengt
-    
-    h ? swLaps[0].total : 0;
+    const prevTotal=swLaps.length ? swLaps[0].total : 0;
     const lap=total - prevTotal;
     const split=swLaps.length ? total - swLaps[swLaps.length-1].total : total;
     swLaps.unshift({lap,split,total});
