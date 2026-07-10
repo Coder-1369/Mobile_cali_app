@@ -360,6 +360,18 @@
   .profile-field{display:flex;flex-direction:column;gap:6px;}
   .profile-input{width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);font-family:var(--ff-mono);font-size:12px;padding:8px 10px;border-radius:8px;}
   .profile-note{font-size:12px;color:var(--muted);line-height:1.5;margin-top:10px;}
+  .google-signin-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:11px 14px;border-radius:10px;background:#fff;border:1px solid var(--border2);color:#1f1f1f;font-family:var(--ff-mono);font-size:12px;font-weight:600;cursor:pointer;}
+  .google-signin-btn svg{width:18px;height:18px;flex:0 0 auto;}
+  .remember-me-row{display:flex;align-items:center;gap:8px;margin-top:12px;font-family:var(--ff-mono);font-size:11px;color:var(--muted);}
+  .remember-me-row input{accent-color:var(--accent-p);width:15px;height:15px;}
+  .account-signedin{display:flex;align-items:center;gap:12px;}
+  .account-avatar{width:44px;height:44px;border-radius:50%;background:var(--surface2);border:1px solid var(--border2);object-fit:cover;flex:0 0 auto;}
+  .account-avatar-fallback{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--accent-p),var(--accent-fl));display:flex;align-items:center;justify-content:center;font-family:var(--ff-head);font-weight:800;font-size:16px;color:#fff;flex:0 0 auto;}
+  .account-info{flex:1;min-width:0;}
+  .account-name{font-family:var(--ff-head);font-size:14px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .account-email{font-family:var(--ff-mono);font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .account-synced-badge{display:inline-flex;align-items:center;gap:4px;margin-top:4px;font-family:var(--ff-mono);font-size:9px;letter-spacing:.5px;text-transform:uppercase;color:var(--green);}
+  .account-synced-badge::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--green);}
   .export-row{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;}
   .export-action{width:100%;margin-top:10px;}
   .export-note{font-size:12px;color:var(--muted);line-height:1.5;margin-top:10px;}
@@ -520,6 +532,14 @@
   .ex-card:nth-child(4){animation-delay:.14s;}
   .ex-card:nth-child(5){animation-delay:.18s;}
   </style>
+  <!-- Firebase (Google Sign-In + cloud profile sync). Loaded as plain compat
+       scripts so it matches the plain-script style used elsewhere in this
+       file. If these fail to load (offline, blocked, or not configured) the
+       app keeps working in local-only/guest mode — every call site below
+       checks firebaseReady first. -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
   </head>
   <body>
   <div id="app">
@@ -892,6 +912,37 @@
               <div class="settings-desc">View and manage your saved programs.</div>
             </div>
             <button class="settings-btn" onclick="openSavedPrograms()">Open</button>
+          </div>
+        </div>
+
+        <div class="section-label">Account</div>
+        <div class="settings-card" id="account-card">
+          <div id="account-signed-out">
+            <div class="settings-row">
+              <div>
+                <div class="settings-title">Sign in with Google</div>
+                <div class="settings-desc">Save your profile online and pick up right where you left off on any device.</div>
+              </div>
+            </div>
+            <button class="google-signin-btn" onclick="signInWithGoogle()">
+              <svg viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5h-1.9V20.4H24v7.2h11.3c-1.6 4.6-6 7.9-11.3 7.9-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l5.1-5.1C33.9 6.1 29.2 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.2-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6 4.4C13.9 15.2 18.6 12.2 24 12.2c3.1 0 5.8 1.1 8 3l5.1-5.1C33.9 6.1 29.2 4 24 4 16.3 4 9.6 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.1 0 9.8-2 13.3-5.2l-6.2-5.2c-2 1.4-4.5 2.2-7.1 2.2-5.2 0-9.6-3.3-11.3-7.9l-6.1 4.7C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5h-1.9V20.4H24v7.2h11.3c-.8 2.3-2.2 4.2-4.1 5.6l6.2 5.2C40.5 35.9 44 30.4 44 24c0-1.2-.1-2.4-.4-3.5z"/></svg>
+              Sign in with Google
+            </button>
+            <label class="remember-me-row"><input type="checkbox" id="remember-me-checkbox" checked/>Remember me on this device</label>
+          </div>
+          <div id="account-signed-in" style="display:none;">
+            <div class="account-signedin">
+              <img class="account-avatar" id="account-avatar-img" src="" alt="" style="display:none;"/>
+              <div class="account-avatar-fallback" id="account-avatar-fallback">?</div>
+              <div class="account-info">
+                <div class="account-name" id="account-name">—</div>
+                <div class="account-email" id="account-email">—</div>
+                <div class="account-synced-badge">Synced to your Google account</div>
+              </div>
+            </div>
+            <div class="settings-control" style="margin-top:12px;">
+              <button class="settings-btn warn" onclick="signOutOfGoogle()">Sign out</button>
+            </div>
           </div>
         </div>
 
@@ -1376,6 +1427,141 @@
     localStorage.setItem('training_profile', JSON.stringify(profile));
   }
 
+  // ── ACCOUNT / GOOGLE SIGN-IN / CLOUD PROFILE SYNC ──────────────────────
+  // Fill these in with your own Firebase project's web config (Firebase
+  // console → Project settings → General → "Your apps" → SDK setup and
+  // configuration). Until real values are set, the app stays in local-only
+  // guest mode and every feature keeps working exactly as before.
+  const firebaseConfig = {
+  apiKey: "AIzaSyDSqW6stCwreCbmLy6x4tB-7PGUnVL3wu0",
+  authDomain: "mobile-cali-app.firebaseapp.com",
+  projectId: "mobile-cali-app",
+  storageBucket: "mobile-cali-app.firebasestorage.app",
+  messagingSenderId: "1001420618455",
+  appId: "1:1001420618455:web:6ce373cb8c3843622f0e92"
+};
+
+  let firebaseReady=false;
+  let fsAuth=null;
+  let fsDb=null;
+  let authUser=null;
+
+  function initFirebaseAuth(){
+    try{
+      if(typeof firebase==='undefined') return; // SDK didn't load (offline/blocked) — stay in guest mode
+      if(!firebaseConfig.apiKey || firebaseConfig.apiKey.indexOf('YOUR_')===0) return; // not configured yet
+      firebase.initializeApp(firebaseConfig);
+      fsAuth=firebase.auth();
+      fsDb=firebase.firestore();
+      firebaseReady=true;
+      const rememberPref=localStorage.getItem('remember_me_pref');
+      const rememberBox=document.getElementById('remember-me-checkbox');
+      if(rememberBox && rememberPref!==null) rememberBox.checked=(rememberPref==='1');
+      fsAuth.onAuthStateChanged(handleAuthStateChanged);
+    }catch(e){
+      console.warn('Firebase init skipped:', e);
+    }
+  }
+
+  function handleAuthStateChanged(user){
+    authUser=user || null;
+    if(authUser){
+      syncProfileFromCloud(authUser).catch(e=>console.warn('Cloud profile sync failed:', e));
+    }
+    renderAccountCard();
+  }
+
+  async function syncProfileFromCloud(user){
+    if(!fsDb) return;
+    const docRef=fsDb.collection('users').doc(user.uid);
+    const snap=await docRef.get();
+    if(snap.exists && snap.data() && snap.data().profile){
+      profile={...profile, ...snap.data().profile};
+      saveProfile();
+      syncProfileInputs();
+      renderTodaySessionCard();
+      renderWorkoutTimerDock();
+    } else {
+      // First sign-in on this account: push whatever local/guest data exists
+      // so it becomes the seed for their cloud profile instead of being lost.
+      await docRef.set({
+        profile,
+        displayName: user.displayName || '',
+        email: user.email || '',
+        photoURL: user.photoURL || '',
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      }, {merge:true});
+    }
+  }
+
+  function pushProfileToCloud(){
+    if(!firebaseReady || !authUser || !fsDb) return;
+    fsDb.collection('users').doc(authUser.uid).set({
+      profile,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }, {merge:true}).catch(e=>console.warn('Cloud profile save failed:', e));
+  }
+
+  function signInWithGoogle(){
+    if(!firebaseReady || !fsAuth){
+      showToast('Cloud sign-in isn\'t set up yet.');
+      return;
+    }
+    const remember=document.getElementById('remember-me-checkbox')?.checked !== false;
+    localStorage.setItem('remember_me_pref', remember ? '1' : '0');
+    const persistence=remember ? firebase.auth.Auth.Persistence.LOCAL : firebase.auth.Auth.Persistence.SESSION;
+    fsAuth.setPersistence(persistence)
+      .then(()=>{
+        const provider=new firebase.auth.GoogleAuthProvider();
+        return fsAuth.signInWithPopup(provider);
+      })
+      .then(()=>{
+        showToast('Signed in');
+        haptic('success');
+      })
+      .catch(e=>{
+        console.warn('Sign-in failed:', e);
+        showToast('Sign-in failed. Try again.');
+      });
+  }
+
+  function signOutOfGoogle(){
+    if(!fsAuth) return;
+    fsAuth.signOut().then(()=>{
+      showToast('Signed out');
+      haptic('tap');
+    }).catch(e=>console.warn('Sign-out failed:', e));
+  }
+
+  function renderAccountCard(){
+    const signedOutEl=document.getElementById('account-signed-out');
+    const signedInEl=document.getElementById('account-signed-in');
+    if(!signedOutEl || !signedInEl) return;
+    if(authUser){
+      signedOutEl.style.display='none';
+      signedInEl.style.display='block';
+      const name=authUser.displayName || authUser.email || 'Signed in';
+      const nameEl=document.getElementById('account-name');
+      const emailEl=document.getElementById('account-email');
+      const img=document.getElementById('account-avatar-img');
+      const fallback=document.getElementById('account-avatar-fallback');
+      if(nameEl) nameEl.textContent=name;
+      if(emailEl) emailEl.textContent=authUser.email || '';
+      if(authUser.photoURL && img){
+        img.src=authUser.photoURL;
+        img.style.display='block';
+        if(fallback) fallback.style.display='none';
+      } else if(fallback){
+        fallback.textContent=name.charAt(0).toUpperCase();
+        fallback.style.display='flex';
+        if(img) img.style.display='none';
+      }
+    } else {
+      signedOutEl.style.display='block';
+      signedInEl.style.display='none';
+    }
+  }
+
   function loadExportPrefs(){
     try{
       const raw=localStorage.getItem('training_export_prefs');
@@ -1408,6 +1594,7 @@
     if(height) profile.heightCm=height.value === '' ? '' : Math.max(100, Math.min(250, Number(height.value) || 0));
     if(weight) profile.weightKg=weight.value === '' ? '' : Math.max(30, Math.min(250, Number(weight.value) || 0));
     saveProfile();
+    pushProfileToCloud();
     renderTodaySessionCard();
     renderWorkoutTimerDock();
     if(todaySkill==='p' || todaySkill==='fl') renderToday();
@@ -3815,6 +4002,8 @@
   loadExportPrefs();
   loadSettings();
   applySettings();
+  try{ initFirebaseAuth(); }catch(e){ console.warn('Firebase init error:', e); }
+  renderAccountCard();
   renderSavedPrograms();
   renderRestTimerDisplay();
   renderRestTimerButtons();
