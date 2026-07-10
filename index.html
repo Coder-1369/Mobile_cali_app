@@ -1826,13 +1826,12 @@
     haptic('success');
   }
 
-  function getWorkoutKey(type){
-    const level=(type==='p' || type==='fl') ? document.getElementById(type==='p' ? 'planche-level' : 'fl-level').value : 'default';
-    return `${currentDateKey()}|${type}|${level}|${isDeloadMode() ? 'deload' : 'normal'}`;
+  function currentDateKey(){
+    return new Date().toISOString().slice(0,10);
   }
 
   function getWorkoutKey(type){
-    const level=document.getElementById(type==='p' ? 'planche-level' : 'fl-level').value;
+    const level=(type==='p' || type==='fl') ? document.getElementById(type==='p' ? 'planche-level' : 'fl-level').value : 'default';
     return `${currentDateKey()}|${type}|${level}|${isDeloadMode() ? 'deload' : 'normal'}`;
   }
 
