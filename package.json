@@ -1,0 +1,30 @@
+{
+  "name": "mobile_cali_app",
+  "version": "1.0.0",
+  "description": "Calisthenics app for frontlever and planche",
+  "main": "sw.js",
+  "scripts": {
+    "build:web": "node build-web.js",
+    "sync": "npm run build:web && npx cap sync",
+    "open:android": "npx cap open android",
+    "open:ios": "npx cap open ios",
+    "icons": "npx capacitor-assets generate"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Coder-1369/Mobile_cali_app.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Coder-1369/Mobile_cali_app/issues"
+  },
+  "homepage": "https://github.com/Coder-1369/Mobile_cali_app#readme",
+  "dependencies": {
+    "@capacitor/android": "^8.4.1",
+    "@capacitor/cli": "^8.4.1",
+    "@capacitor/core": "^8.4.1",
+    "@capacitor/ios": "^8.4.1"
+  }
+}

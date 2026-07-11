@@ -1,0 +1,16 @@
+import type { CapacitorConfig } from '@capacitor/cli';
+
+const config: CapacitorConfig = {
+  appId: 'io.github.coder1369.calitraining',
+  appName: 'Cali Training',
+  webDir: 'www',
+  backgroundColor: '#0c0c0e',
+  android: {
+    backgroundColor: '#0c0c0e'
+  },
+  ios: {
+    backgroundColor: '#0c0c0e'
+  }
+};
+
+export default config;
