@@ -8,5 +8,11 @@
   },
   "ios": {
     "backgroundColor": "#0c0c0e"
+  },
+  "plugins": {
+    "FirebaseAuthentication": {
+      "skipNativeAuth": false,
+      "providers": ["google.com"]
+    }
   }
 }

@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "1001420618455",
+    "project_id": "mobile-cali-app",
+    "storage_bucket": "mobile-cali-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1001420618455:android:fd4d15bfa29428a52f0e92",
+        "android_client_info": {
+          "package_name": "io.github.coder1369.calitraining"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1001420618455-u9f6mm3r0kconro7pvpurd5j8jn08g3s.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "io.github.coder1369.calitraining",
+            "certificate_hash": "8ea5762c6c0a8a92dd7ad995032ed156b5b8ecea"
+          }
+        },
+        {
+          "client_id": "1001420618455-014gm65i23t7npteta4ul3150pugj5bd.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDboRVhytpPNNSbn_YPVxxQ-FDbGAyfGD8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1001420618455-014gm65i23t7npteta4ul3150pugj5bd.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

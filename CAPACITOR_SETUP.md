@@ -36,8 +36,10 @@ build.
 
 A source icon is already in `resources/icon.png` (from your existing
 `icon-512.png`), plus a matching dark splash screen at `resources/splash.png`.
-To generate all the icon sizes both platforms need (Android: ~6 densities,
-iOS: ~15+ sizes, including the App Store's 1024×1024):
+The splash screens actually baked into `android/app/src/main/res/drawable*/`
+are already solid dark (`#0c0c0e`) to match your theme — no white flash on
+launch. To generate all the icon sizes both platforms need (Android: ~6
+densities, iOS: ~15+ sizes, including the App Store's 1024×1024):
 
 ```
 npm install --save-dev @capacitor/assets
@@ -48,6 +50,112 @@ npm run sync
 Swap in a higher-resolution source image at `resources/icon.png` first
 (1024×1024 or larger) if you want the sharpest result — the current one is
 upscaled from 512×512, which is fine but not ideal for the largest slots.
+
+---
+
+## Fixed automatically — no action needed
+
+These were bugs from the first native build; they're already fixed in the
+code and require nothing further from you:
+
+- **Text overflowing its boxes** — Android's system font-size accessibility
+  setting was scaling text past what the CSS expected. Locked with
+  `text-size-adjust: 100%`.
+- **Grey/blank area around the notch and above the nav bar** — the native
+  Android theme didn't have a background color defined at all (missing
+  `colors.xml`), so unpainted areas fell back to a default light color. Now
+  explicitly dark, matching the app.
+- **Bottom nav bar sitting too close to the gesture bar** — added proper
+  `env(safe-area-inset-bottom)` padding so it clears Android's gesture area
+  on every device, not just ones where the fixed padding happened to be
+  enough.
+- **Hardware/gesture back button exiting the app** — it now closes an open
+  modal first, then returns to the Today tab if you're elsewhere, and only
+  minimizes (not force-closes) the app if you're already home with nothing
+  open.
+- **Exporting a workout not showing any confirmation** — a plain download
+  doesn't really exist inside a native app shell, so on native builds export
+  now writes the file and opens Android's native Share sheet, which doubles
+  as the "it worked" confirmation and lets you save it anywhere (Drive,
+  Files, email, etc.).
+
+## Google Sign-In on native Android — one required extra step
+
+The reason sign-in previously bounced you out to a browser and never came
+back: Google actively blocks its OAuth sign-in flow from running inside a
+bare WebView (a security policy, not something fixable from the web-app
+side). The fix was switching to a plugin that uses Android's actual native
+Google Sign-In UI (an account picker, no browser at all) — but that requires
+one extra piece of Firebase setup you'll need to do once.
+
+Firebase's console walks you through a generic 4-step wizard meant for
+*any* Android project, including ones with no existing tooling at all. You're
+using Capacitor, which already did steps 3 and 4 for you automatically the
+moment you ran `npx cap sync` (I confirmed this myself — your
+`android/build.gradle` and `android/app/build.gradle` already have the exact
+lines that wizard is asking you to paste in by hand). Here's exactly what to
+do at each screen, including which ones to skip:
+
+1. Go to the [Firebase console](https://console.firebase.google.com), open
+   your existing project (the same one your web app already uses).
+2. Click the gear icon (top left) → **Project settings**.
+3. Scroll down to **"Your apps"** → click the **Android icon** (`</>`  is
+   web, the little Android robot icon is what you want) to start "Add app."
+
+   **Wizard Step 1 — "Register app":**
+   - **Android package name**: `io.github.coder1369.calitraining` (must
+     match exactly — this is your `capacitor.config.json`'s `appId`).
+   - **App nickname**: anything, e.g. "Cali Training Android."
+   - **Debug signing certificate SHA-1**: this field is what actually makes
+     Google Sign-In work, so don't skip it. Get the value by running this
+     from your project folder (use the same keystore file you created earlier
+     when building the signed APK):
+     ```
+     keytool -list -v -keystore your-keystore-file.keystore -alias your-alias-name
+     ```
+     It'll ask for the keystore password, then print a block of info —
+     find the line starting with `SHA1:` and copy that hex string (with or
+     without the colons, either works) into Firebase's field.
+   - Click **Register app**.
+
+   **Wizard Step 2 — "Download config file":**
+   - Click **Download google-services.json**. Save it somewhere you can
+     find it.
+   - Click **Next**.
+
+   **Wizard Step 3 — "Add Firebase SDK" — this is the screen you got stuck
+   on. Skip it entirely:**
+   - Ignore the Kotlin DSL / Groovy code blocks it shows you — that's the
+     manual setup Capacitor already did for you automatically.
+   - Just click **Next** without pasting or editing anything.
+
+   **Wizard Step 4 — "Run your app to verify installation":**
+   - This just wants to see your app launch once and talk to Firebase. You
+     can safely click **"Skip this step"** (usually a small link/button near
+     the bottom) — you'll verify it yourself in a minute anyway.
+   - Click **Continue to console**. You're done in the browser.
+
+4. Now, back in your project folder: take the `google-services.json` file
+   you downloaded in Step 2 above, and place it at exactly:
+   ```
+   android/app/google-services.json
+   ```
+   (directly inside the `app` folder, right next to `build.gradle` — **not**
+   inside `src/`, and not renamed.)
+5. Run:
+   ```
+   npm run sync
+   ```
+6. Rebuild the signed APK in Android Studio exactly like before (Build →
+   Generate Signed Bundle / APK), install it, and try "Sign in with Google"
+   again — it should now show Android's native account picker instead of
+   bouncing to a browser.
+
+Until you do this, tapping "Sign in with Google" on the native app will show
+a toast saying native sign-in isn't set up yet — everything else in the app
+keeps working normally either way.
+a toast saying native sign-in isn't set up yet — everything else in the app
+keeps working normally either way.
 
 ---
 
