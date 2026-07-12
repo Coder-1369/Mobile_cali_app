@@ -1529,21 +1529,45 @@
       });
   }
 
+  function withTimeout(promise, ms, label){
+    let timer;
+    const timeout=new Promise((_, reject)=>{
+      timer=setTimeout(()=>reject(new Error(`${label} timed out after ${Math.round(ms/1000)}s`)), ms);
+    });
+    return Promise.race([promise, timeout]).finally(()=>clearTimeout(timer));
+  }
+
   async function signInWithGoogleNative(){
     const FirebaseAuthentication=getCapacitorPlugin('FirebaseAuthentication');
     if(!FirebaseAuthentication){
       showToast('Native sign-in isn\'t set up yet. See CAPACITOR_SETUP.md.');
       return;
     }
+    const btn=document.querySelector('.google-signin-btn');
+    const originalLabel=btn ? btn.innerHTML : null;
+    if(btn){
+      btn.disabled=true;
+      btn.style.opacity='0.6';
+      btn.innerHTML='Signing in…';
+    }
+    showToast('Opening Google sign-in…');
     try{
       // This shows Android's native account picker directly — no browser
       // round-trip, so there's nothing that needs to "return" to the app.
-      await FirebaseAuthentication.signInWithGoogle();
+      await withTimeout(FirebaseAuthentication.signInWithGoogle({useCredentialManager:false}), 20000, 'Google sign-in');
       showToast('Signed in');
       haptic('success');
     }catch(e){
       console.warn('Native sign-in failed:', e);
-      showToast('Sign-in failed. Try again.');
+      const detail=(e && (e.message || e.code)) ? String(e.message || e.code).slice(0, 80) : '';
+      showToast(detail ? `Sign-in failed: ${detail}` : 'Sign-in failed. Try again.');
+      haptic('warn');
+    }finally{
+      if(btn){
+        btn.disabled=false;
+        btn.style.opacity='';
+        if(originalLabel!==null) btn.innerHTML=originalLabel;
+      }
     }
   }
 
