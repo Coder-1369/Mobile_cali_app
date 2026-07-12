@@ -1463,8 +1463,36 @@
     }
   }
 
+  // On native, the plugin's own authStateChange event (and getCurrentUser)
+  // is the documented source of truth — the web SDK's onAuthStateChanged
+  // above is not guaranteed to fire for native-driven sign-ins, so this is
+  // required in addition to it, not just a nice-to-have.
+  function initNativeAuthListener(){
+    if(!isNativeApp()) return;
+    const FirebaseAuthentication=getCapacitorPlugin('FirebaseAuthentication');
+    if(!FirebaseAuthentication) return;
+    try{
+      FirebaseAuthentication.addListener('authStateChange', (change)=>{
+        handleAuthStateChanged(normalizeAuthUser(change && change.user));
+      });
+      FirebaseAuthentication.getCurrentUser().then(result=>{
+        if(result && result.user) handleAuthStateChanged(normalizeAuthUser(result.user));
+      }).catch(e=>console.warn('getCurrentUser failed:', e));
+    }catch(e){
+      console.warn('Native auth listener setup skipped:', e);
+    }
+  }
+
+  // The native plugin's User type uses photoUrl; the web Firebase SDK uses
+  // photoURL. Normalize so renderAccountCard() etc. can rely on one shape.
+  function normalizeAuthUser(user){
+    if(!user) return null;
+    if(!user.photoURL && user.photoUrl) user.photoURL=user.photoUrl;
+    return user;
+  }
+
   function handleAuthStateChanged(user){
-    authUser=user || null;
+    authUser=normalizeAuthUser(user) || null;
     if(authUser){
       syncProfileFromCloud(authUser).catch(e=>console.warn('Cloud profile sync failed:', e));
     }
@@ -1700,6 +1728,7 @@
     if(!isNativeApp()) return;
     try{ initStatusBar(); }catch(e){ console.warn(e); }
     try{ initBackButtonHandler(); }catch(e){ console.warn(e); }
+    try{ initNativeAuthListener(); }catch(e){ console.warn(e); }
   }
 
   function loadExportPrefs(){
